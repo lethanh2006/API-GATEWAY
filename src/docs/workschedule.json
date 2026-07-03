@@ -1,0 +1,775 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Workschedule Service API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/admin/schedule/pending": {
+      "get": {
+        "summary": "Lấy danh sách yêu cầu đang chờ duyệt",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "week",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/schedule/all": {
+      "get": {
+        "summary": "Lấy toàn bộ yêu cầu lịch làm việc",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "week",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/schedule/{id}/approve": {
+      "post": {
+        "summary": "Duyệt một yêu cầu lịch làm việc",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Duyệt thành công"
+          },
+          "400": {
+            "description": "Request không hợp lệ hoặc không ở trạng thái pending"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/schedule/{id}/reject": {
+      "post": {
+        "summary": "Từ chối một yêu cầu lịch làm việc",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Từ chối thành công"
+          },
+          "400": {
+            "description": "Request không hợp lệ hoặc không ở trạng thái pending"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/schedule/bulk-approve": {
+      "post": {
+        "summary": "Duyệt hàng loạt các yêu cầu",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ids"
+                ],
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Duyệt hàng loạt thành công"
+          },
+          "400": {
+            "description": "Thiếu danh sách ids"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/schedule/heatmap": {
+      "get": {
+        "summary": "Thống kê heatmap theo tuần đã duyệt",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "week",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy dữ liệu heatmap thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/attendance/scan": {
+      "post": {
+        "summary": "Quét token QR để check-in/check-out",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quét thành công"
+          },
+          "400": {
+            "description": "Token không hợp lệ hoặc hết hạn"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/attendance/my": {
+      "get": {
+        "summary": "Lấy lịch sử chấm công của tôi",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy dữ liệu thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/attendance/qr/generate": {
+      "post": {
+        "summary": "Tạo token QR chấm công (chỉ Admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tạo token thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/attendance/today": {
+      "get": {
+        "summary": "Lấy danh sách chấm công trong ngày (chỉ Admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy dữ liệu thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/attendance/report": {
+      "get": {
+        "summary": "Lấy báo cáo chấm công (chỉ Admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy báo cáo thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/policy": {
+      "get": {
+        "summary": "Xem policy hiện tại",
+        "responses": {
+          "200": {
+            "description": "Lấy policy thành công"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/admin/policy": {
+      "patch": {
+        "summary": "Cập nhật policy (chỉ Admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submit_deadline_day": {
+                    "type": "number"
+                  },
+                  "submit_deadline_hour": {
+                    "type": "number"
+                  },
+                  "require_reason_for_remote": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật policy thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "403": {
+            "description": "Không có quyền truy cập"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/schedule/my": {
+      "get": {
+        "summary": "Lấy danh sách lịch làm việc của người dùng hiện tại",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "week",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tuần theo định dạng ISO week (ví dụ 2026-W17)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách lịch làm việc"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/schedule/requests": {
+      "post": {
+        "summary": "Tạo yêu cầu đăng ký lịch làm việc theo tuần",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "week_start"
+                ],
+                "properties": {
+                  "week_start": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Ngày bắt đầu tuần (bắt buộc là thứ 2)"
+                  },
+                  "entries": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "office",
+                            "remote",
+                            "leave"
+                          ]
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo yêu cầu thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc đã tồn tại yêu cầu trong tuần"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/schedule/requests/{id}": {
+      "get": {
+        "summary": "Lấy chi tiết một yêu cầu lịch làm việc",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID của yêu cầu lịch làm việc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy chi tiết thành công"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "404": {
+            "description": "Không tìm thấy yêu cầu"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Cập nhật danh sách entries của yêu cầu nháp",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID của yêu cầu lịch làm việc"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "entries"
+                ],
+                "properties": {
+                  "entries": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "office",
+                            "remote",
+                            "leave"
+                          ]
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thành công"
+          },
+          "400": {
+            "description": "Yêu cầu không hợp lệ hoặc không ở trạng thái draft"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "404": {
+            "description": "Không tìm thấy yêu cầu"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Xóa yêu cầu lịch làm việc ở trạng thái nháp",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID của yêu cầu lịch làm việc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa thành công"
+          },
+          "400": {
+            "description": "Không thể xóa yêu cầu không phải draft"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "404": {
+            "description": "Không tìm thấy yêu cầu"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/schedule/requests/{id}/submit": {
+      "post": {
+        "summary": "Gửi yêu cầu lịch làm việc để phê duyệt",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID của yêu cầu lịch làm việc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gửi yêu cầu thành công"
+          },
+          "400": {
+            "description": "Yêu cầu không hợp lệ, không ở trạng thái draft hoặc đã quá hạn"
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "404": {
+            "description": "Không tìm thấy yêu cầu"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  }
+}
