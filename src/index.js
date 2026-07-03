@@ -142,7 +142,16 @@ app.get('/api/docs-merged.json', async (req, res) => {
     info: { title: 'Centralized API Gateway', version: '1.0.0' },
     servers: [{ url: `http://localhost:${PORT}`, description: 'Gateway Server' }],
     paths: {},
-    components: { schemas: {}, securitySchemes: {} },
+    components: { 
+      schemas: {}, 
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      } 
+    },
     tags: []
   };
 
