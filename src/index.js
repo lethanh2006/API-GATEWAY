@@ -214,8 +214,6 @@ app.get('/api/docs-merged.json', async (req, res) => {
     const { service, spec } = result;
     const serviceNameTag = service.route.split('/').pop().toUpperCase();
 
-    merged.tags.push({ name: serviceNameTag });
-
     if (spec.paths) {
       for (const [pathStr, pathItem] of Object.entries(spec.paths)) {
         let finalPath = pathStr;
@@ -227,9 +225,19 @@ app.get('/api/docs-merged.json', async (req, res) => {
 
         for (const method of Object.keys(pathItem)) {
           if (pathItem[method]) {
-            pathItem[method].tags = pathItem[method].tags || [];
-            if (!pathItem[method].tags.includes(serviceNameTag)) {
-              pathItem[method].tags.push(serviceNameTag);
+            if (pathItem[method].tags && pathItem[method].tags.length > 0) {
+              pathItem[method].tags = pathItem[method].tags.map(tag => {
+                const prefixedTag = `${serviceNameTag} - ${tag}`;
+                if (!merged.tags.some(t => t.name === prefixedTag)) {
+                  merged.tags.push({ name: prefixedTag });
+                }
+                return prefixedTag;
+              });
+            } else {
+              pathItem[method].tags = [serviceNameTag];
+              if (!merged.tags.some(t => t.name === serviceNameTag)) {
+                merged.tags.push({ name: serviceNameTag });
+              }
             }
           }
         }

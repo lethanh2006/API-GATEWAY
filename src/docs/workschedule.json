@@ -5,7 +5,7 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/admin/schedule/pending": {
+    "/schedule/pending": {
       "get": {
         "summary": "Lấy danh sách yêu cầu đang chờ duyệt",
         "security": [
@@ -39,7 +39,7 @@
         }
       }
     },
-    "/admin/schedule/all": {
+    "/schedule/all": {
       "get": {
         "summary": "Lấy toàn bộ yêu cầu lịch làm việc",
         "security": [
@@ -87,7 +87,7 @@
         }
       }
     },
-    "/admin/schedule/{id}/approve": {
+    "/schedule/requests/{id}/approve": {
       "post": {
         "summary": "Duyệt một yêu cầu lịch làm việc",
         "security": [
@@ -124,7 +124,7 @@
         }
       }
     },
-    "/admin/schedule/{id}/reject": {
+    "/schedule/requests/{id}/reject": {
       "post": {
         "summary": "Từ chối một yêu cầu lịch làm việc",
         "security": [
@@ -176,7 +176,7 @@
         }
       }
     },
-    "/admin/schedule/bulk-approve": {
+    "/schedule/requests/bulk-approve": {
       "post": {
         "summary": "Duyệt hàng loạt các yêu cầu",
         "security": [
@@ -224,7 +224,7 @@
         }
       }
     },
-    "/admin/schedule/heatmap": {
+    "/schedule/heatmap": {
       "get": {
         "summary": "Thống kê heatmap theo tuần đã duyệt",
         "security": [
@@ -338,7 +338,7 @@
         }
       }
     },
-    "/admin/attendance/qr/generate": {
+    "/attendance/qr/generate": {
       "post": {
         "summary": "Tạo token QR chấm công (chỉ Admin)",
         "security": [
@@ -362,7 +362,7 @@
         }
       }
     },
-    "/admin/attendance/today": {
+    "/attendance/today": {
       "get": {
         "summary": "Lấy danh sách chấm công trong ngày (chỉ Admin)",
         "security": [
@@ -386,7 +386,7 @@
         }
       }
     },
-    "/admin/attendance/report": {
+    "/attendance/report": {
       "get": {
         "summary": "Lấy báo cáo chấm công (chỉ Admin)",
         "security": [
@@ -443,7 +443,7 @@
         }
       }
     },
-    "/admin/policy": {
+    "/policy": {
       "patch": {
         "summary": "Cập nhật policy (chỉ Admin)",
         "security": [
