@@ -2,12 +2,15 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workschedule Service API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API quản lý lịch làm việc tuần, đăng ký remote/leave/office, chấm công qua QR và quản lý chính sách đăng ký lịch của nhân viên."
   },
   "paths": {
     "/schedule/pending": {
       "get": {
-        "summary": "Lấy danh sách yêu cầu đang chờ duyệt",
+        "summary": "Lấy danh sách yêu cầu đang chờ duyệt (Admin)",
+        "description": "Lấy toàn bộ các yêu cầu đăng ký lịch làm việc có trạng thái là `pending` để admin phê duyệt. Có thể lọc theo tuần.",
+        "tags": ["ADMIN SCHEDULE"],
         "security": [
           {
             "bearerAuth": []
@@ -18,6 +21,7 @@
             "in": "query",
             "name": "week",
             "required": false,
+            "description": "Tuần theo định dạng ISO week (ví dụ: 2026-W17)",
             "schema": {
               "type": "string"
             }
@@ -25,23 +29,42 @@
         ],
         "responses": {
           "200": {
-            "description": "Lấy danh sách thành công"
+            "description": "Lấy danh sách thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "integer", "example": 1 },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ScheduleWithDetails"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "403": {
-            "description": "Không có quyền truy cập"
+            "description": "Không có quyền truy cập (yêu cầu quyền schedule:read-all)"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/all": {
       "get": {
-        "summary": "Lấy toàn bộ yêu cầu lịch làm việc",
+        "summary": "Lấy toàn bộ yêu cầu lịch làm việc (Admin)",
+        "description": "Lấy tất cả yêu cầu lịch làm việc (ngoại trừ trạng thái `draft`). Có thể lọc theo tuần và trạng thái cụ thể.",
+        "tags": ["ADMIN SCHEDULE"],
         "security": [
           {
             "bearerAuth": []
@@ -52,6 +75,7 @@
             "in": "query",
             "name": "week",
             "required": false,
+            "description": "Tuần theo định dạng ISO week (ví dụ: 2026-W17)",
             "schema": {
               "type": "string"
             }
@@ -60,10 +84,11 @@
             "in": "query",
             "name": "status",
             "required": false,
+            "description": "Trạng thái yêu cầu để lọc. Nếu không truyền, mặc định sẽ lấy tất cả trạng thái khác `draft`.",
             "schema": {
               "type": "string",
               "enum": [
-                "draft",
+                "all",
                 "pending",
                 "approved",
                 "rejected"
@@ -73,23 +98,42 @@
         ],
         "responses": {
           "200": {
-            "description": "Lấy danh sách thành công"
+            "description": "Lấy danh sách thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "integer", "example": 1 },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ScheduleWithDetails"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "403": {
-            "description": "Không có quyền truy cập"
+            "description": "Không có quyền truy cập (yêu cầu quyền schedule:read-all)"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/requests/{id}/approve": {
       "post": {
-        "summary": "Duyệt một yêu cầu lịch làm việc",
+        "summary": "Duyệt một yêu cầu lịch làm việc (Admin)",
+        "description": "Duyệt yêu cầu lịch làm việc đang ở trạng thái `pending`. Nếu yêu cầu có lịch làm việc từ xa (`remote`), hệ thống sẽ tự động tạo bản ghi chấm công (`AttendanceRecord`) trước cho những ngày đó.",
+        "tags": ["ADMIN SCHEDULE"],
         "security": [
           {
             "bearerAuth": []
@@ -100,6 +144,7 @@
             "in": "path",
             "name": "id",
             "required": true,
+            "description": "ID của yêu cầu lịch làm việc cần duyệt",
             "schema": {
               "type": "string"
             }
@@ -107,26 +152,39 @@
         ],
         "responses": {
           "200": {
-            "description": "Duyệt thành công"
+            "description": "Duyệt thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Approved successfully" }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Request không hợp lệ hoặc không ở trạng thái pending"
+            "description": "Yêu cầu không hợp lệ hoặc yêu cầu không ở trạng thái pending"
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "403": {
-            "description": "Không có quyền truy cập"
+            "description": "Không có quyền truy cập (yêu cầu quyền schedule:approve)"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/requests/{id}/reject": {
       "post": {
-        "summary": "Từ chối một yêu cầu lịch làm việc",
+        "summary": "Từ chối một yêu cầu lịch làm việc (Admin)",
+        "description": "Từ chối yêu cầu lịch làm việc đang ở trạng thái `pending` kèm theo lý do từ chối.",
+        "tags": ["ADMIN SCHEDULE"],
         "security": [
           {
             "bearerAuth": []
@@ -137,20 +195,24 @@
             "in": "path",
             "name": "id",
             "required": true,
+            "description": "ID của yêu cầu lịch làm việc cần từ chối",
             "schema": {
               "type": "string"
             }
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["reason"],
                 "properties": {
                   "reason": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Lý do từ chối yêu cầu",
+                    "example": "Lịch đăng ký remote quá nhiều ngày mà không có lý do hợp lý."
                   }
                 }
               }
@@ -159,26 +221,39 @@
         },
         "responses": {
           "200": {
-            "description": "Từ chối thành công"
+            "description": "Từ chối thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Rejected successfully" }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Request không hợp lệ hoặc không ở trạng thái pending"
+            "description": "Yêu cầu không hợp lệ hoặc yêu cầu không ở trạng thái pending"
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "403": {
-            "description": "Không có quyền truy cập"
+            "description": "Không có quyền truy cập (yêu cầu quyền schedule:approve)"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/requests/bulk-approve": {
       "post": {
-        "summary": "Duyệt hàng loạt các yêu cầu",
+        "summary": "Duyệt hàng loạt các yêu cầu (Admin)",
+        "description": "Duyệt đồng thời nhiều yêu cầu lịch làm việc ở trạng thái `pending` thông qua mảng chứa các IDs.",
+        "tags": ["ADMIN SCHEDULE"],
         "security": [
           {
             "bearerAuth": []
@@ -196,9 +271,11 @@
                 "properties": {
                   "ids": {
                     "type": "array",
+                    "description": "Danh sách các ID yêu cầu cần duyệt",
                     "items": {
                       "type": "string"
-                    }
+                    },
+                    "example": ["65f12a3b...", "65f12b4c..."]
                   }
                 }
               }
@@ -207,26 +284,39 @@
         },
         "responses": {
           "200": {
-            "description": "Duyệt hàng loạt thành công"
+            "description": "Duyệt hàng loạt thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Bulk approval complete" }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Thiếu danh sách ids"
+            "description": "Thiếu danh sách ids hoặc danh sách không hợp lệ"
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "403": {
-            "description": "Không có quyền truy cập"
+            "description": "Không có quyền truy cập (yêu cầu quyền schedule:approve)"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/heatmap": {
       "get": {
-        "summary": "Thống kê heatmap theo tuần đã duyệt",
+        "summary": "Thống kê heatmap theo tuần đã duyệt (Admin/User)",
+        "description": "Thống kê số lượng nhân sự đăng ký theo từng hình thức (office, remote, day_off, leave) trong tuần để phục vụ vẽ biểu đồ nhiệt (heatmap).",
+        "tags": ["ADMIN SCHEDULE"],
         "security": [
           {
             "bearerAuth": []
@@ -237,6 +327,7 @@
             "in": "query",
             "name": "week",
             "required": false,
+            "description": "Tuần cần thống kê theo định dạng ISO week (mặc định là tuần hiện tại)",
             "schema": {
               "type": "string"
             }
@@ -244,7 +335,47 @@
         ],
         "responses": {
           "200": {
-            "description": "Lấy dữ liệu heatmap thành công"
+            "description": "Lấy dữ liệu heatmap thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "format": "date",
+                            "description": "Ngày trong tuần",
+                            "example": "2026-04-20T00:00:00.000Z"
+                          },
+                          "stats": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": ["office", "remote", "day_off", "leave"]
+                                },
+                                "count": {
+                                  "type": "integer",
+                                  "description": "Số lượng nhân sự đăng ký"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
@@ -253,14 +384,16 @@
             "description": "Không có quyền truy cập"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/attendance/scan": {
       "post": {
-        "summary": "Quét token QR để check-in/check-out",
+        "summary": "Quét token QR để check-in hoặc check-out (User)",
+        "description": "Sử dụng token QR hợp lệ (từ Admin cung cấp) để ghi nhận check-in hoặc check-out cho ngày hôm đó. Người dùng phải có lịch làm việc tại văn phòng (`office`) được duyệt cho ngày hiện tại.",
+        "tags": ["ATTENDANCE"],
         "security": [
           {
             "bearerAuth": []
@@ -272,9 +405,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["token"],
                 "properties": {
                   "token": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Chuỗi token QR Code được quét",
+                    "example": "2f8a84bc5a..."
                   }
                 }
               }
@@ -283,23 +419,39 @@
         },
         "responses": {
           "200": {
-            "description": "Quét thành công"
+            "description": "Ghi nhận check-in hoặc check-out thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Check-in thành công" },
+                    "data": {
+                      "$ref": "#/components/schemas/AttendanceRecord"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Token không hợp lệ hoặc hết hạn"
+            "description": "Token không hợp lệ, đã sử dụng, hết hạn hoặc người dùng không có lịch office được duyệt hôm nay."
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/attendance/my": {
       "get": {
-        "summary": "Lấy lịch sử chấm công của tôi",
+        "summary": "Lấy lịch sử chấm công của tôi (User)",
+        "description": "Truy vấn danh sách các lần chấm công cá nhân của người dùng hiện tại, hỗ trợ khoảng thời gian từ ngày nào đến ngày nào.",
+        "tags": ["ATTENDANCE"],
         "security": [
           {
             "bearerAuth": []
@@ -310,6 +462,7 @@
             "in": "query",
             "name": "from",
             "required": false,
+            "description": "Từ ngày (YYYY-MM-DD)",
             "schema": {
               "type": "string",
               "format": "date"
@@ -319,6 +472,7 @@
             "in": "query",
             "name": "to",
             "required": false,
+            "description": "Đến ngày (YYYY-MM-DD)",
             "schema": {
               "type": "string",
               "format": "date"
@@ -327,44 +481,78 @@
         ],
         "responses": {
           "200": {
-            "description": "Lấy dữ liệu thành công"
+            "description": "Lấy dữ liệu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "integer", "example": 5 },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AttendanceRecordWithEmployee"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/attendance/qr/generate": {
       "post": {
-        "summary": "Tạo token QR chấm công (chỉ Admin)",
+        "summary": "Tạo token QR chấm công mới (Admin)",
+        "description": "Tạo một token QR ngẫu nhiên dùng để chấm công, token có giá trị sử dụng trong vòng 30 giây.",
+        "tags": ["ATTENDANCE"],
         "security": [
           {
             "bearerAuth": []
           }
         ],
         "responses": {
-          "200": {
-            "description": "Tạo token thành công"
+          "201": {
+            "description": "Tạo token thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "$ref": "#/components/schemas/AttendanceQrToken"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "403": {
-            "description": "Không có quyền truy cập"
+            "description": "Không có quyền truy cập (yêu cầu quyền attendance:generate)"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/attendance/today": {
       "get": {
-        "summary": "Lấy danh sách chấm công trong ngày (chỉ Admin)",
+        "summary": "Lấy danh sách nhân viên chấm công trong ngày (Admin)",
+        "description": "Lấy tất cả các bản ghi chấm công có lượt check-in trong ngày hôm nay.",
+        "tags": ["ATTENDANCE"],
         "security": [
           {
             "bearerAuth": []
@@ -372,7 +560,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Lấy dữ liệu thành công"
+            "description": "Lấy dữ liệu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "integer", "example": 2 },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AttendanceRecordWithEmployee"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
@@ -381,14 +586,16 @@
             "description": "Không có quyền truy cập"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/attendance/report": {
       "get": {
-        "summary": "Lấy báo cáo chấm công (chỉ Admin)",
+        "summary": "Lấy báo cáo chấm công toàn công ty (Admin)",
+        "description": "Lấy báo cáo chấm công của toàn bộ nhân viên hoặc lọc theo từng nhân viên trong khoảng thời gian xác định.",
+        "tags": ["ATTENDANCE"],
         "security": [
           {
             "bearerAuth": []
@@ -399,6 +606,7 @@
             "in": "query",
             "name": "from",
             "required": false,
+            "description": "Từ ngày (YYYY-MM-DD)",
             "schema": {
               "type": "string",
               "format": "date"
@@ -408,15 +616,42 @@
             "in": "query",
             "name": "to",
             "required": false,
+            "description": "Đến ngày (YYYY-MM-DD)",
             "schema": {
               "type": "string",
               "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "employee_id",
+            "required": false,
+            "description": "ID của nhân viên cụ thể cần lọc",
+            "schema": {
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Lấy báo cáo thành công"
+            "description": "Lấy báo cáo thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "integer", "example": 10 },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AttendanceRecordWithEmployee"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
@@ -425,27 +660,43 @@
             "description": "Không có quyền truy cập"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/policy": {
       "get": {
-        "summary": "Xem policy hiện tại",
+        "summary": "Xem chính sách đăng ký lịch làm việc hiện tại",
+        "description": "Lấy cấu hình khoảng thời gian bắt đầu/kết thúc đăng ký và trạng thái khóa của hệ thống đăng ký lịch.",
+        "tags": ["POLICY"],
         "responses": {
           "200": {
-            "description": "Lấy policy thành công"
+            "description": "Lấy policy thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "integer", "example": 1 },
+                    "data": {
+                      "$ref": "#/components/schemas/WorkPolicy"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
-      }
-    },
-    "/policy": {
+      },
       "patch": {
-        "summary": "Cập nhật policy (chỉ Admin)",
+        "summary": "Cập nhật chính sách đăng ký lịch làm việc (Admin)",
+        "description": "Cập nhật thời hạn mở/đóng đăng ký lịch tuần và mở/khóa hệ thống đăng ký lịch làm việc của nhân viên.",
+        "tags": ["POLICY"],
         "security": [
           {
             "bearerAuth": []
@@ -458,14 +709,22 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "submit_deadline_day": {
-                    "type": "number"
+                  "registration_start": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Thời gian bắt đầu cho phép đăng ký lịch",
+                    "example": "2026-04-01T08:00:00.000Z"
                   },
-                  "submit_deadline_hour": {
-                    "type": "number"
+                  "registration_end": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Thời gian hết hạn đăng ký lịch",
+                    "example": "2026-04-07T18:00:00.000Z"
                   },
-                  "require_reason_for_remote": {
-                    "type": "boolean"
+                  "locked": {
+                    "type": "boolean",
+                    "description": "Khóa/mở chức năng đăng ký",
+                    "example": false
                   }
                 }
               }
@@ -474,7 +733,20 @@
         },
         "responses": {
           "200": {
-            "description": "Cập nhật policy thành công"
+            "description": "Cập nhật chính sách thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "$ref": "#/components/schemas/WorkPolicy"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
@@ -483,14 +755,16 @@
             "description": "Không có quyền truy cập"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/my": {
       "get": {
-        "summary": "Lấy danh sách lịch làm việc của người dùng hiện tại",
+        "summary": "Lấy danh sách lịch làm việc của tôi (User)",
+        "description": "Lấy lịch sử đăng ký lịch tuần của bản thân người dùng hiện tại kèm theo chi tiết các ngày đăng ký làm việc (entries). Có thể lọc theo tuần.",
+        "tags": ["SCHEDULE REQUEST"],
         "security": [
           {
             "bearerAuth": []
@@ -509,20 +783,38 @@
         ],
         "responses": {
           "200": {
-            "description": "Danh sách lịch làm việc"
+            "description": "Lấy danh sách thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ScheduleWithDetails"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/requests": {
       "post": {
-        "summary": "Tạo yêu cầu đăng ký lịch làm việc theo tuần",
+        "summary": "Khởi tạo yêu cầu đăng ký lịch làm việc mới (User)",
+        "description": "Tạo một yêu cầu lịch làm việc nháp (`draft`) cho một tuần nhất định kèm theo các ngày cụ thể. Ngày bắt đầu tuần (`week_start`) bắt buộc phải là thứ Hai. Việc tạo mới bị giới hạn bởi thời gian mở đăng ký của Policy và tối đa 4 tuần tới (nếu không phải là Admin).",
+        "tags": ["SCHEDULE REQUEST"],
         "security": [
           {
             "bearerAuth": []
@@ -541,27 +833,37 @@
                   "week_start": {
                     "type": "string",
                     "format": "date",
-                    "description": "Ngày bắt đầu tuần (bắt buộc là thứ 2)"
+                    "description": "Ngày bắt đầu tuần (yêu cầu là thứ Hai - YYYY-MM-DD)",
+                    "example": "2026-04-20"
                   },
                   "entries": {
                     "type": "array",
+                    "description": "Danh sách lịch làm việc của từng ngày trong tuần",
                     "items": {
                       "type": "object",
+                      "required": ["date", "type"],
                       "properties": {
                         "date": {
                           "type": "string",
-                          "format": "date"
+                          "format": "date",
+                          "description": "Ngày cụ thể",
+                          "example": "2026-04-20"
                         },
                         "type": {
                           "type": "string",
                           "enum": [
                             "office",
                             "remote",
+                            "day_off",
                             "leave"
-                          ]
+                          ],
+                          "description": "Hình thức làm việc/nghỉ",
+                          "example": "office"
                         },
                         "note": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Ghi chú thêm",
+                          "example": "Lên văn phòng họp nhóm"
                         }
                       }
                     }
@@ -573,23 +875,38 @@
         },
         "responses": {
           "201": {
-            "description": "Tạo yêu cầu thành công"
+            "description": "Tạo yêu cầu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "$ref": "#/components/schemas/ScheduleRequest"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Dữ liệu không hợp lệ hoặc đã tồn tại yêu cầu trong tuần"
+            "description": "Dữ liệu không hợp lệ, week_start không phải thứ 2, đã tồn tại lịch đăng ký cho tuần này hoặc bị hạn chế bởi Policy/Giới hạn 4 tuần tương lai."
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/requests/{id}": {
       "get": {
-        "summary": "Lấy chi tiết một yêu cầu lịch làm việc",
+        "summary": "Lấy chi tiết một yêu cầu lịch làm việc (Admin/User)",
+        "description": "Xem chi tiết một yêu cầu lịch làm việc cụ thể gồm thông tin chung, thông tin nhân viên, và danh sách các ngày đăng ký cụ thể.",
+        "tags": ["SCHEDULE REQUEST"],
         "security": [
           {
             "bearerAuth": []
@@ -603,26 +920,41 @@
             "schema": {
               "type": "string"
             },
-            "description": "ID của yêu cầu lịch làm việc"
+            "description": "ID của yêu cầu lịch làm việc cần lấy thông tin"
           }
         ],
         "responses": {
           "200": {
-            "description": "Lấy chi tiết thành công"
+            "description": "Lấy chi tiết thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "$ref": "#/components/schemas/ScheduleWithDetails"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Chưa xác thực"
           },
           "404": {
-            "description": "Không tìm thấy yêu cầu"
+            "description": "Không tìm thấy yêu cầu hoặc bạn không có quyền xem yêu cầu này"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       },
       "patch": {
-        "summary": "Cập nhật danh sách entries của yêu cầu nháp",
+        "summary": "Cập nhật danh sách các ngày của yêu cầu nháp (User)",
+        "description": "Chỉnh sửa danh sách đăng ký các ngày của một yêu cầu lịch đang ở trạng thái `draft`. Nếu yêu cầu đã được duyệt (`approved`), hành động này sẽ cập nhật lại toàn bộ các bản ghi điểm danh tương ứng.",
+        "tags": ["SCHEDULE REQUEST"],
         "security": [
           {
             "bearerAuth": []
@@ -636,7 +968,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "ID của yêu cầu lịch làm việc"
+            "description": "ID của yêu cầu lịch làm việc cần cập nhật"
           }
         ],
         "requestBody": {
@@ -652,23 +984,29 @@
                   "entries": {
                     "type": "array",
                     "minItems": 1,
+                    "description": "Danh sách ngày làm việc cập nhật mới cho tuần đó",
                     "items": {
                       "type": "object",
+                      "required": ["date", "type"],
                       "properties": {
                         "date": {
                           "type": "string",
-                          "format": "date"
+                          "format": "date",
+                          "example": "2026-04-20"
                         },
                         "type": {
                           "type": "string",
                           "enum": [
                             "office",
                             "remote",
+                            "day_off",
                             "leave"
-                          ]
+                          ],
+                          "example": "remote"
                         },
                         "note": {
-                          "type": "string"
+                          "type": "string",
+                          "example": "Làm việc tại nhà vì lí do sức khỏe"
                         }
                       }
                     }
@@ -680,10 +1018,21 @@
         },
         "responses": {
           "200": {
-            "description": "Cập nhật thành công"
+            "description": "Cập nhật thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Updated successfully" }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Yêu cầu không hợp lệ hoặc không ở trạng thái draft"
+            "description": "Yêu cầu không hợp lệ, không ở trạng thái nháp (chỉ Admin mới được sửa khi khác nháp), hoặc không được phép sửa do quy định Policy/Giới hạn tuần tương lai."
           },
           "401": {
             "description": "Chưa xác thực"
@@ -692,12 +1041,14 @@
             "description": "Không tìm thấy yêu cầu"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       },
       "delete": {
-        "summary": "Xóa yêu cầu lịch làm việc ở trạng thái nháp",
+        "summary": "Xóa yêu cầu lịch làm việc (User)",
+        "description": "Xóa hoàn toàn một yêu cầu lịch. User thường chỉ có quyền xóa yêu cầu nháp (`draft`) trong thời gian mở đăng ký. Admin có thể xóa bất kỳ yêu cầu nào (nếu xóa yêu cầu đã duyệt, hệ thống sẽ tự động gỡ các bản ghi chấm công tương ứng).",
+        "tags": ["SCHEDULE REQUEST"],
         "security": [
           {
             "bearerAuth": []
@@ -711,15 +1062,26 @@
             "schema": {
               "type": "string"
             },
-            "description": "ID của yêu cầu lịch làm việc"
+            "description": "ID của yêu cầu lịch làm việc cần xóa"
           }
         ],
         "responses": {
           "200": {
-            "description": "Xóa thành công"
+            "description": "Xóa thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Deleted successfully" }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Không thể xóa yêu cầu không phải draft"
+            "description": "Không thể xóa yêu cầu không phải draft (áp dụng cho User), hoặc bị khóa bởi Policy."
           },
           "401": {
             "description": "Chưa xác thực"
@@ -728,14 +1090,16 @@
             "description": "Không tìm thấy yêu cầu"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
           }
         }
       }
     },
     "/schedule/requests/{id}/submit": {
       "post": {
-        "summary": "Gửi yêu cầu lịch làm việc để phê duyệt",
+        "summary": "Gửi yêu cầu lịch làm việc để phê duyệt (User)",
+        "description": "Chuyển trạng thái yêu cầu từ `draft` sang `pending` để chờ Admin phê duyệt.",
+        "tags": ["SCHEDULE REQUEST"],
         "security": [
           {
             "bearerAuth": []
@@ -749,15 +1113,28 @@
             "schema": {
               "type": "string"
             },
-            "description": "ID của yêu cầu lịch làm việc"
+            "description": "ID của yêu cầu lịch cần gửi duyệt"
           }
         ],
         "responses": {
           "200": {
-            "description": "Gửi yêu cầu thành công"
+            "description": "Gửi yêu cầu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "$ref": "#/components/schemas/ScheduleRequest"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Yêu cầu không hợp lệ, không ở trạng thái draft hoặc đã quá hạn"
+            "description": "Yêu cầu không phải là draft, đã gửi trước đó, hoặc bị hạn chế bởi Policy."
           },
           "401": {
             "description": "Chưa xác thực"
@@ -766,7 +1143,397 @@
             "description": "Không tìm thấy yêu cầu"
           },
           "500": {
-            "description": "Server error"
+            "description": "Lỗi máy chủ nội bộ"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Employee": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID định danh của nhân viên",
+            "example": "65f12a3b..."
+          },
+          "username": {
+            "type": "string",
+            "description": "Tên tài khoản hiển thị",
+            "example": "thanhle"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Địa chỉ email",
+            "example": "thanhkiem23102006@gmail.com"
+          }
+        }
+      },
+      "ScheduleRequest": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID của yêu cầu lịch",
+            "example": "65f12a3b..."
+          },
+          "employee_id": {
+            "type": "string",
+            "description": "ID của nhân viên tạo lịch",
+            "example": "65f12a3b..."
+          },
+          "week_start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ngày bắt đầu tuần (luôn là thứ Hai)",
+            "example": "2026-04-20T00:00:00.000Z"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "pending", "approved", "rejected"],
+            "description": "Trạng thái của yêu cầu",
+            "example": "draft"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm gửi yêu cầu duyệt",
+            "example": "2026-04-19T10:00:00.000Z"
+          },
+          "reviewed_by": {
+            "type": "string",
+            "description": "ID Admin đã phê duyệt/từ chối",
+            "example": "65f1292a..."
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm duyệt yêu cầu",
+            "example": "2026-04-19T11:00:00.000Z"
+          },
+          "reject_reason": {
+            "type": "string",
+            "description": "Lý do nếu bị từ chối",
+            "example": "Lý do từ chối"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ScheduleEntry": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65f12a3d..."
+          },
+          "request_id": {
+            "type": "string",
+            "example": "65f12a3b..."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ngày đăng ký làm việc",
+            "example": "2026-04-20T00:00:00.000Z"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["office", "remote", "day_off", "leave"],
+            "example": "office"
+          },
+          "note": {
+            "type": "string",
+            "example": "Work at HQ"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ScheduleWithDetails": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65f12a3b..."
+          },
+          "employee_id": {
+            "type": "string",
+            "example": "65f12a3b..."
+          },
+          "week_start": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-20T00:00:00.000Z"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "pending", "approved", "rejected"],
+            "example": "pending"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-19T10:00:00.000Z"
+          },
+          "reviewed_by": {
+            "type": "string",
+            "example": null
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": null
+          },
+          "reject_reason": {
+            "type": "string",
+            "example": null
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "employee": {
+            "$ref": "#/components/schemas/Employee"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleEntry"
+            }
+          }
+        }
+      },
+      "AttendanceRecord": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65f12c9e..."
+          },
+          "employee_id": {
+            "type": "string",
+            "example": "65f12a3b..."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ngày chấm công",
+            "example": "2026-04-20T00:00:00.000Z"
+          },
+          "schedule_type": {
+            "type": "string",
+            "enum": ["office", "remote"],
+            "description": "Hình thức làm việc trong ngày",
+            "example": "office"
+          },
+          "check_in_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm quét QR check-in (hoặc tự động tạo 09:00 nếu là remote)",
+            "example": "2026-04-20T08:50:12.345Z"
+          },
+          "check_out_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm quét QR check-out (hoặc tự động tạo 18:00 nếu là remote)",
+            "example": "2026-04-20T18:05:44.123Z"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["qr", "schedule"],
+            "description": "Nguồn gốc ghi nhận: quét QR trực tiếp hoặc tự động sinh từ lịch đăng ký remote được duyệt",
+            "example": "qr"
+          },
+          "check_in_token_id": {
+            "type": "string",
+            "description": "ID của token QR đã dùng check-in",
+            "example": "65f12c8a..."
+          },
+          "check_out_token_id": {
+            "type": "string",
+            "description": "ID của token QR đã dùng check-out",
+            "example": "65f12d1b..."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AttendanceRecordWithEmployee": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65f12c9e..."
+          },
+          "employee_id": {
+            "type": "string",
+            "example": "65f12a3b..."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-20T00:00:00.000Z"
+          },
+          "schedule_type": {
+            "type": "string",
+            "enum": ["office", "remote"],
+            "example": "office"
+          },
+          "check_in_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-20T08:50:00.000Z"
+          },
+          "check_out_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-20T18:05:00.000Z"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["qr", "schedule"],
+            "example": "qr"
+          },
+          "check_in_token_id": {
+            "type": "string",
+            "example": "65f12c8a..."
+          },
+          "check_out_token_id": {
+            "type": "string",
+            "example": "65f12d1b..."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "employee": {
+            "$ref": "#/components/schemas/Employee"
+          }
+        }
+      },
+      "AttendanceQrToken": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65f12c8a..."
+          },
+          "token": {
+            "type": "string",
+            "description": "Chuỗi token QR dùng để quét",
+            "example": "a3f5b721..."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ngày tạo token",
+            "example": "2026-04-20T00:00:00.000Z"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời hạn hết hiệu lực của token",
+            "example": "2026-04-20T08:30:30.000Z"
+          },
+          "used": {
+            "type": "boolean",
+            "description": "Trạng thái token đã được sử dụng hay chưa",
+            "example": false
+          },
+          "used_by": {
+            "type": "string",
+            "description": "ID người dùng đã sử dụng token này",
+            "example": null
+          },
+          "used_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian token được quét sử dụng",
+            "example": null
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkPolicy": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65f12c01..."
+          },
+          "registration_start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm mở đăng ký lịch tuần",
+            "example": "2026-04-01T08:00:00.000Z"
+          },
+          "registration_end": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm khóa đăng ký lịch tuần",
+            "example": "2026-04-07T18:00:00.000Z"
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "Hệ thống đăng ký lịch bị khóa thủ công (nếu true)",
+            "example": false
+          },
+          "updated_by": {
+            "type": "string",
+            "description": "ID của Admin đã cập nhật chính sách gần nhất",
+            "example": "65f1292a..."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }
