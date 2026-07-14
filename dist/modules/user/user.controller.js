@@ -20,6 +20,7 @@ const jwt_guard_1 = require("../auth/common/guard/jwt/jwt.guard");
 const role_guard_1 = require("../auth/common/guard/role/role.guard");
 const role_decorator_1 = require("../../common/decorators/role.decorator");
 const role_enum_1 = require("../../common/enums/role.enum");
+const update_user_dto_1 = require("./dto/update-user.dto");
 let UserController = class UserController {
     userService;
     constructor(userService) {
@@ -28,8 +29,14 @@ let UserController = class UserController {
     async getMyProfile(req) {
         return this.userService.getMyProfile(req.user);
     }
+    async getAllUsers(req) {
+        return this.userService.getAllUsers(req.user);
+    }
     async getPublicProfile(userId, req) {
         return this.userService.getPublicProfile(userId, req.user);
+    }
+    async updateUser(body, req) {
+        return this.userService.updateUser(body, req.user);
     }
     async getFullProfileByAdmin(userId, req) {
         return this.userService.getFullProfileByAdmin(userId, req.user);
@@ -48,6 +55,17 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getMyProfile", null);
 __decorate([
+    (0, common_1.Get)('user/all'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Lấy danh sách tất cả người dùng trong hệ thống (USER)',
+    }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllUsers", null);
+__decorate([
     (0, common_1.Get)(':userId'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
@@ -60,6 +78,18 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getPublicProfile", null);
+__decorate([
+    (0, common_1.Post)('update/user'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Cập nhật tên hiển thị của người dùng (USER)',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [update_user_dto_1.UpdateUserDto, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateUser", null);
 __decorate([
     (0, common_1.Get)('admin/:userId'),
     (0, swagger_1.ApiBearerAuth)(),

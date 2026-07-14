@@ -21,6 +21,8 @@ const role_decorator_1 = require("../../common/decorators/role.decorator");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
 const role_enum_1 = require("../../common/enums/role.enum");
 const swagger_1 = require("@nestjs/swagger");
+const create_request_dto_1 = require("./dto/create-request.dto");
+const update_entries_dto_1 = require("./dto/update-entries.dto");
 let WorkscheduleController = class WorkscheduleController {
     workscheduleService;
     constructor(workscheduleService) {
@@ -35,7 +37,7 @@ let WorkscheduleController = class WorkscheduleController {
     async approveRequest(id, req) {
         return this.workscheduleService.approveRequest(id, req.user);
     }
-    async rejectRequest(id, req) {
+    async rejectRequest(id, body, req) {
         return this.workscheduleService.rejectRequest(id, req.user);
     }
     async bulkApprove(body, req) {
@@ -124,9 +126,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_entries_dto_1.RejectRequestDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "rejectRequest", null);
 __decorate([
@@ -137,7 +140,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [update_entries_dto_1.BulkApproveDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "bulkApprove", null);
 __decorate([
@@ -157,7 +160,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [update_entries_dto_1.ScanAttendanceDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "scanAttendance", null);
 __decorate([
@@ -215,7 +218,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [update_entries_dto_1.UpdatePolicyDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "updatePolicy", null);
 __decorate([
@@ -234,7 +237,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [create_request_dto_1.CreateScheduleRequestDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "createRequest", null);
 __decorate([
@@ -257,7 +260,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:paramtypes", [String, update_entries_dto_1.UpdateScheduleEntriesDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "updateEntries", null);
 __decorate([

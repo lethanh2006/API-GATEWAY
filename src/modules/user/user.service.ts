@@ -52,4 +52,12 @@ export class UserService {
   async getFullProfileByAdmin(userId: string, user: any) {
     return this.forward('GET', `/api/user/user/${userId}`, null, null, user);
   }
+
+  async getAllUsers(user: any) {
+    return this.forward('GET', '/api/user/user/all', null, null, user);
+  }
+
+  async updateUser(dto: any, user: any) {
+    return this.forward('POST', '/api/user/update/user', dto, null, user);
+  }
 }

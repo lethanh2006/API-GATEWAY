@@ -3,6 +3,8 @@ import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @ApiTags('Api Chat')
 @Controller('api/chat')
@@ -13,7 +15,7 @@ export class ChatController {
   @Post('chat/new')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Tạo cuộc trò chuyện mới' })
-  async createChat(@Body() body: any, @Req() req: any) {
+  async createChat(@Body() body: CreateChatDto, @Req() req: any) {
     return this.chatService.createChat(body, req.user);
   }
 
@@ -27,7 +29,7 @@ export class ChatController {
   @Post('message')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Gửi tin nhắn mới (chứa text hoặc file ảnh)' })
-  async sendMessage(@Body() body: any, @Req() req: any) {
+  async sendMessage(@Body() body: SendMessageDto, @Req() req: any) {
     return this.chatService.sendMessage(body, req.user);
   }
 

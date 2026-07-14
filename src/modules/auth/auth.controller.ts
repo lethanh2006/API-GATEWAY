@@ -16,6 +16,10 @@ import { RolesGuard } from './common/guard/role/role.guard';
 import { Roles } from '../../common/decorators/role.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums/role.enum';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { UpdateEmailDto, LoginGoogleDto } from './dto/update-email.dto';
 
 @Controller('api/auth')
 @ApiTags('Api Auth')
@@ -30,21 +34,21 @@ export class AuthController {
   @Post('register')
   @Public()
   @ApiOperation({ summary: 'Đăng ký tài khoản mới (PUBLIC)' })
-  async register(@Body() body: any) {
+  async register(@Body() body: RegisterDto) {
     return this.authService.register(body);
   }
 
   @Post('login')
   @Public()
   @ApiOperation({ summary: 'Đăng nhập bước 1 — verify password, gửi OTP (PUBLIC)' })
-  async login(@Body() body: any) {
+  async login(@Body() body: LoginDto) {
     return this.authService.login(body);
   }
 
   @Post('verify')
   @Public()
   @ApiOperation({ summary: 'Đăng nhập bước 2 — xác thực OTP, nhận token (PUBLIC)' })
-  async verifyOtp(@Body() body: any) {
+  async verifyOtp(@Body() body: VerifyOtpDto) {
     return this.authService.verifyOtp(body);
   }
 
@@ -58,7 +62,7 @@ export class AuthController {
   @Post('login-google')
   @Public()
   @ApiOperation({ summary: 'Đăng nhập bằng Google (PUBLIC)' })
-  async loginWithGoogle(@Body() body: any) {
+  async loginWithGoogle(@Body() body: LoginGoogleDto) {
     return this.authService.loginWithGoogle(body);
   }
 
@@ -76,7 +80,7 @@ export class AuthController {
   @Patch('me/email')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cập nhật email của bản thân (USER)' })
-  async updateMyEmail(@Body() body: any, @Req() req: any) {
+  async updateMyEmail(@Body() body: UpdateEmailDto, @Req() req: any) {
     return this.authService.updateMyEmail(body, req.user);
   }
 

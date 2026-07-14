@@ -21,6 +21,10 @@ const role_guard_1 = require("./common/guard/role/role.guard");
 const role_decorator_1 = require("../../common/decorators/role.decorator");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
 const role_enum_1 = require("../../common/enums/role.enum");
+const register_dto_1 = require("./dto/register.dto");
+const login_dto_1 = require("./dto/login.dto");
+const verify_otp_dto_1 = require("./dto/verify-otp.dto");
+const update_email_dto_1 = require("./dto/update-email.dto");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -64,7 +68,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Đăng ký tài khoản mới (PUBLIC)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 __decorate([
@@ -73,7 +77,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Đăng nhập bước 1 — verify password, gửi OTP (PUBLIC)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
@@ -82,7 +86,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Đăng nhập bước 2 — xác thực OTP, nhận token (PUBLIC)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [verify_otp_dto_1.VerifyOtpDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "verifyOtp", null);
 __decorate([
@@ -100,7 +104,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Đăng nhập bằng Google (PUBLIC)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [update_email_dto_1.LoginGoogleDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginWithGoogle", null);
 __decorate([
@@ -119,7 +123,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [update_email_dto_1.UpdateEmailDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "updateMyEmail", null);
 __decorate([

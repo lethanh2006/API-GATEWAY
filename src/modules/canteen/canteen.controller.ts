@@ -6,6 +6,7 @@ import { Roles } from '../../common/decorators/role.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -24,7 +25,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Tạo mới món ăn' })
-  async createMenuItem(@Body() body: any, @Req() req: any) {
+  async createMenuItem(@Body() body: CreateMenuItemDto, @Req() req: any) {
     return this.canteenService.createMenuItem(body, req.user);
   }
 }

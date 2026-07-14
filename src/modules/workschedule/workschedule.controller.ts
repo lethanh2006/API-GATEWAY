@@ -6,6 +6,8 @@ import { Roles } from '../../common/decorators/role.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { CreateScheduleRequestDto } from './dto/create-request.dto';
+import { UpdateScheduleEntriesDto, UpdatePolicyDto, ScanAttendanceDto, RejectRequestDto, BulkApproveDto } from './dto/update-entries.dto';
 
 @ApiTags('Api Workschedule')
 @Controller('api/workschedule')
@@ -47,7 +49,7 @@ export class WorkscheduleController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' })
   @ApiParam({ name: 'id', example: 'req123' })
-  async rejectRequest(@Param('id') id: string, @Req() req: any) {
+  async rejectRequest(@Param('id') id: string, @Body() body: RejectRequestDto, @Req() req: any) {
     return this.workscheduleService.rejectRequest(id, req.user);
   }
 
@@ -55,7 +57,7 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Phê duyệt hàng loạt yêu cầu lịch làm việc (Admin)' })
-  async bulkApprove(@Body() body: any, @Req() req: any) {
+  async bulkApprove(@Body() body: BulkApproveDto, @Req() req: any) {
     return this.workscheduleService.bulkApprove(body, req.user);
   }
 
@@ -74,7 +76,7 @@ export class WorkscheduleController {
   @Post('attendance/scan')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Điểm danh bằng quét QR Code' })
-  async scanAttendance(@Body() body: any, @Req() req: any) {
+  async scanAttendance(@Body() body: ScanAttendanceDto, @Req() req: any) {
     return this.workscheduleService.scanAttendance(body, req.user);
   }
 
@@ -124,7 +126,7 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Cập nhật chính sách chấm công (Admin)' })
-  async updatePolicy(@Body() body: any, @Req() req: any) {
+  async updatePolicy(@Body() body: UpdatePolicyDto, @Req() req: any) {
     return this.workscheduleService.updatePolicy(body, req.user);
   }
 
@@ -142,7 +144,7 @@ export class WorkscheduleController {
   @Post('schedule/requests')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Tạo yêu cầu đăng ký lịch làm việc mới' })
-  async createRequest(@Body() body: any, @Req() req: any) {
+  async createRequest(@Body() body: CreateScheduleRequestDto, @Req() req: any) {
     return this.workscheduleService.createRequest(body, req.user);
   }
 
@@ -158,7 +160,7 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cập nhật nội dung một yêu cầu lịch làm việc' })
   @ApiParam({ name: 'id', example: 'req123' })
-  async updateEntries(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+  async updateEntries(@Param('id') id: string, @Body() body: UpdateScheduleEntriesDto, @Req() req: any) {
     return this.workscheduleService.updateEntries(id, body, req.user);
   }
 

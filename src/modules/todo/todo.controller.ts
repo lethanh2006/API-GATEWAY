@@ -5,6 +5,8 @@ import { RolesGuard } from '../auth/common/guard/role/role.guard';
 import { Roles } from '../../common/decorators/role.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { AssignTaskDto, UpdateTaskStatusDto } from './dto/assign-task.dto';
 
 @ApiTags('Api Todo')
 @Controller('api/todo')
@@ -23,15 +25,15 @@ export class TodoController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cập nhật trạng thái của một công việc' })
   @ApiParam({ name: 'id', example: 'taskId123' })
-  async updateTaskStatus(@Param('id') id: string, @Body('status') status: string, @Req() req: any) {
-    return this.todoService.updateTaskStatus(id, status, req.user);
+  async updateTaskStatus(@Param('id') id: string, @Body() body: UpdateTaskStatusDto, @Req() req: any) {
+    return this.todoService.updateTaskStatus(id, body.status, req.user);
   }
 
   @Post()
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Tạo công việc mới (chỉ Admin)' })
-  async createTask(@Body() body: any, @Req() req: any) {
+  async createTask(@Body() body: CreateTaskDto, @Req() req: any) {
     return this.todoService.createTask(body, req.user);
   }
 
@@ -40,8 +42,8 @@ export class TodoController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Giao lại công việc cho người dùng (chỉ Admin)' })
   @ApiParam({ name: 'id', example: 'taskId123' })
-  async assignTask(@Param('id') id: string, @Body('assignedTo') assignedTo: string, @Req() req: any) {
-    return this.todoService.assignTask(id, assignedTo, req.user);
+  async assignTask(@Param('id') id: string, @Body() body: AssignTaskDto, @Req() req: any) {
+    return this.todoService.assignTask(id, body.assignedTo, req.user);
   }
 
   @Get()

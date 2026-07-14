@@ -18,6 +18,8 @@ const chat_service_1 = require("./chat.service");
 const jwt_guard_1 = require("../auth/common/guard/jwt/jwt.guard");
 const role_guard_1 = require("../auth/common/guard/role/role.guard");
 const swagger_1 = require("@nestjs/swagger");
+const create_chat_dto_1 = require("./dto/create-chat.dto");
+const send_message_dto_1 = require("./dto/send-message.dto");
 let ChatController = class ChatController {
     chatService;
     constructor(chatService) {
@@ -44,7 +46,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [create_chat_dto_1.CreateChatDto, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "createChat", null);
 __decorate([
@@ -63,7 +65,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [send_message_dto_1.SendMessageDto, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "sendMessage", null);
 __decorate([

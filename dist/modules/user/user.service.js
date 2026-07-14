@@ -56,6 +56,12 @@ let UserService = class UserService {
     async getFullProfileByAdmin(userId, user) {
         return this.forward('GET', `/api/user/user/${userId}`, null, null, user);
     }
+    async getAllUsers(user) {
+        return this.forward('GET', '/api/user/user/all', null, null, user);
+    }
+    async updateUser(dto, user) {
+        return this.forward('POST', '/api/user/update/user', dto, null, user);
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

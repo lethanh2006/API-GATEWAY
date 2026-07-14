@@ -20,6 +20,8 @@ const role_guard_1 = require("../auth/common/guard/role/role.guard");
 const role_decorator_1 = require("../../common/decorators/role.decorator");
 const role_enum_1 = require("../../common/enums/role.enum");
 const swagger_1 = require("@nestjs/swagger");
+const create_task_dto_1 = require("./dto/create-task.dto");
+const assign_task_dto_1 = require("./dto/assign-task.dto");
 let TodoController = class TodoController {
     todoService;
     constructor(todoService) {
@@ -28,14 +30,14 @@ let TodoController = class TodoController {
     async getMyTasks(req) {
         return this.todoService.getMyTasks(req.user);
     }
-    async updateTaskStatus(id, status, req) {
-        return this.todoService.updateTaskStatus(id, status, req.user);
+    async updateTaskStatus(id, body, req) {
+        return this.todoService.updateTaskStatus(id, body.status, req.user);
     }
     async createTask(body, req) {
         return this.todoService.createTask(body, req.user);
     }
-    async assignTask(id, assignedTo, req) {
-        return this.todoService.assignTask(id, assignedTo, req.user);
+    async assignTask(id, body, req) {
+        return this.todoService.assignTask(id, body.assignedTo, req.user);
     }
     async getAllTasks(req) {
         return this.todoService.getAllTasks(req.user);
@@ -60,10 +62,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Cập nhật trạng thái của một công việc' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'taskId123' }),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)('status')),
+    __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, assign_task_dto_1.UpdateTaskStatusDto, Object]),
     __metadata("design:returntype", Promise)
 ], TodoController.prototype, "updateTaskStatus", null);
 __decorate([
@@ -74,7 +76,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [create_task_dto_1.CreateTaskDto, Object]),
     __metadata("design:returntype", Promise)
 ], TodoController.prototype, "createTask", null);
 __decorate([
@@ -84,10 +86,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Giao lại công việc cho người dùng (chỉ Admin)' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'taskId123' }),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)('assignedTo')),
+    __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, assign_task_dto_1.AssignTaskDto, Object]),
     __metadata("design:returntype", Promise)
 ], TodoController.prototype, "assignTask", null);
 __decorate([

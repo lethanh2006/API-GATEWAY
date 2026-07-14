@@ -9,4 +9,6 @@ export declare class UserService {
     getMyProfile(user: any): Promise<any>;
     getPublicProfile(userId: string, user: any): Promise<any>;
     getFullProfileByAdmin(userId: string, user: any): Promise<any>;
+    getAllUsers(user: any): Promise<any>;
+    updateUser(dto: any, user: any): Promise<any>;
 }

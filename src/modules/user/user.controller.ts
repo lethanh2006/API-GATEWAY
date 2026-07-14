@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
   Param,
   Req,
   UseGuards,
@@ -11,6 +13,7 @@ import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
 import { Roles } from '../../common/decorators/role.decorator';
 import { Role } from '../../common/enums/role.enum';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('api/user')
 @ApiTags('Api User')
@@ -31,6 +34,18 @@ export class UserController {
   }
 
   // ============================================================
+  // USER — xem danh sách tất cả người dùng trong hệ thống
+  // ============================================================
+  @Get('user/all')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Lấy danh sách tất cả người dùng trong hệ thống (USER)',
+  })
+  async getAllUsers(@Req() req: any) {
+    return this.userService.getAllUsers(req.user);
+  }
+
+  // ============================================================
   // USER — xem profile public của user khác
   // ============================================================
   @Get(':userId')
@@ -41,6 +56,18 @@ export class UserController {
   @ApiParam({ name: 'userId', example: '1' })
   async getPublicProfile(@Param('userId') userId: string, @Req() req: any) {
     return this.userService.getPublicProfile(userId, req.user);
+  }
+
+  // ============================================================
+  // USER — cập nhật thông tin tên người dùng
+  // ============================================================
+  @Post('update/user')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cập nhật tên hiển thị của người dùng (USER)',
+  })
+  async updateUser(@Body() body: UpdateUserDto, @Req() req: any) {
+    return this.userService.updateUser(body, req.user);
   }
 
   // ============================================================
