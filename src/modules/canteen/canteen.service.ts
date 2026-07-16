@@ -48,4 +48,20 @@ export class CanteenService {
   async createMenuItem(dto: any, user: any) {
     return this.forward('POST', '/api/canteen/admin/menu', dto, null, user);
   }
+
+  async updateMenuItem(id: string, dto: any, user: any) {
+    return this.forward('PUT', `/api/canteen/admin/menu/${id}`, dto, null, user);
+  }
+
+  async deleteMenuItem(id: string, user: any) {
+    return this.forward('DELETE', `/api/canteen/admin/menu/${id}`, null, null, user);
+  }
+
+  async undoMenuItemChange(user: any) {
+    return this.forward('POST', '/api/canteen/admin/menu/undo', null, null, user);
+  }
+
+  async redoMenuItemChange(user: any) {
+    return this.forward('POST', '/api/canteen/admin/menu/redo', null, null, user);
+  }
 }

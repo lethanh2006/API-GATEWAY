@@ -8,4 +8,8 @@ export declare class CanteenService {
     private forward;
     getMenu(): Promise<any>;
     createMenuItem(dto: any, user: any): Promise<any>;
+    updateMenuItem(id: string, dto: any, user: any): Promise<any>;
+    deleteMenuItem(id: string, user: any): Promise<any>;
+    undoMenuItemChange(user: any): Promise<any>;
+    redoMenuItemChange(user: any): Promise<any>;
 }

@@ -53,6 +53,18 @@ let CanteenService = class CanteenService {
     async createMenuItem(dto, user) {
         return this.forward('POST', '/api/canteen/admin/menu', dto, null, user);
     }
+    async updateMenuItem(id, dto, user) {
+        return this.forward('PUT', `/api/canteen/admin/menu/${id}`, dto, null, user);
+    }
+    async deleteMenuItem(id, user) {
+        return this.forward('DELETE', `/api/canteen/admin/menu/${id}`, null, null, user);
+    }
+    async undoMenuItemChange(user) {
+        return this.forward('POST', '/api/canteen/admin/menu/undo', null, null, user);
+    }
+    async redoMenuItemChange(user) {
+        return this.forward('POST', '/api/canteen/admin/menu/redo', null, null, user);
+    }
 };
 exports.CanteenService = CanteenService;
 exports.CanteenService = CanteenService = __decorate([
