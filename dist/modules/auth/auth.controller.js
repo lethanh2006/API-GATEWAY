@@ -60,6 +60,9 @@ let AuthController = class AuthController {
     async deleteUserByAdmin(userId, req) {
         return this.authService.deleteUserByAdmin(userId, req.user);
     }
+    async updateUserRole(userId, body) {
+        return this.authService.updateUserRole(userId, body.role);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -159,6 +162,18 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "deleteUserByAdmin", null);
+__decorate([
+    (0, common_1.Patch)('users/:userId/role'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật vai trò người dùng (ADMIN)' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', example: '1' }),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateUserRole", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('api/auth'),
     (0, swagger_1.ApiTags)('Api Auth'),

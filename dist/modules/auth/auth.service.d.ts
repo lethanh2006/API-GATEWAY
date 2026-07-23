@@ -16,4 +16,5 @@ export declare class AuthService {
     deleteMyAccount(user: any): Promise<any>;
     getUserProfileByAdmin(userId: string, user: any): Promise<any>;
     deleteUserByAdmin(userId: string, user: any): Promise<any>;
+    updateUserRole(userId: string, role: string): Promise<any>;
 }

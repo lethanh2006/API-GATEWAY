@@ -77,6 +77,9 @@ let AuthService = class AuthService {
     async deleteUserByAdmin(userId, user) {
         return this.forward('DELETE', `/api/auth/users/${userId}`, null, null, user);
     }
+    async updateUserRole(userId, role) {
+        return this.forward('PATCH', `/api/auth/users/${userId}/role`, { role });
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

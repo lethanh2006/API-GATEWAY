@@ -112,4 +112,16 @@ export class AuthController {
   async deleteUserByAdmin(@Param('userId') userId: string, @Req() req: any) {
     return this.authService.deleteUserByAdmin(userId, req.user);
   }
+
+  @Patch('users/:userId/role')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Cập nhật vai trò người dùng (ADMIN)' })
+  @ApiParam({ name: 'userId', example: '1' })
+  async updateUserRole(
+    @Param('userId') userId: string,
+    @Body() body: { role: string }
+  ) {
+    return this.authService.updateUserRole(userId, body.role);
+  }
 }

@@ -16,4 +16,7 @@ export declare class AuthController {
     deleteMyAccount(req: any): Promise<any>;
     getUserProfileByAdmin(userId: string, req: any): Promise<any>;
     deleteUserByAdmin(userId: string, req: any): Promise<any>;
+    updateUserRole(userId: string, body: {
+        role: string;
+    }): Promise<any>;
 }

@@ -80,4 +80,8 @@ export class AuthService {
   async deleteUserByAdmin(userId: string, user: any) {
     return this.forward('DELETE', `/api/auth/users/${userId}`, null, null, user);
   }
+
+  async updateUserRole(userId: string, role: string) {
+    return this.forward('PATCH', `/api/auth/users/${userId}/role`, { role });
+  }
 }
