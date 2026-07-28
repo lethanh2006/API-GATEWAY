@@ -120,6 +120,13 @@ export class CanteenService {
   async consumeIngredient(dto: any, user: any) {
     return this.forward('POST', '/api/canteen/inventory/consume', dto, null, user);
   }
+
+  // --- Analytics APIs ---
+  async getTopDishes(limit: number, user: any) {
+    const params = limit ? { limit } : undefined;
+    return this.forward('GET', '/api/canteen/analytics/top-dishes', null, params, user);
+  }
 }
+
 
 

@@ -104,6 +104,10 @@ let CanteenService = class CanteenService {
     async consumeIngredient(dto, user) {
         return this.forward('POST', '/api/canteen/inventory/consume', dto, null, user);
     }
+    async getTopDishes(limit, user) {
+        const params = limit ? { limit } : undefined;
+        return this.forward('GET', '/api/canteen/analytics/top-dishes', null, params, user);
+    }
 };
 exports.CanteenService = CanteenService;
 exports.CanteenService = CanteenService = __decorate([

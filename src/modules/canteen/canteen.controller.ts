@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { CanteenService } from './canteen.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
@@ -178,6 +178,17 @@ export class CanteenController {
   async consumeIngredient(@Body() body: ConsumeIngredientDto, @Req() req: any) {
     return this.canteenService.consumeIngredient(body, req.user);
   }
+
+  // --- 3.5 Nhóm API Báo Cáo & Phân Tích (Analytics APIs) ---
+
+  @Get('analytics/top-dishes')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap)' })
+  async getTopDishes(@Query('limit') limit: number, @Req() req: any) {
+    return this.canteenService.getTopDishes(limit, req.user);
+  }
 }
+
 
 

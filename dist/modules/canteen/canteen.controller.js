@@ -89,6 +89,9 @@ let CanteenController = class CanteenController {
     async consumeIngredient(body, req) {
         return this.canteenService.consumeIngredient(body, req.user);
     }
+    async getTopDishes(limit, req) {
+        return this.canteenService.getTopDishes(limit, req.user);
+    }
 };
 exports.CanteenController = CanteenController;
 __decorate([
@@ -289,6 +292,17 @@ __decorate([
     __metadata("design:paramtypes", [consume_ingredient_dto_1.ConsumeIngredientDto, Object]),
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "consumeIngredient", null);
+__decorate([
+    (0, common_1.Get)('analytics/top-dishes'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap)' }),
+    __param(0, (0, common_1.Query)('limit')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getTopDishes", null);
 exports.CanteenController = CanteenController = __decorate([
     (0, swagger_1.ApiTags)('Api Canteen'),
     (0, common_1.Controller)('api/canteen'),

@@ -25,4 +25,5 @@ export declare class CanteenService {
     createInventoryBatch(dto: any, user: any): Promise<any>;
     getInventoryExpiryAlerts(user: any): Promise<any>;
     consumeIngredient(dto: any, user: any): Promise<any>;
+    getTopDishes(limit: number, user: any): Promise<any>;
 }

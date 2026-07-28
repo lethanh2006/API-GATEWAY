@@ -27,4 +27,5 @@ export declare class CanteenController {
     createInventoryBatch(body: CreateInventoryBatchDto, req: any): Promise<any>;
     getInventoryExpiryAlerts(req: any): Promise<any>;
     consumeIngredient(body: ConsumeIngredientDto, req: any): Promise<any>;
+    getTopDishes(limit: number, req: any): Promise<any>;
 }
