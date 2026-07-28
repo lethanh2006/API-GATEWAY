@@ -24,6 +24,9 @@ const swagger_1 = require("@nestjs/swagger");
 const create_menu_item_dto_1 = require("./dto/create-menu-item.dto");
 const update_menu_item_dto_1 = require("./dto/update-menu-item.dto");
 const create_order_dto_1 = require("./dto/create-order.dto");
+const create_ingredient_dto_1 = require("./dto/create-ingredient.dto");
+const create_inventory_batch_dto_1 = require("./dto/create-inventory-batch.dto");
+const consume_ingredient_dto_1 = require("./dto/consume-ingredient.dto");
 let CanteenController = class CanteenController {
     canteenService;
     constructor(canteenService) {
@@ -73,6 +76,18 @@ let CanteenController = class CanteenController {
     }
     async setKitchenOrderReady(id, req) {
         return this.canteenService.setKitchenOrderReady(id, req.user);
+    }
+    async createIngredient(body, req) {
+        return this.canteenService.createIngredient(body, req.user);
+    }
+    async createInventoryBatch(body, req) {
+        return this.canteenService.createInventoryBatch(body, req.user);
+    }
+    async getInventoryExpiryAlerts(req) {
+        return this.canteenService.getInventoryExpiryAlerts(req.user);
+    }
+    async consumeIngredient(body, req) {
+        return this.canteenService.consumeIngredient(body, req.user);
     }
 };
 exports.CanteenController = CanteenController;
@@ -231,6 +246,49 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "setKitchenOrderReady", null);
+__decorate([
+    (0, common_1.Post)('inventory/ingredients'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Khởi tạo nguyên liệu mới' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_ingredient_dto_1.CreateIngredientDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "createIngredient", null);
+__decorate([
+    (0, common_1.Post)('inventory/batches'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng)' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_inventory_batch_dto_1.CreateInventoryBatchDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "createInventoryBatch", null);
+__decorate([
+    (0, common_1.Get)('inventory/expiry-alerts'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap)' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getInventoryExpiryAlerts", null);
+__decorate([
+    (0, common_1.Post)('inventory/consume'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
+    (0, swagger_1.ApiOperation)({ summary: 'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước)' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [consume_ingredient_dto_1.ConsumeIngredientDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "consumeIngredient", null);
 exports.CanteenController = CanteenController = __decorate([
     (0, swagger_1.ApiTags)('Api Canteen'),
     (0, common_1.Controller)('api/canteen'),

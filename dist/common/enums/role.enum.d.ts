@@ -1,6 +1,9 @@
 export declare enum Role {
     ADMIN = "ADMIN",
-    USER = "USER",
     MANAGER = "MANAGER",
-    CHEF = "CHEF"
+    CHEF = "CHEF",
+    CASHIER = "CASHIER",
+    WAITER = "WAITER",
+    USER = "USER",
+    VIP = "VIP"
 }

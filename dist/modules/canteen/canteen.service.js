@@ -92,6 +92,18 @@ let CanteenService = class CanteenService {
     async setKitchenOrderReady(id, user) {
         return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/ready`, null, null, user);
     }
+    async createIngredient(dto, user) {
+        return this.forward('POST', '/api/canteen/inventory/ingredients', dto, null, user);
+    }
+    async createInventoryBatch(dto, user) {
+        return this.forward('POST', '/api/canteen/inventory/batches', dto, null, user);
+    }
+    async getInventoryExpiryAlerts(user) {
+        return this.forward('GET', '/api/canteen/inventory/expiry-alerts', null, null, user);
+    }
+    async consumeIngredient(dto, user) {
+        return this.forward('POST', '/api/canteen/inventory/consume', dto, null, user);
+    }
 };
 exports.CanteenService = CanteenService;
 exports.CanteenService = CanteenService = __decorate([

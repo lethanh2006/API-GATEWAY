@@ -103,5 +103,23 @@ export class CanteenService {
   async setKitchenOrderReady(id: string, user: any) {
     return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/ready`, null, null, user);
   }
+
+  // --- Inventory APIs ---
+  async createIngredient(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/inventory/ingredients', dto, null, user);
+  }
+
+  async createInventoryBatch(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/inventory/batches', dto, null, user);
+  }
+
+  async getInventoryExpiryAlerts(user: any) {
+    return this.forward('GET', '/api/canteen/inventory/expiry-alerts', null, null, user);
+  }
+
+  async consumeIngredient(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/inventory/consume', dto, null, user);
+  }
 }
+
 

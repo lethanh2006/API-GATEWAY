@@ -21,4 +21,8 @@ export declare class CanteenService {
     getNextKitchenOrder(user: any): Promise<any>;
     setKitchenOrderCooking(id: string, user: any): Promise<any>;
     setKitchenOrderReady(id: string, user: any): Promise<any>;
+    createIngredient(dto: any, user: any): Promise<any>;
+    createInventoryBatch(dto: any, user: any): Promise<any>;
+    getInventoryExpiryAlerts(user: any): Promise<any>;
+    consumeIngredient(dto: any, user: any): Promise<any>;
 }

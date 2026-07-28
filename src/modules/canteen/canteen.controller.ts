@@ -9,6 +9,9 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateIngredientDto } from './dto/create-ingredient.dto';
+import { CreateInventoryBatchDto } from './dto/create-inventory-batch.dto';
+import { ConsumeIngredientDto } from './dto/consume-ingredient.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -141,5 +144,40 @@ export class CanteenController {
   async setKitchenOrderReady(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.setKitchenOrderReady(id, req.user);
   }
+
+  // --- 3.4 Nhóm API Quản Lý Kho (Inventory APIs) ---
+
+  @Post('inventory/ingredients')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Khởi tạo nguyên liệu mới' })
+  async createIngredient(@Body() body: CreateIngredientDto, @Req() req: any) {
+    return this.canteenService.createIngredient(body, req.user);
+  }
+
+  @Post('inventory/batches')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng)' })
+  async createInventoryBatch(@Body() body: CreateInventoryBatchDto, @Req() req: any) {
+    return this.canteenService.createInventoryBatch(body, req.user);
+  }
+
+  @Get('inventory/expiry-alerts')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap)' })
+  async getInventoryExpiryAlerts(@Req() req: any) {
+    return this.canteenService.getInventoryExpiryAlerts(req.user);
+  }
+
+  @Post('inventory/consume')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước)' })
+  async consumeIngredient(@Body() body: ConsumeIngredientDto, @Req() req: any) {
+    return this.canteenService.consumeIngredient(body, req.user);
+  }
 }
+
 
