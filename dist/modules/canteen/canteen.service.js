@@ -50,6 +50,10 @@ let CanteenService = class CanteenService {
     async getMenu() {
         return this.forward('GET', '/api/canteen/menu');
     }
+    async searchMenu(query) {
+        const params = query ? { q: query } : undefined;
+        return this.forward('GET', '/api/canteen/menu/search', null, params);
+    }
     async createMenuItem(dto, user) {
         return this.forward('POST', '/api/canteen/admin/menu', dto, null, user);
     }
@@ -91,6 +95,21 @@ let CanteenService = class CanteenService {
     }
     async setKitchenOrderReady(id, user) {
         return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/ready`, null, null, user);
+    }
+    async getAllTables() {
+        return this.forward('GET', '/api/canteen/tables');
+    }
+    async getTableById(id) {
+        return this.forward('GET', `/api/canteen/tables/${id}`);
+    }
+    async createTable(dto, user) {
+        return this.forward('POST', '/api/canteen/tables', dto, null, user);
+    }
+    async updateTableStatus(id, dto, user) {
+        return this.forward('PATCH', `/api/canteen/tables/${id}/status`, dto, null, user);
+    }
+    async allocateTables(dto, user) {
+        return this.forward('POST', '/api/canteen/tables/allocate', dto, null, user);
     }
     async createIngredient(dto, user) {
         return this.forward('POST', '/api/canteen/inventory/ingredients', dto, null, user);

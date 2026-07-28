@@ -12,6 +12,9 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { CreateInventoryBatchDto } from './dto/create-inventory-batch.dto';
 import { ConsumeIngredientDto } from './dto/consume-ingredient.dto';
+import { CreateTableDto } from './dto/create-table.dto';
+import { UpdateTableStatusDto } from './dto/update-table-status.dto';
+import { AllocateTableDto } from './dto/allocate-table.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -26,6 +29,13 @@ export class CanteenController {
   @ApiOperation({ summary: 'Lấy toàn bộ thực đơn đang bán (phân nhóm theo Category)' })
   async getMenu() {
     return this.canteenService.getMenu();
+  }
+
+  @Get('menu/search')
+  @Public()
+  @ApiOperation({ summary: 'Tìm kiếm món ăn real-time bằng thuật toán Trie Prefix Tree' })
+  async searchMenu(@Query('q') query: string) {
+    return this.canteenService.searchMenu(query || '');
   }
 
   @Post('admin/menu')
@@ -145,7 +155,51 @@ export class CanteenController {
     return this.canteenService.setKitchenOrderReady(id, req.user);
   }
 
-  // --- 3.4 Nhóm API Quản Lý Kho (Inventory APIs) ---
+  // --- 3.4 Nhóm API Quản Lý Bàn Ăn (Table APIs) ---
+
+  @Get('tables')
+  @Public()
+  @ApiOperation({ summary: 'Lấy danh sách tất cả các bàn ăn' })
+  async getAllTables() {
+    return this.canteenService.getAllTables();
+  }
+
+  @Get('tables/:id')
+  @Public()
+  @ApiOperation({ summary: 'Lấy thông tin bàn ăn theo ID' })
+  async getTableById(@Param('id') id: string) {
+    return this.canteenService.getTableById(id);
+  }
+
+  @Post('tables')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Khởi tạo bàn ăn mới' })
+  async createTable(@Body() body: CreateTableDto, @Req() req: any) {
+    return this.canteenService.createTable(body, req.user);
+  }
+
+  @Patch('tables/:id/status')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.WAITER)
+  @ApiOperation({ summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved)' })
+  async updateTableStatus(
+    @Param('id') id: string,
+    @Body() body: UpdateTableStatusDto,
+    @Req() req: any,
+  ) {
+    return this.canteenService.updateTableStatus(id, body, req.user);
+  }
+
+  @Post('tables/allocate')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.WAITER)
+  @ApiOperation({ summary: 'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách' })
+  async allocateTables(@Body() body: AllocateTableDto, @Req() req: any) {
+    return this.canteenService.allocateTables(body, req.user);
+  }
+
+  // --- 3.5 Nhóm API Quản Lý Kho (Inventory APIs) ---
 
   @Post('inventory/ingredients')
   @ApiBearerAuth()
@@ -179,7 +233,7 @@ export class CanteenController {
     return this.canteenService.consumeIngredient(body, req.user);
   }
 
-  // --- 3.5 Nhóm API Báo Cáo & Phân Tích (Analytics APIs) ---
+  // --- 3.6 Nhóm API Báo Cáo & Phân Tích (Analytics APIs) ---
 
   @Get('analytics/top-dishes')
   @ApiBearerAuth()
@@ -189,6 +243,3 @@ export class CanteenController {
     return this.canteenService.getTopDishes(limit, req.user);
   }
 }
-
-
-

@@ -5,10 +5,14 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { CreateInventoryBatchDto } from './dto/create-inventory-batch.dto';
 import { ConsumeIngredientDto } from './dto/consume-ingredient.dto';
+import { CreateTableDto } from './dto/create-table.dto';
+import { UpdateTableStatusDto } from './dto/update-table-status.dto';
+import { AllocateTableDto } from './dto/allocate-table.dto';
 export declare class CanteenController {
     private readonly canteenService;
     constructor(canteenService: CanteenService);
     getMenu(): Promise<any>;
+    searchMenu(query: string): Promise<any>;
     createMenuItem(body: CreateMenuItemDto, req: any): Promise<any>;
     updateMenuItem(id: string, body: UpdateMenuItemDto, req: any): Promise<any>;
     deleteMenuItem(id: string, req: any): Promise<any>;
@@ -23,6 +27,11 @@ export declare class CanteenController {
     getNextKitchenOrder(req: any): Promise<any>;
     setKitchenOrderCooking(id: string, req: any): Promise<any>;
     setKitchenOrderReady(id: string, req: any): Promise<any>;
+    getAllTables(): Promise<any>;
+    getTableById(id: string): Promise<any>;
+    createTable(body: CreateTableDto, req: any): Promise<any>;
+    updateTableStatus(id: string, body: UpdateTableStatusDto, req: any): Promise<any>;
+    allocateTables(body: AllocateTableDto, req: any): Promise<any>;
     createIngredient(body: CreateIngredientDto, req: any): Promise<any>;
     createInventoryBatch(body: CreateInventoryBatchDto, req: any): Promise<any>;
     getInventoryExpiryAlerts(req: any): Promise<any>;

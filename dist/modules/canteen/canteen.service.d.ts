@@ -7,6 +7,7 @@ export declare class CanteenService {
     constructor(httpService: HttpService, configService: ConfigService);
     private forward;
     getMenu(): Promise<any>;
+    searchMenu(query: string): Promise<any>;
     createMenuItem(dto: any, user: any): Promise<any>;
     updateMenuItem(id: string, dto: any, user: any): Promise<any>;
     deleteMenuItem(id: string, user: any): Promise<any>;
@@ -21,6 +22,11 @@ export declare class CanteenService {
     getNextKitchenOrder(user: any): Promise<any>;
     setKitchenOrderCooking(id: string, user: any): Promise<any>;
     setKitchenOrderReady(id: string, user: any): Promise<any>;
+    getAllTables(): Promise<any>;
+    getTableById(id: string): Promise<any>;
+    createTable(dto: any, user: any): Promise<any>;
+    updateTableStatus(id: string, dto: any, user: any): Promise<any>;
+    allocateTables(dto: any, user: any): Promise<any>;
     createIngredient(dto: any, user: any): Promise<any>;
     createInventoryBatch(dto: any, user: any): Promise<any>;
     getInventoryExpiryAlerts(user: any): Promise<any>;

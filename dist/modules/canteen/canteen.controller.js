@@ -27,6 +27,9 @@ const create_order_dto_1 = require("./dto/create-order.dto");
 const create_ingredient_dto_1 = require("./dto/create-ingredient.dto");
 const create_inventory_batch_dto_1 = require("./dto/create-inventory-batch.dto");
 const consume_ingredient_dto_1 = require("./dto/consume-ingredient.dto");
+const create_table_dto_1 = require("./dto/create-table.dto");
+const update_table_status_dto_1 = require("./dto/update-table-status.dto");
+const allocate_table_dto_1 = require("./dto/allocate-table.dto");
 let CanteenController = class CanteenController {
     canteenService;
     constructor(canteenService) {
@@ -34,6 +37,9 @@ let CanteenController = class CanteenController {
     }
     async getMenu() {
         return this.canteenService.getMenu();
+    }
+    async searchMenu(query) {
+        return this.canteenService.searchMenu(query || '');
     }
     async createMenuItem(body, req) {
         return this.canteenService.createMenuItem(body, req.user);
@@ -77,6 +83,21 @@ let CanteenController = class CanteenController {
     async setKitchenOrderReady(id, req) {
         return this.canteenService.setKitchenOrderReady(id, req.user);
     }
+    async getAllTables() {
+        return this.canteenService.getAllTables();
+    }
+    async getTableById(id) {
+        return this.canteenService.getTableById(id);
+    }
+    async createTable(body, req) {
+        return this.canteenService.createTable(body, req.user);
+    }
+    async updateTableStatus(id, body, req) {
+        return this.canteenService.updateTableStatus(id, body, req.user);
+    }
+    async allocateTables(body, req) {
+        return this.canteenService.allocateTables(body, req.user);
+    }
     async createIngredient(body, req) {
         return this.canteenService.createIngredient(body, req.user);
     }
@@ -102,6 +123,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "getMenu", null);
+__decorate([
+    (0, common_1.Get)('menu/search'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm món ăn real-time bằng thuật toán Trie Prefix Tree' }),
+    __param(0, (0, common_1.Query)('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "searchMenu", null);
 __decorate([
     (0, common_1.Post)('admin/menu'),
     (0, swagger_1.ApiBearerAuth)(),
@@ -249,6 +279,57 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "setKitchenOrderReady", null);
+__decorate([
+    (0, common_1.Get)('tables'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả các bàn ăn' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getAllTables", null);
+__decorate([
+    (0, common_1.Get)('tables/:id'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy thông tin bàn ăn theo ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getTableById", null);
+__decorate([
+    (0, common_1.Post)('tables'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Khởi tạo bàn ăn mới' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_table_dto_1.CreateTableDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "createTable", null);
+__decorate([
+    (0, common_1.Patch)('tables/:id/status'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.WAITER),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_table_status_dto_1.UpdateTableStatusDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "updateTableStatus", null);
+__decorate([
+    (0, common_1.Post)('tables/allocate'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.WAITER),
+    (0, swagger_1.ApiOperation)({ summary: 'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [allocate_table_dto_1.AllocateTableDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "allocateTables", null);
 __decorate([
     (0, common_1.Post)('inventory/ingredients'),
     (0, swagger_1.ApiBearerAuth)(),

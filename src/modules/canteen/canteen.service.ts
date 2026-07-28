@@ -33,7 +33,7 @@ export class CanteenService {
         })
       );
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response) {
         return error.response.data;
       }
@@ -44,6 +44,11 @@ export class CanteenService {
   // --- Menu APIs ---
   async getMenu() {
     return this.forward('GET', '/api/canteen/menu');
+  }
+
+  async searchMenu(query: string) {
+    const params = query ? { q: query } : undefined;
+    return this.forward('GET', '/api/canteen/menu/search', null, params);
   }
 
   async createMenuItem(dto: any, user: any) {
@@ -104,6 +109,27 @@ export class CanteenService {
     return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/ready`, null, null, user);
   }
 
+  // --- Table APIs ---
+  async getAllTables() {
+    return this.forward('GET', '/api/canteen/tables');
+  }
+
+  async getTableById(id: string) {
+    return this.forward('GET', `/api/canteen/tables/${id}`);
+  }
+
+  async createTable(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/tables', dto, null, user);
+  }
+
+  async updateTableStatus(id: string, dto: any, user: any) {
+    return this.forward('PATCH', `/api/canteen/tables/${id}/status`, dto, null, user);
+  }
+
+  async allocateTables(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/tables/allocate', dto, null, user);
+  }
+
   // --- Inventory APIs ---
   async createIngredient(dto: any, user: any) {
     return this.forward('POST', '/api/canteen/inventory/ingredients', dto, null, user);
@@ -127,6 +153,3 @@ export class CanteenService {
     return this.forward('GET', '/api/canteen/analytics/top-dishes', null, params, user);
   }
 }
-
-
-
