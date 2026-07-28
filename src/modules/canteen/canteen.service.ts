@@ -41,6 +41,7 @@ export class CanteenService {
     }
   }
 
+  // --- Menu APIs ---
   async getMenu() {
     return this.forward('GET', '/api/canteen/menu');
   }
@@ -63,5 +64,26 @@ export class CanteenService {
 
   async redoMenuItemChange(user: any) {
     return this.forward('POST', '/api/canteen/admin/menu/redo', null, null, user);
+  }
+
+  // --- Order APIs ---
+  async createOrder(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/orders', dto, null, user);
+  }
+
+  async getMyOrders(user: any) {
+    return this.forward('GET', '/api/canteen/orders/my-orders', null, null, user);
+  }
+
+  async getOrderById(id: string, user: any) {
+    return this.forward('GET', `/api/canteen/orders/${id}`, null, null, user);
+  }
+
+  async confirmOrder(id: string, user: any) {
+    return this.forward('PATCH', `/api/canteen/orders/${id}/confirm`, null, null, user);
+  }
+
+  async completeOrder(id: string, user: any) {
+    return this.forward('PATCH', `/api/canteen/orders/${id}/complete`, null, null, user);
   }
 }
