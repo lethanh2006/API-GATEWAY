@@ -1,6 +1,7 @@
 import { CanteenService } from './canteen.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { CreateOrderDto } from './dto/create-order.dto';
 export declare class CanteenController {
     private readonly canteenService;
     constructor(canteenService: CanteenService);
@@ -10,4 +11,13 @@ export declare class CanteenController {
     deleteMenuItem(id: string, req: any): Promise<any>;
     undoMenuItemChange(req: any): Promise<any>;
     redoMenuItemChange(req: any): Promise<any>;
+    createOrder(body: CreateOrderDto, req: any): Promise<any>;
+    getMyOrders(req: any): Promise<any>;
+    getOrderById(id: string, req: any): Promise<any>;
+    confirmOrder(id: string, req: any): Promise<any>;
+    completeOrder(id: string, req: any): Promise<any>;
+    getKitchenQueue(req: any): Promise<any>;
+    getNextKitchenOrder(req: any): Promise<any>;
+    setKitchenOrderCooking(id: string, req: any): Promise<any>;
+    setKitchenOrderReady(id: string, req: any): Promise<any>;
 }

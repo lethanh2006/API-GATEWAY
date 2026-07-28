@@ -107,4 +107,39 @@ export class CanteenController {
   async completeOrder(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.completeOrder(id, req.user);
   }
+
+  // --- 3.3 Nhóm API Nhà Bếp (Kitchen APIs) ---
+
+  @Get('kitchen/queue')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Xem danh sách các đơn hàng đang chờ trong hàng đợi ưu tiên' })
+  async getKitchenQueue(@Req() req: any) {
+    return this.canteenService.getKitchenQueue(req.user);
+  }
+
+  @Post('kitchen/next')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Lấy đơn hàng có độ ưu tiên cao nhất ra khỏi hàng đợi để chế biến' })
+  async getNextKitchenOrder(@Req() req: any) {
+    return this.canteenService.getNextKitchenOrder(req.user);
+  }
+
+  @Patch('kitchen/orders/:id/cooking')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Chuyển trạng thái đơn hàng sang COOKING' })
+  async setKitchenOrderCooking(@Param('id') id: string, @Req() req: any) {
+    return this.canteenService.setKitchenOrderCooking(id, req.user);
+  }
+
+  @Patch('kitchen/orders/:id/ready')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Đánh dấu món ăn đã chuẩn bị xong, chuyển trạng thái READY' })
+  async setKitchenOrderReady(@Param('id') id: string, @Req() req: any) {
+    return this.canteenService.setKitchenOrderReady(id, req.user);
+  }
 }
+

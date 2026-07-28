@@ -86,4 +86,22 @@ export class CanteenService {
   async completeOrder(id: string, user: any) {
     return this.forward('PATCH', `/api/canteen/orders/${id}/complete`, null, null, user);
   }
+
+  // --- Kitchen APIs ---
+  async getKitchenQueue(user: any) {
+    return this.forward('GET', '/api/canteen/kitchen/queue', null, null, user);
+  }
+
+  async getNextKitchenOrder(user: any) {
+    return this.forward('POST', '/api/canteen/kitchen/next', null, null, user);
+  }
+
+  async setKitchenOrderCooking(id: string, user: any) {
+    return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/cooking`, null, null, user);
+  }
+
+  async setKitchenOrderReady(id: string, user: any) {
+    return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/ready`, null, null, user);
+  }
 }
+

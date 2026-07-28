@@ -12,4 +12,13 @@ export declare class CanteenService {
     deleteMenuItem(id: string, user: any): Promise<any>;
     undoMenuItemChange(user: any): Promise<any>;
     redoMenuItemChange(user: any): Promise<any>;
+    createOrder(dto: any, user: any): Promise<any>;
+    getMyOrders(user: any): Promise<any>;
+    getOrderById(id: string, user: any): Promise<any>;
+    confirmOrder(id: string, user: any): Promise<any>;
+    completeOrder(id: string, user: any): Promise<any>;
+    getKitchenQueue(user: any): Promise<any>;
+    getNextKitchenOrder(user: any): Promise<any>;
+    setKitchenOrderCooking(id: string, user: any): Promise<any>;
+    setKitchenOrderReady(id: string, user: any): Promise<any>;
 }

@@ -65,6 +65,33 @@ let CanteenService = class CanteenService {
     async redoMenuItemChange(user) {
         return this.forward('POST', '/api/canteen/admin/menu/redo', null, null, user);
     }
+    async createOrder(dto, user) {
+        return this.forward('POST', '/api/canteen/orders', dto, null, user);
+    }
+    async getMyOrders(user) {
+        return this.forward('GET', '/api/canteen/orders/my-orders', null, null, user);
+    }
+    async getOrderById(id, user) {
+        return this.forward('GET', `/api/canteen/orders/${id}`, null, null, user);
+    }
+    async confirmOrder(id, user) {
+        return this.forward('PATCH', `/api/canteen/orders/${id}/confirm`, null, null, user);
+    }
+    async completeOrder(id, user) {
+        return this.forward('PATCH', `/api/canteen/orders/${id}/complete`, null, null, user);
+    }
+    async getKitchenQueue(user) {
+        return this.forward('GET', '/api/canteen/kitchen/queue', null, null, user);
+    }
+    async getNextKitchenOrder(user) {
+        return this.forward('POST', '/api/canteen/kitchen/next', null, null, user);
+    }
+    async setKitchenOrderCooking(id, user) {
+        return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/cooking`, null, null, user);
+    }
+    async setKitchenOrderReady(id, user) {
+        return this.forward('PATCH', `/api/canteen/kitchen/orders/${id}/ready`, null, null, user);
+    }
 };
 exports.CanteenService = CanteenService;
 exports.CanteenService = CanteenService = __decorate([
