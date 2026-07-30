@@ -1,5 +1,6 @@
 import {
   Body,
+  BadRequestException,
   Controller,
   Get,
   Param,
@@ -53,7 +54,7 @@ export class ChatController {
         callback(
           file.mimetype.startsWith('image/')
             ? null
-            : new Error('Chỉ chấp nhận tệp hình ảnh'),
+            : new BadRequestException('Chỉ chấp nhận tệp hình ảnh'),
           file.mimetype.startsWith('image/')
         ),
     })

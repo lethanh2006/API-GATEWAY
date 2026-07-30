@@ -66,7 +66,7 @@ __decorate([
         limits: { fileSize: 5 * 1024 * 1024 },
         fileFilter: (_req, file, callback) => callback(file.mimetype.startsWith('image/')
             ? null
-            : new Error('Chỉ chấp nhận tệp hình ảnh'), file.mimetype.startsWith('image/')),
+            : new common_1.BadRequestException('Chỉ chấp nhận tệp hình ảnh'), file.mimetype.startsWith('image/')),
     })),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
