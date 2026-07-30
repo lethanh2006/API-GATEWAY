@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { BadGatewayException, HttpException, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -11,6 +11,7 @@ export interface UploadedChatImage {
 
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -46,7 +47,8 @@ export class ChatService {
       if (error.response) {
         throw new HttpException(error.response.data, error.response.status);
       }
-      throw error;
+      this.logger.warn(`Không kết nối được Chat Service: ${error.message}`);
+      throw new BadGatewayException('Chat Service hiện không khả dụng');
     }
   }
 
@@ -59,6 +61,10 @@ export class ChatService {
   }
 
   async sendMessage(dto: any, image: UploadedChatImage | undefined, user: any) {
+    if (!image) {
+      return this.forward('POST', '/api/chat/message', dto, null, user);
+    }
+
     const form = new FormData();
     form.append('chatId', dto.chatId);
     if (dto.text) form.append('text', dto.text);
@@ -79,7 +85,8 @@ export class ChatService {
       if (error.response) {
         throw new HttpException(error.response.data, error.response.status);
       }
-      throw error;
+      this.logger.warn(`Không gửi được ảnh đến Chat Service: ${error.message}`);
+      throw new BadGatewayException('Chat Service hiện không khả dụng');
     }
   }
 

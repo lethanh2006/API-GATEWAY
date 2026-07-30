@@ -8,6 +8,7 @@ export interface UploadedChatImage {
 export declare class ChatService {
     private readonly httpService;
     private readonly configService;
+    private readonly logger;
     private readonly baseUrl;
     constructor(httpService: HttpService, configService: ConfigService);
     private createUserHeaders;

@@ -8,15 +8,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var ChatService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatService = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
-let ChatService = class ChatService {
+let ChatService = ChatService_1 = class ChatService {
     httpService;
     configService;
+    logger = new common_1.Logger(ChatService_1.name);
     baseUrl;
     constructor(httpService, configService) {
         this.httpService = httpService;
@@ -47,7 +49,8 @@ let ChatService = class ChatService {
             if (error.response) {
                 throw new common_1.HttpException(error.response.data, error.response.status);
             }
-            throw error;
+            this.logger.warn(`Không kết nối được Chat Service: ${error.message}`);
+            throw new common_1.BadGatewayException('Chat Service hiện không khả dụng');
         }
     }
     async createChat(dto, user) {
@@ -57,6 +60,9 @@ let ChatService = class ChatService {
         return this.forward('GET', '/api/chat/chat/all', null, null, user);
     }
     async sendMessage(dto, image, user) {
+        if (!image) {
+            return this.forward('POST', '/api/chat/message', dto, null, user);
+        }
         const form = new FormData();
         form.append('chatId', dto.chatId);
         if (dto.text)
@@ -76,7 +82,8 @@ let ChatService = class ChatService {
             if (error.response) {
                 throw new common_1.HttpException(error.response.data, error.response.status);
             }
-            throw error;
+            this.logger.warn(`Không gửi được ảnh đến Chat Service: ${error.message}`);
+            throw new common_1.BadGatewayException('Chat Service hiện không khả dụng');
         }
     }
     async getMessages(chatId, user) {
@@ -84,7 +91,7 @@ let ChatService = class ChatService {
     }
 };
 exports.ChatService = ChatService;
-exports.ChatService = ChatService = __decorate([
+exports.ChatService = ChatService = ChatService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [axios_1.HttpService,
         config_1.ConfigService])

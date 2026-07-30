@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, HttpException, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class WorkscheduleService {
+  private readonly logger = new Logger(WorkscheduleService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -35,9 +36,10 @@ export class WorkscheduleService {
       return response.data;
     } catch (error) {
       if (error.response) {
-        return error.response.data;
+        throw new HttpException(error.response.data, error.response.status);
       }
-      throw error;
+      this.logger.warn(`Không kết nối được Workschedule Service: ${error.message}`);
+      throw new BadGatewayException('Workschedule Service hiện không khả dụng');
     }
   }
 
