@@ -1,8 +1,26 @@
-import { Controller, Get, Post, Body, Param, Req, UseGuards } from '@nestjs/common';
-import { ChatService } from './chat.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ChatService, type UploadedChatImage } from './chat.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 
@@ -28,9 +46,37 @@ export class ChatController {
 
   @Post('message')
   @ApiBearerAuth()
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, callback) =>
+        callback(
+          file.mimetype.startsWith('image/')
+            ? null
+            : new Error('Chỉ chấp nhận tệp hình ảnh'),
+          file.mimetype.startsWith('image/')
+        ),
+    })
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['chatId'],
+      properties: {
+        chatId: { type: 'string' },
+        text: { type: 'string' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiOperation({ summary: 'Gửi tin nhắn mới (chứa text hoặc file ảnh)' })
-  async sendMessage(@Body() body: SendMessageDto, @Req() req: any) {
-    return this.chatService.sendMessage(body, req.user);
+  async sendMessage(
+    @Body() body: SendMessageDto,
+    @UploadedFile() image: UploadedChatImage | undefined,
+    @Req() req: any
+  ) {
+    return this.chatService.sendMessage(body, image, req.user);
   }
 
   @Get('message/:chatId')

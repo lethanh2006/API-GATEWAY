@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+
+export interface UploadedChatImage {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+}
 
 @Injectable()
 export class ChatService {
@@ -14,14 +20,17 @@ export class ChatService {
     this.baseUrl = this.configService.get<string>('CHAT_SERVICE_URL', 'http://localhost:5002');
   }
 
-  private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
+  private createUserHeaders(user?: any) {
     const headers: Record<string, string> = {};
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
       headers['x-user-payload'] = base64User;
     }
+    return headers;
+  }
 
+  private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
     try {
       const response = await firstValueFrom(
         this.httpService.request({
@@ -29,13 +38,13 @@ export class ChatService {
           url: `${this.baseUrl}${path}`,
           data,
           params,
-          headers,
+          headers: this.createUserHeaders(user),
         })
       );
       return response.data;
     } catch (error) {
       if (error.response) {
-        return error.response.data;
+        throw new HttpException(error.response.data, error.response.status);
       }
       throw error;
     }
@@ -49,10 +58,29 @@ export class ChatService {
     return this.forward('GET', '/api/chat/chat/all', null, null, user);
   }
 
-  async sendMessage(dto: any, user: any) {
-    // Note: If sending multi-part file uploads (images), we may need to forward content-type or forward raw stream.
-    // For simplicity, standard json body forwarding is handled here.
-    return this.forward('POST', '/api/chat/message', dto, null, user);
+  async sendMessage(dto: any, image: UploadedChatImage | undefined, user: any) {
+    const form = new FormData();
+    form.append('chatId', dto.chatId);
+    if (dto.text) form.append('text', dto.text);
+    if (image) {
+      const bytes = Uint8Array.from(image.buffer);
+      form.append('image', new Blob([bytes], { type: image.mimetype }), image.originalname);
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`${this.baseUrl}/api/chat/message`, form, {
+          headers: this.createUserHeaders(user),
+          maxBodyLength: 6 * 1024 * 1024,
+        })
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new HttpException(error.response.data, error.response.status);
+      }
+      throw error;
+    }
   }
 
   async getMessages(chatId: string, user: any) {
