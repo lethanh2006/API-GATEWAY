@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const chat_service_1 = require("./chat.service");
 const jwt_guard_1 = require("../auth/common/guard/jwt/jwt.guard");
 const role_guard_1 = require("../auth/common/guard/role/role.guard");
@@ -31,8 +32,8 @@ let ChatController = class ChatController {
     async getAllChats(req) {
         return this.chatService.getAllChats(req.user);
     }
-    async sendMessage(body, req) {
-        return this.chatService.sendMessage(body, req.user);
+    async sendMessage(body, image, req) {
+        return this.chatService.sendMessage(body, image, req.user);
     }
     async getMessages(chatId, req) {
         return this.chatService.getMessages(chatId, req.user);
@@ -61,11 +62,30 @@ __decorate([
 __decorate([
     (0, common_1.Post)('message'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('image', {
+        limits: { fileSize: 5 * 1024 * 1024 },
+        fileFilter: (_req, file, callback) => callback(file.mimetype.startsWith('image/')
+            ? null
+            : new Error('Chỉ chấp nhận tệp hình ảnh'), file.mimetype.startsWith('image/')),
+    })),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            required: ['chatId'],
+            properties: {
+                chatId: { type: 'string' },
+                text: { type: 'string' },
+                image: { type: 'string', format: 'binary' },
+            },
+        },
+    }),
     (0, swagger_1.ApiOperation)({ summary: 'Gửi tin nhắn mới (chứa text hoặc file ảnh)' }),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [send_message_dto_1.SendMessageDto, Object]),
+    __metadata("design:paramtypes", [send_message_dto_1.SendMessageDto, Object, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "sendMessage", null);
 __decorate([

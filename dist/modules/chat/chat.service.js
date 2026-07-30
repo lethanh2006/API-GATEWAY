@@ -23,26 +23,29 @@ let ChatService = class ChatService {
         this.configService = configService;
         this.baseUrl = this.configService.get('CHAT_SERVICE_URL', 'http://localhost:5002');
     }
-    async forward(method, path, data, params, user) {
+    createUserHeaders(user) {
         const headers = {};
         if (user) {
             const userPayloadStr = JSON.stringify(user);
             const base64User = Buffer.from(userPayloadStr).toString('base64');
             headers['x-user-payload'] = base64User;
         }
+        return headers;
+    }
+    async forward(method, path, data, params, user) {
         try {
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService.request({
                 method,
                 url: `${this.baseUrl}${path}`,
                 data,
                 params,
-                headers,
+                headers: this.createUserHeaders(user),
             }));
             return response.data;
         }
         catch (error) {
             if (error.response) {
-                return error.response.data;
+                throw new common_1.HttpException(error.response.data, error.response.status);
             }
             throw error;
         }
@@ -53,8 +56,28 @@ let ChatService = class ChatService {
     async getAllChats(user) {
         return this.forward('GET', '/api/chat/chat/all', null, null, user);
     }
-    async sendMessage(dto, user) {
-        return this.forward('POST', '/api/chat/message', dto, null, user);
+    async sendMessage(dto, image, user) {
+        const form = new FormData();
+        form.append('chatId', dto.chatId);
+        if (dto.text)
+            form.append('text', dto.text);
+        if (image) {
+            const bytes = Uint8Array.from(image.buffer);
+            form.append('image', new Blob([bytes], { type: image.mimetype }), image.originalname);
+        }
+        try {
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(`${this.baseUrl}/api/chat/message`, form, {
+                headers: this.createUserHeaders(user),
+                maxBodyLength: 6 * 1024 * 1024,
+            }));
+            return response.data;
+        }
+        catch (error) {
+            if (error.response) {
+                throw new common_1.HttpException(error.response.data, error.response.status);
+            }
+            throw error;
+        }
     }
     async getMessages(chatId, user) {
         return this.forward('GET', `/api/chat/message/${chatId}`, null, null, user);
