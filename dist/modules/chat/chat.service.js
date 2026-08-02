@@ -87,7 +87,7 @@ let ChatService = ChatService_1 = class ChatService {
         }
     }
     async getMessages(chatId, user) {
-        return this.forward('GET', `/api/chat/message/${chatId}`, null, null, user);
+        return this.forward('GET', `/api/chat/message/${encodeURIComponent(chatId)}`, null, null, user);
     }
 };
 exports.ChatService = ChatService;

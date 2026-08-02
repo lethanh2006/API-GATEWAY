@@ -9,9 +9,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateTaskDto = void 0;
+exports.CreateTaskDto = exports.TaskPriority = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+var TaskPriority;
+(function (TaskPriority) {
+    TaskPriority["LOW"] = "low";
+    TaskPriority["MEDIUM"] = "medium";
+    TaskPriority["HIGH"] = "high";
+})(TaskPriority || (exports.TaskPriority = TaskPriority = {}));
 class CreateTaskDto {
     title;
     description;
@@ -23,26 +29,33 @@ exports.CreateTaskDto = CreateTaskDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Báo cáo doanh thu', description: 'Tiêu đề của công việc cần làm' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'Tiêu đề không được để trống' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Hoàn thành báo cáo quý trước thứ Sáu', description: 'Mô tả chi tiết về công việc', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(2000),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'high', description: 'Mức độ ưu tiên (low, medium, high)', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(TaskPriority, { message: 'priority phải là low, medium hoặc high' }),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "priority", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2026-07-20T17:00:00.000Z', description: 'Thời hạn hoàn thành công việc', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsISO8601)({}, { message: 'deadline phải là thời gian ISO 8601 hợp lệ' }),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "deadline", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'userId456', description: 'ID của người dùng được phân công việc', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsMongoId)({ message: 'assignedTo phải là MongoDB ObjectId hợp lệ' }),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "assignedTo", void 0);
 //# sourceMappingURL=create-task.dto.js.map

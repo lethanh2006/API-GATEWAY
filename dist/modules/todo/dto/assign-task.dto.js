@@ -9,9 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateTaskStatusDto = exports.AssignTaskDto = void 0;
+exports.UpdateTaskStatusDto = exports.AssignTaskDto = exports.TaskStatus = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+var TaskStatus;
+(function (TaskStatus) {
+    TaskStatus["TODO"] = "todo";
+    TaskStatus["IN_PROGRESS"] = "in_progress";
+    TaskStatus["DONE"] = "done";
+    TaskStatus["CANCELLED"] = "cancelled";
+})(TaskStatus || (exports.TaskStatus = TaskStatus = {}));
 class AssignTaskDto {
     assignedTo;
 }
@@ -19,6 +26,7 @@ exports.AssignTaskDto = AssignTaskDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'userId456', description: 'ID của người dùng được giao việc' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'assignedTo không được để trống' }),
+    (0, class_validator_1.IsMongoId)({ message: 'assignedTo phải là MongoDB ObjectId hợp lệ' }),
     __metadata("design:type", String)
 ], AssignTaskDto.prototype, "assignedTo", void 0);
 class UpdateTaskStatusDto {
@@ -26,8 +34,9 @@ class UpdateTaskStatusDto {
 }
 exports.UpdateTaskStatusDto = UpdateTaskStatusDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'completed', description: 'Trạng thái mới của công việc (pending, in-progress, completed)' }),
+    (0, swagger_1.ApiProperty)({ enum: TaskStatus, example: TaskStatus.DONE, description: 'Trạng thái mới của công việc' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'status không được để trống' }),
+    (0, class_validator_1.IsEnum)(TaskStatus, { message: 'status phải là todo, in_progress, done hoặc cancelled' }),
     __metadata("design:type", String)
 ], UpdateTaskStatusDto.prototype, "status", void 0);
 //# sourceMappingURL=assign-task.dto.js.map

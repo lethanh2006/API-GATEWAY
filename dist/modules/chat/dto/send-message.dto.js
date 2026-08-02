@@ -20,11 +20,14 @@ exports.SendMessageDto = SendMessageDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'chatId123', description: 'ID của cuộc trò chuyện cần gửi tin nhắn' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'chatId không được để trống' }),
+    (0, class_validator_1.IsMongoId)({ message: 'chatId phải là MongoDB ObjectId hợp lệ' }),
     __metadata("design:type", String)
 ], SendMessageDto.prototype, "chatId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Hello there!', description: 'Nội dung tin nhắn dạng văn bản (text)', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(1000, { message: 'Tin nhắn không được vượt quá 1000 ký tự' }),
     __metadata("design:type", String)
 ], SendMessageDto.prototype, "text", void 0);
 //# sourceMappingURL=send-message.dto.js.map

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, HttpException, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class TodoService {
+  private readonly logger = new Logger(TodoService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -33,11 +34,12 @@ export class TodoService {
         })
       );
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response) {
-        return error.response.data;
+        throw new HttpException(error.response.data, error.response.status);
       }
-      throw error;
+      this.logger.warn(`Không kết nối được Todo Service: ${error.message}`);
+      throw new BadGatewayException('Todo Service hiện không khả dụng');
     }
   }
 
@@ -46,7 +48,7 @@ export class TodoService {
   }
 
   async updateTaskStatus(id: string, status: string, user: any) {
-    return this.forward('PATCH', `/api/todo/${id}/status`, { status }, null, user);
+    return this.forward('PATCH', `/api/todo/${encodeURIComponent(id)}/status`, { status }, null, user);
   }
 
   async createTask(dto: any, user: any) {
@@ -54,7 +56,7 @@ export class TodoService {
   }
 
   async assignTask(id: string, assignedTo: string, user: any) {
-    return this.forward('PATCH', `/api/todo/${id}/assign`, { assignedTo }, null, user);
+    return this.forward('PATCH', `/api/todo/${encodeURIComponent(id)}/assign`, { assignedTo }, null, user);
   }
 
   async getAllTasks(user: any) {
@@ -62,6 +64,6 @@ export class TodoService {
   }
 
   async deleteTask(id: string, user: any) {
-    return this.forward('DELETE', `/api/todo/${id}`, null, null, user);
+    return this.forward('DELETE', `/api/todo/${encodeURIComponent(id)}`, null, null, user);
   }
 }

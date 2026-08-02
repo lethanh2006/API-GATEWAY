@@ -91,6 +91,6 @@ export class ChatService {
   }
 
   async getMessages(chatId: string, user: any) {
-    return this.forward('GET', `/api/chat/message/${chatId}`, null, null, user);
+    return this.forward('GET', `/api/chat/message/${encodeURIComponent(chatId)}`, null, null, user);
   }
 }

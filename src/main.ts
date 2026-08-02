@@ -41,17 +41,21 @@ async function bootstrap() {
 
   // 5. Setup WebSocket / Socket.io reverse proxy for Chat Service
   const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://localhost:5002';
-  const socketProxy = createProxyMiddleware({
+  const socketProxy = createProxyMiddleware('/socket.io', {
     target: chatServiceUrl,
     changeOrigin: true,
     ws: true,
-    onError: (err: any) => {
+    onError: (err: any, _req: any, response: any) => {
       console.error('[Socket Proxy Error]', err.message);
+      if (typeof response?.writeHead === 'function' && !response.headersSent) {
+        response.writeHead(502, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ message: 'Chat realtime hiện không khả dụng' }));
+      }
     },
   });
 
-  // Attach socket.io path to socketProxy middleware
-  app.use('/socket.io', socketProxy);
+  // Giữ nguyên /socket.io khi forward cả HTTP polling lẫn WebSocket upgrade.
+  app.use(socketProxy);
 
   // 6. Start the API Gateway HTTP Server
   const port = process.env.PORT || 3000;
@@ -61,7 +65,6 @@ async function bootstrap() {
   // 7. Bind WebSocket Upgrade listener for Socket.io traffic
   const server = app.getHttpServer();
   server.on('upgrade', (req: any, socket: any, head: any) => {
-    console.log('[Gateway] Nhận được yêu cầu nâng cấp kết nối WS Upgrade:', req.url);
     socketProxy.upgrade(req, socket, head);
   });
 }

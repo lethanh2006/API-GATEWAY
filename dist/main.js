@@ -61,21 +61,24 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup(process.env.ENDPOINT_SWAGGER || 'api-docs', app, document);
     const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://localhost:5002';
-    const socketProxy = (0, http_proxy_middleware_1.createProxyMiddleware)({
+    const socketProxy = (0, http_proxy_middleware_1.createProxyMiddleware)('/socket.io', {
         target: chatServiceUrl,
         changeOrigin: true,
         ws: true,
-        onError: (err) => {
+        onError: (err, _req, response) => {
             console.error('[Socket Proxy Error]', err.message);
+            if (typeof response?.writeHead === 'function' && !response.headersSent) {
+                response.writeHead(502, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'Chat realtime hiện không khả dụng' }));
+            }
         },
     });
-    app.use('/socket.io', socketProxy);
+    app.use(socketProxy);
     const port = process.env.PORT || 3000;
     await app.listen(port, '0.0.0.0');
     console.log(`[Gateway] đang khởi chạy thành công tại: http://localhost:${port}`);
     const server = app.getHttpServer();
     server.on('upgrade', (req, socket, head) => {
-        console.log('[Gateway] Nhận được yêu cầu nâng cấp kết nối WS Upgrade:', req.url);
         socketProxy.upgrade(req, socket, head);
     });
 }

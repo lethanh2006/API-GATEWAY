@@ -19,6 +19,7 @@ exports.CreateChatDto = CreateChatDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'userId456', description: 'ID của người dùng muốn tạo cuộc trò chuyện cùng' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'otherUserId không được để trống' }),
+    (0, class_validator_1.IsMongoId)({ message: 'otherUserId phải là MongoDB ObjectId hợp lệ' }),
     __metadata("design:type", String)
 ], CreateChatDto.prototype, "otherUserId", void 0);
 //# sourceMappingURL=create-chat.dto.js.map
