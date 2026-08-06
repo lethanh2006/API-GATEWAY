@@ -19,6 +19,9 @@ let AppController = class AppController {
             services: ['/api/auth', '/api/user', '/api/chat', '/api/todo', '/api/workschedule', '/api/canteen'],
         };
     }
+    getHealth() {
+        return { status: 'ok', service: 'gateway' };
+    }
 };
 exports.AppController = AppController;
 __decorate([
@@ -27,6 +30,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "getHealthCheck", null);
+__decorate([
+    (0, common_1.Get)('health'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getHealth", null);
 exports.AppController = AppController = __decorate([
     (0, swagger_1.ApiExcludeController)(),
     (0, common_1.Controller)()

@@ -3,4 +3,8 @@ export declare class AppController {
         message: string;
         services: string[];
     };
+    getHealth(): {
+        status: string;
+        service: string;
+    };
 }

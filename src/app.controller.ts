@@ -11,4 +11,9 @@ export class AppController {
       services: ['/api/auth', '/api/user', '/api/chat', '/api/todo', '/api/workschedule', '/api/canteen'],
     };
   }
+
+  @Get('health')
+  getHealth() {
+    return { status: 'ok', service: 'gateway' };
+  }
 }
