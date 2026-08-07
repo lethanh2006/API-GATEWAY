@@ -22,7 +22,7 @@ export class WorkscheduleController {
 
   @Get('schedule/pending')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy danh sách yêu cầu lịch làm việc chờ phê duyệt (Admin)' })
   async getPendingRequests(@Query() query: Record<string, string>, @Req() req: any) {
     return this.workscheduleService.getPendingRequests(query, req.user);
@@ -30,7 +30,7 @@ export class WorkscheduleController {
 
   @Get('schedule/all')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy tất cả danh sách yêu cầu lịch làm việc (Admin)' })
   async getAllRequests(@Query() query: Record<string, string>, @Req() req: any) {
     return this.workscheduleService.getAllRequests(query, req.user);
@@ -38,7 +38,7 @@ export class WorkscheduleController {
 
   @Post('schedule/requests/:id/approve')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Duyệt yêu cầu lịch làm việc (Admin)' })
   @ApiParam({ name: 'id', example: 'req123' })
   async approveRequest(@Param('id') id: string, @Req() req: any) {
@@ -47,7 +47,7 @@ export class WorkscheduleController {
 
   @Post('schedule/requests/:id/reject')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' })
   @ApiParam({ name: 'id', example: 'req123' })
   async rejectRequest(@Param('id') id: string, @Body() body: RejectRequestDto, @Req() req: any) {
@@ -56,7 +56,7 @@ export class WorkscheduleController {
 
   @Post('schedule/requests/bulk-approve')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Phê duyệt hàng loạt yêu cầu lịch làm việc (Admin)' })
   async bulkApprove(@Body() body: BulkApproveDto, @Req() req: any) {
     return this.workscheduleService.bulkApprove(body, req.user);
@@ -64,7 +64,7 @@ export class WorkscheduleController {
 
   @Get('schedule/heatmap')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy dữ liệu heatmap lịch làm việc (Admin)' })
   async getHeatmap(@Query() query: Record<string, string>, @Req() req: any) {
     return this.workscheduleService.getHeatmap(query, req.user);
@@ -90,7 +90,7 @@ export class WorkscheduleController {
 
   @Post('attendance/qr/generate')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Tạo mã QR Code điểm danh (Admin)' })
   async generateQrToken(@Req() req: any) {
     return this.workscheduleService.generateQrToken(req.user);
@@ -98,7 +98,7 @@ export class WorkscheduleController {
 
   @Get('attendance/today')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy danh sách điểm danh hôm nay (Admin)' })
   async getTodayAttendance(@Req() req: any) {
     return this.workscheduleService.getTodayAttendance(req.user);
@@ -106,7 +106,7 @@ export class WorkscheduleController {
 
   @Get('attendance/report')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy báo cáo điểm danh (Admin)' })
   async getReport(@Query() query: Record<string, string>, @Req() req: any) {
     return this.workscheduleService.getReport(query, req.user);
