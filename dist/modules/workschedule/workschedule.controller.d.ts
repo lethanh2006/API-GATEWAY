@@ -1,6 +1,7 @@
 import { WorkscheduleService } from './workschedule.service';
 import { CreateScheduleRequestDto } from './dto/create-request.dto';
 import { UpdateScheduleEntriesDto, UpdatePolicyDto, ScanAttendanceDto, RejectRequestDto, BulkApproveDto } from './dto/update-entries.dto';
+import { CreateWorkRequestDto } from './dto/work-request.dto';
 export declare class WorkscheduleController {
     private readonly workscheduleService;
     constructor(workscheduleService: WorkscheduleService);
@@ -17,10 +18,18 @@ export declare class WorkscheduleController {
     getReport(req: any): Promise<any>;
     getPolicy(): Promise<any>;
     updatePolicy(body: UpdatePolicyDto, req: any): Promise<any>;
+    getMonthlyOverview(month: string, req: any): Promise<any>;
     getMySchedules(req: any): Promise<any>;
     createRequest(body: CreateScheduleRequestDto, req: any): Promise<any>;
     getRequestInfo(id: string, req: any): Promise<any>;
     updateEntries(id: string, body: UpdateScheduleEntriesDto, req: any): Promise<any>;
     submitRequest(id: string, req: any): Promise<any>;
     deleteRequest(id: string, req: any): Promise<any>;
+    getMyWorkRequestStats(month: string, req: any): Promise<any>;
+    getMyWorkRequests(query: Record<string, string>, req: any): Promise<any>;
+    createWorkRequest(body: CreateWorkRequestDto, req: any): Promise<any>;
+    cancelWorkRequest(id: string, req: any): Promise<any>;
+    getAdminWorkRequests(query: Record<string, string>, req: any): Promise<any>;
+    approveWorkRequest(id: string, req: any): Promise<any>;
+    rejectWorkRequest(id: string, body: RejectRequestDto, req: any): Promise<any>;
 }

@@ -21,9 +21,17 @@ export declare class WorkscheduleService {
     getPolicy(): Promise<any>;
     updatePolicy(dto: any, user: any): Promise<any>;
     getMySchedules(user: any): Promise<any>;
+    getMonthlyOverview(month: string, user: any): Promise<any>;
     createRequest(dto: any, user: any): Promise<any>;
     getRequestInfo(id: string, user: any): Promise<any>;
     updateEntries(id: string, dto: any, user: any): Promise<any>;
     submitRequest(id: string, user: any): Promise<any>;
     deleteRequest(id: string, user: any): Promise<any>;
+    getMyWorkRequestStats(month: string, user: any): Promise<any>;
+    getMyWorkRequests(query: Record<string, string>, user: any): Promise<any>;
+    createWorkRequest(dto: any, user: any): Promise<any>;
+    cancelWorkRequest(id: string, user: any): Promise<any>;
+    getAdminWorkRequests(query: Record<string, string>, user: any): Promise<any>;
+    approveWorkRequest(id: string, user: any): Promise<any>;
+    rejectWorkRequest(id: string, dto: any, user: any): Promise<any>;
 }

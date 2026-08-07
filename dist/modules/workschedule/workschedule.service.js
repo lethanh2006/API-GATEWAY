@@ -92,6 +92,9 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
     async getMySchedules(user) {
         return this.forward('GET', '/api/workschedule/schedule/my', null, null, user);
     }
+    async getMonthlyOverview(month, user) {
+        return this.forward('GET', '/api/workschedule/schedule/monthly-overview', null, { month }, user);
+    }
     async createRequest(dto, user) {
         return this.forward('POST', '/api/workschedule/schedule/requests', dto, null, user);
     }
@@ -105,7 +108,28 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
         return this.forward('POST', `/api/workschedule/schedule/requests/${id}/submit`, null, null, user);
     }
     async deleteRequest(id, user) {
-        return this.forward('DELETE', `/api/workschedule/schedule/requests/${id}`, null, null, user);
+        return this.forward('DELETE', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);
+    }
+    async getMyWorkRequestStats(month, user) {
+        return this.forward('GET', '/api/workschedule/requests/my/stats', null, month ? { month } : undefined, user);
+    }
+    async getMyWorkRequests(query, user) {
+        return this.forward('GET', '/api/workschedule/requests/my', null, query, user);
+    }
+    async createWorkRequest(dto, user) {
+        return this.forward('POST', '/api/workschedule/requests', dto, null, user);
+    }
+    async cancelWorkRequest(id, user) {
+        return this.forward('PATCH', `/api/workschedule/requests/${encodeURIComponent(id)}/cancel`, null, null, user);
+    }
+    async getAdminWorkRequests(query, user) {
+        return this.forward('GET', '/api/workschedule/requests/admin', null, query, user);
+    }
+    async approveWorkRequest(id, user) {
+        return this.forward('POST', `/api/workschedule/requests/${encodeURIComponent(id)}/approve`, null, null, user);
+    }
+    async rejectWorkRequest(id, dto, user) {
+        return this.forward('POST', `/api/workschedule/requests/${encodeURIComponent(id)}/reject`, dto, null, user);
     }
 };
 exports.WorkscheduleService = WorkscheduleService;

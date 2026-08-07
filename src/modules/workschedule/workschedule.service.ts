@@ -99,6 +99,16 @@ export class WorkscheduleService {
     return this.forward('GET', '/api/workschedule/schedule/my', null, null, user);
   }
 
+  async getMonthlyOverview(month: string, user: any) {
+    return this.forward(
+      'GET',
+      '/api/workschedule/schedule/monthly-overview',
+      null,
+      { month },
+      user,
+    );
+  }
+
   async createRequest(dto: any, user: any) {
     return this.forward('POST', '/api/workschedule/schedule/requests', dto, null, user);
   }
@@ -116,6 +126,58 @@ export class WorkscheduleService {
   }
 
   async deleteRequest(id: string, user: any) {
-    return this.forward('DELETE', `/api/workschedule/schedule/requests/${id}`, null, null, user);
+    return this.forward('DELETE', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);
+  }
+
+  async getMyWorkRequestStats(month: string, user: any) {
+    return this.forward(
+      'GET',
+      '/api/workschedule/requests/my/stats',
+      null,
+      month ? { month } : undefined,
+      user,
+    );
+  }
+
+  async getMyWorkRequests(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/requests/my', null, query, user);
+  }
+
+  async createWorkRequest(dto: any, user: any) {
+    return this.forward('POST', '/api/workschedule/requests', dto, null, user);
+  }
+
+  async cancelWorkRequest(id: string, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/workschedule/requests/${encodeURIComponent(id)}/cancel`,
+      null,
+      null,
+      user,
+    );
+  }
+
+  async getAdminWorkRequests(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/requests/admin', null, query, user);
+  }
+
+  async approveWorkRequest(id: string, user: any) {
+    return this.forward(
+      'POST',
+      `/api/workschedule/requests/${encodeURIComponent(id)}/approve`,
+      null,
+      null,
+      user,
+    );
+  }
+
+  async rejectWorkRequest(id: string, dto: any, user: any) {
+    return this.forward(
+      'POST',
+      `/api/workschedule/requests/${encodeURIComponent(id)}/reject`,
+      dto,
+      null,
+      user,
+    );
   }
 }

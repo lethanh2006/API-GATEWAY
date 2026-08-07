@@ -23,6 +23,7 @@ const role_enum_1 = require("../../common/enums/role.enum");
 const swagger_1 = require("@nestjs/swagger");
 const create_request_dto_1 = require("./dto/create-request.dto");
 const update_entries_dto_1 = require("./dto/update-entries.dto");
+const work_request_dto_1 = require("./dto/work-request.dto");
 let WorkscheduleController = class WorkscheduleController {
     workscheduleService;
     constructor(workscheduleService) {
@@ -67,6 +68,9 @@ let WorkscheduleController = class WorkscheduleController {
     async updatePolicy(body, req) {
         return this.workscheduleService.updatePolicy(body, req.user);
     }
+    async getMonthlyOverview(month, req) {
+        return this.workscheduleService.getMonthlyOverview(month, req.user);
+    }
     async getMySchedules(req) {
         return this.workscheduleService.getMySchedules(req.user);
     }
@@ -84,6 +88,27 @@ let WorkscheduleController = class WorkscheduleController {
     }
     async deleteRequest(id, req) {
         return this.workscheduleService.deleteRequest(id, req.user);
+    }
+    async getMyWorkRequestStats(month, req) {
+        return this.workscheduleService.getMyWorkRequestStats(month, req.user);
+    }
+    async getMyWorkRequests(query, req) {
+        return this.workscheduleService.getMyWorkRequests(query, req.user);
+    }
+    async createWorkRequest(body, req) {
+        return this.workscheduleService.createWorkRequest(body, req.user);
+    }
+    async cancelWorkRequest(id, req) {
+        return this.workscheduleService.cancelWorkRequest(id, req.user);
+    }
+    async getAdminWorkRequests(query, req) {
+        return this.workscheduleService.getAdminWorkRequests(query, req.user);
+    }
+    async approveWorkRequest(id, req) {
+        return this.workscheduleService.approveWorkRequest(id, req.user);
+    }
+    async rejectWorkRequest(id, body, req) {
+        return this.workscheduleService.rejectWorkRequest(id, body, req.user);
     }
 };
 exports.WorkscheduleController = WorkscheduleController;
@@ -222,6 +247,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "updatePolicy", null);
 __decorate([
+    (0, common_1.Get)('schedule/monthly-overview'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy lịch làm việc và thống kê cá nhân theo tháng' }),
+    __param(0, (0, common_1.Query)('month')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "getMonthlyOverview", null);
+__decorate([
     (0, common_1.Get)('schedule/my'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách lịch làm việc của bản thân' }),
@@ -285,6 +320,83 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "deleteRequest", null);
+__decorate([
+    (0, common_1.Get)('requests/my/stats'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy thống kê đơn từ cá nhân theo tháng' }),
+    __param(0, (0, common_1.Query)('month')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "getMyWorkRequestStats", null);
+__decorate([
+    (0, common_1.Get)('requests/my'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy lịch sử đơn từ của bản thân' }),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "getMyWorkRequests", null);
+__decorate([
+    (0, common_1.Post)('requests'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo đơn nghỉ, đi muộn, về sớm, OT, công tác hoặc remote' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [work_request_dto_1.CreateWorkRequestDto, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "createWorkRequest", null);
+__decorate([
+    (0, common_1.Patch)('requests/:id/cancel'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiParam)({ name: 'id' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Hủy đơn đang chờ duyệt của bản thân' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "cancelWorkRequest", null);
+__decorate([
+    (0, common_1.Get)('requests/admin'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách đơn từ để quản lý xử lý' }),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "getAdminWorkRequests", null);
+__decorate([
+    (0, common_1.Post)('requests/:id/approve'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
+    (0, swagger_1.ApiParam)({ name: 'id' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Duyệt đơn từ của nhân viên' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "approveWorkRequest", null);
+__decorate([
+    (0, common_1.Post)('requests/:id/reject'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
+    (0, swagger_1.ApiParam)({ name: 'id' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Từ chối đơn từ của nhân viên' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_entries_dto_1.RejectRequestDto, Object]),
+    __metadata("design:returntype", Promise)
+], WorkscheduleController.prototype, "rejectWorkRequest", null);
 exports.WorkscheduleController = WorkscheduleController = __decorate([
     (0, swagger_1.ApiTags)('Api Workschedule'),
     (0, common_1.Controller)('api/workschedule'),
