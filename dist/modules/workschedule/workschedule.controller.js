@@ -115,7 +115,7 @@ exports.WorkscheduleController = WorkscheduleController;
 __decorate([
     (0, common_1.Get)('schedule/pending'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách yêu cầu lịch làm việc chờ phê duyệt (Admin)' }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Req)()),
@@ -126,7 +126,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('schedule/all'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy tất cả danh sách yêu cầu lịch làm việc (Admin)' }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Req)()),
@@ -137,7 +137,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('schedule/requests/:id/approve'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Duyệt yêu cầu lịch làm việc (Admin)' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
     __param(0, (0, common_1.Param)('id')),
@@ -149,7 +149,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('schedule/requests/:id/reject'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
     __param(0, (0, common_1.Param)('id')),
@@ -162,7 +162,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('schedule/requests/bulk-approve'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Phê duyệt hàng loạt yêu cầu lịch làm việc (Admin)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -173,7 +173,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('schedule/heatmap'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy dữ liệu heatmap lịch làm việc (Admin)' }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Req)()),
@@ -203,7 +203,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('attendance/qr/generate'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Tạo mã QR Code điểm danh (Admin)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -213,7 +213,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('attendance/today'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách điểm danh hôm nay (Admin)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -223,7 +223,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('attendance/report'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy báo cáo điểm danh (Admin)' }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Req)()),
