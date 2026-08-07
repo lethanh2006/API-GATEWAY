@@ -43,28 +43,34 @@ export class WorkscheduleService {
     }
   }
 
-  async getPendingRequests(user: any) {
-    return this.forward('GET', '/api/workschedule/schedule/pending', null, null, user);
+  async getPendingRequests(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/schedule/pending', null, query, user);
   }
 
-  async getAllRequests(user: any) {
-    return this.forward('GET', '/api/workschedule/schedule/all', null, null, user);
+  async getAllRequests(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/schedule/all', null, query, user);
   }
 
   async approveRequest(id: string, user: any) {
-    return this.forward('POST', `/api/workschedule/schedule/requests/${id}/approve`, null, null, user);
+    return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/approve`, null, null, user);
   }
 
-  async rejectRequest(id: string, user: any) {
-    return this.forward('POST', `/api/workschedule/schedule/requests/${id}/reject`, null, null, user);
+  async rejectRequest(id: string, dto: any, user: any) {
+    return this.forward(
+      'POST',
+      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/reject`,
+      dto,
+      null,
+      user,
+    );
   }
 
   async bulkApprove(dto: any, user: any) {
     return this.forward('POST', '/api/workschedule/schedule/requests/bulk-approve', dto, null, user);
   }
 
-  async getHeatmap(user: any) {
-    return this.forward('GET', '/api/workschedule/schedule/heatmap', null, null, user);
+  async getHeatmap(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/schedule/heatmap', null, query, user);
   }
 
   async scanAttendance(dto: any, user: any) {
@@ -83,8 +89,8 @@ export class WorkscheduleService {
     return this.forward('GET', '/api/workschedule/attendance/today', null, null, user);
   }
 
-  async getReport(user: any) {
-    return this.forward('GET', '/api/workschedule/attendance/report', null, null, user);
+  async getReport(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/attendance/report', null, query, user);
   }
 
   async getPolicy() {
@@ -95,8 +101,8 @@ export class WorkscheduleService {
     return this.forward('PATCH', '/api/workschedule/policy', dto, null, user);
   }
 
-  async getMySchedules(user: any) {
-    return this.forward('GET', '/api/workschedule/schedule/my', null, null, user);
+  async getMySchedules(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/schedule/my', null, query, user);
   }
 
   async getMonthlyOverview(month: string, user: any) {
@@ -114,15 +120,15 @@ export class WorkscheduleService {
   }
 
   async getRequestInfo(id: string, user: any) {
-    return this.forward('GET', `/api/workschedule/schedule/requests/${id}`, null, null, user);
+    return this.forward('GET', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);
   }
 
   async updateEntries(id: string, dto: any, user: any) {
-    return this.forward('PATCH', `/api/workschedule/schedule/requests/${id}`, dto, null, user);
+    return this.forward('PATCH', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, dto, null, user);
   }
 
   async submitRequest(id: string, user: any) {
-    return this.forward('POST', `/api/workschedule/schedule/requests/${id}/submit`, null, null, user);
+    return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/submit`, null, null, user);
   }
 
   async deleteRequest(id: string, user: any) {

@@ -50,23 +50,23 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
             throw new common_1.BadGatewayException('Workschedule Service hiện không khả dụng');
         }
     }
-    async getPendingRequests(user) {
-        return this.forward('GET', '/api/workschedule/schedule/pending', null, null, user);
+    async getPendingRequests(query, user) {
+        return this.forward('GET', '/api/workschedule/schedule/pending', null, query, user);
     }
-    async getAllRequests(user) {
-        return this.forward('GET', '/api/workschedule/schedule/all', null, null, user);
+    async getAllRequests(query, user) {
+        return this.forward('GET', '/api/workschedule/schedule/all', null, query, user);
     }
     async approveRequest(id, user) {
-        return this.forward('POST', `/api/workschedule/schedule/requests/${id}/approve`, null, null, user);
+        return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/approve`, null, null, user);
     }
-    async rejectRequest(id, user) {
-        return this.forward('POST', `/api/workschedule/schedule/requests/${id}/reject`, null, null, user);
+    async rejectRequest(id, dto, user) {
+        return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/reject`, dto, null, user);
     }
     async bulkApprove(dto, user) {
         return this.forward('POST', '/api/workschedule/schedule/requests/bulk-approve', dto, null, user);
     }
-    async getHeatmap(user) {
-        return this.forward('GET', '/api/workschedule/schedule/heatmap', null, null, user);
+    async getHeatmap(query, user) {
+        return this.forward('GET', '/api/workschedule/schedule/heatmap', null, query, user);
     }
     async scanAttendance(dto, user) {
         return this.forward('POST', '/api/workschedule/attendance/scan', dto, null, user);
@@ -80,8 +80,8 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
     async getTodayAttendance(user) {
         return this.forward('GET', '/api/workschedule/attendance/today', null, null, user);
     }
-    async getReport(user) {
-        return this.forward('GET', '/api/workschedule/attendance/report', null, null, user);
+    async getReport(query, user) {
+        return this.forward('GET', '/api/workschedule/attendance/report', null, query, user);
     }
     async getPolicy() {
         return this.forward('GET', '/api/workschedule/policy');
@@ -89,8 +89,8 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
     async updatePolicy(dto, user) {
         return this.forward('PATCH', '/api/workschedule/policy', dto, null, user);
     }
-    async getMySchedules(user) {
-        return this.forward('GET', '/api/workschedule/schedule/my', null, null, user);
+    async getMySchedules(query, user) {
+        return this.forward('GET', '/api/workschedule/schedule/my', null, query, user);
     }
     async getMonthlyOverview(month, user) {
         return this.forward('GET', '/api/workschedule/schedule/monthly-overview', null, { month }, user);
@@ -99,13 +99,13 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
         return this.forward('POST', '/api/workschedule/schedule/requests', dto, null, user);
     }
     async getRequestInfo(id, user) {
-        return this.forward('GET', `/api/workschedule/schedule/requests/${id}`, null, null, user);
+        return this.forward('GET', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);
     }
     async updateEntries(id, dto, user) {
-        return this.forward('PATCH', `/api/workschedule/schedule/requests/${id}`, dto, null, user);
+        return this.forward('PATCH', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, dto, null, user);
     }
     async submitRequest(id, user) {
-        return this.forward('POST', `/api/workschedule/schedule/requests/${id}/submit`, null, null, user);
+        return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/submit`, null, null, user);
     }
     async deleteRequest(id, user) {
         return this.forward('DELETE', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);

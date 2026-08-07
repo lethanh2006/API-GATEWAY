@@ -29,23 +29,23 @@ let WorkscheduleController = class WorkscheduleController {
     constructor(workscheduleService) {
         this.workscheduleService = workscheduleService;
     }
-    async getPendingRequests(req) {
-        return this.workscheduleService.getPendingRequests(req.user);
+    async getPendingRequests(query, req) {
+        return this.workscheduleService.getPendingRequests(query, req.user);
     }
-    async getAllRequests(req) {
-        return this.workscheduleService.getAllRequests(req.user);
+    async getAllRequests(query, req) {
+        return this.workscheduleService.getAllRequests(query, req.user);
     }
     async approveRequest(id, req) {
         return this.workscheduleService.approveRequest(id, req.user);
     }
     async rejectRequest(id, body, req) {
-        return this.workscheduleService.rejectRequest(id, req.user);
+        return this.workscheduleService.rejectRequest(id, body, req.user);
     }
     async bulkApprove(body, req) {
         return this.workscheduleService.bulkApprove(body, req.user);
     }
-    async getHeatmap(req) {
-        return this.workscheduleService.getHeatmap(req.user);
+    async getHeatmap(query, req) {
+        return this.workscheduleService.getHeatmap(query, req.user);
     }
     async scanAttendance(body, req) {
         return this.workscheduleService.scanAttendance(body, req.user);
@@ -59,8 +59,8 @@ let WorkscheduleController = class WorkscheduleController {
     async getTodayAttendance(req) {
         return this.workscheduleService.getTodayAttendance(req.user);
     }
-    async getReport(req) {
-        return this.workscheduleService.getReport(req.user);
+    async getReport(query, req) {
+        return this.workscheduleService.getReport(query, req.user);
     }
     async getPolicy() {
         return this.workscheduleService.getPolicy();
@@ -71,8 +71,8 @@ let WorkscheduleController = class WorkscheduleController {
     async getMonthlyOverview(month, req) {
         return this.workscheduleService.getMonthlyOverview(month, req.user);
     }
-    async getMySchedules(req) {
-        return this.workscheduleService.getMySchedules(req.user);
+    async getMySchedules(query, req) {
+        return this.workscheduleService.getMySchedules(query, req.user);
     }
     async createRequest(body, req) {
         return this.workscheduleService.createRequest(body, req.user);
@@ -117,9 +117,10 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách yêu cầu lịch làm việc chờ phê duyệt (Admin)' }),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "getPendingRequests", null);
 __decorate([
@@ -127,9 +128,10 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy tất cả danh sách yêu cầu lịch làm việc (Admin)' }),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "getAllRequests", null);
 __decorate([
@@ -173,9 +175,10 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy dữ liệu heatmap lịch làm việc (Admin)' }),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "getHeatmap", null);
 __decorate([
@@ -222,9 +225,10 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy báo cáo điểm danh (Admin)' }),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "getReport", null);
 __decorate([
@@ -260,9 +264,10 @@ __decorate([
     (0, common_1.Get)('schedule/my'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách lịch làm việc của bản thân' }),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "getMySchedules", null);
 __decorate([

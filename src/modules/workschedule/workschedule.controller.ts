@@ -24,16 +24,16 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Lấy danh sách yêu cầu lịch làm việc chờ phê duyệt (Admin)' })
-  async getPendingRequests(@Req() req: any) {
-    return this.workscheduleService.getPendingRequests(req.user);
+  async getPendingRequests(@Query() query: Record<string, string>, @Req() req: any) {
+    return this.workscheduleService.getPendingRequests(query, req.user);
   }
 
   @Get('schedule/all')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Lấy tất cả danh sách yêu cầu lịch làm việc (Admin)' })
-  async getAllRequests(@Req() req: any) {
-    return this.workscheduleService.getAllRequests(req.user);
+  async getAllRequests(@Query() query: Record<string, string>, @Req() req: any) {
+    return this.workscheduleService.getAllRequests(query, req.user);
   }
 
   @Post('schedule/requests/:id/approve')
@@ -51,7 +51,7 @@ export class WorkscheduleController {
   @ApiOperation({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' })
   @ApiParam({ name: 'id', example: 'req123' })
   async rejectRequest(@Param('id') id: string, @Body() body: RejectRequestDto, @Req() req: any) {
-    return this.workscheduleService.rejectRequest(id, req.user);
+    return this.workscheduleService.rejectRequest(id, body, req.user);
   }
 
   @Post('schedule/requests/bulk-approve')
@@ -66,8 +66,8 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Lấy dữ liệu heatmap lịch làm việc (Admin)' })
-  async getHeatmap(@Req() req: any) {
-    return this.workscheduleService.getHeatmap(req.user);
+  async getHeatmap(@Query() query: Record<string, string>, @Req() req: any) {
+    return this.workscheduleService.getHeatmap(query, req.user);
   }
 
   // ============================================================
@@ -108,8 +108,8 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Lấy báo cáo điểm danh (Admin)' })
-  async getReport(@Req() req: any) {
-    return this.workscheduleService.getReport(req.user);
+  async getReport(@Query() query: Record<string, string>, @Req() req: any) {
+    return this.workscheduleService.getReport(query, req.user);
   }
 
   // ============================================================
@@ -145,8 +145,8 @@ export class WorkscheduleController {
   @Get('schedule/my')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy danh sách lịch làm việc của bản thân' })
-  async getMySchedules(@Req() req: any) {
-    return this.workscheduleService.getMySchedules(req.user);
+  async getMySchedules(@Query() query: Record<string, string>, @Req() req: any) {
+    return this.workscheduleService.getMySchedules(query, req.user);
   }
 
   @Post('schedule/requests')
