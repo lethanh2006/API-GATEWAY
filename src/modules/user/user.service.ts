@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -35,7 +35,7 @@ export class UserService {
       return response.data;
     } catch (error) {
       if (error.response) {
-        return error.response.data;
+        throw new HttpException(error.response.data, error.response.status);
       }
       throw error;
     }

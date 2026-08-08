@@ -1,27 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import type { Request } from 'express';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
-  constructor() {
+  private readonly authServiceUrl: string;
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'your-super-secret-key-chatapp',
+      passReqToCallback: true,
     });
+    this.authServiceUrl = this.configService.get<string>(
+      'AUTH_SERVICE_URL',
+      'http://localhost:4000',
+    );
   }
 
-  async validate(payload: any) {
-    if (payload.user) {
-      return payload.user;
+  async validate(request: Request, _payload: unknown) {
+    const authorization = request.headers.authorization;
+    if (!authorization) throw new UnauthorizedException('Thiếu access token');
+
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.post(
+          `${this.authServiceUrl}/api/auth/introspect`,
+          {},
+          { headers: { Authorization: authorization } },
+        ),
+      );
+      if (!data?.valid || !data?.user) {
+        throw new UnauthorizedException('Token không còn hiệu lực');
+      }
+      return data.user;
+    } catch {
+      throw new UnauthorizedException('Token không còn hiệu lực');
     }
-    return {
-      _id: payload.userId || payload._id || payload.id,
-      userId: payload.userId || payload._id || payload.id,
-      username: payload.username,
-      role: payload.role,
-      tokenVersion: payload.tokenVersion,
-    };
   }
 }
