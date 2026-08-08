@@ -151,13 +151,14 @@ export class WorkscheduleController {
 
   @Post('schedule/requests')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Tạo yêu cầu đăng ký lịch làm việc mới' })
+  @ApiOperation({ summary: 'Tạo và gửi yêu cầu đăng ký lịch làm việc' })
   async createRequest(@Body() body: CreateScheduleRequestDto, @Req() req: any) {
     return this.workscheduleService.createRequest(body, req.user);
   }
 
   @Get('schedule/requests/:id')
   @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Xem chi tiết một yêu cầu lịch làm việc' })
   @ApiParam({ name: 'id', example: 'req123' })
   async getRequestInfo(@Param('id') id: string, @Req() req: any) {
@@ -166,22 +167,16 @@ export class WorkscheduleController {
 
   @Patch('schedule/requests/:id')
   @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Cập nhật nội dung một yêu cầu lịch làm việc' })
   @ApiParam({ name: 'id', example: 'req123' })
   async updateEntries(@Param('id') id: string, @Body() body: UpdateScheduleEntriesDto, @Req() req: any) {
     return this.workscheduleService.updateEntries(id, body, req.user);
   }
 
-  @Post('schedule/requests/:id/submit')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Nộp yêu cầu đăng ký lịch làm việc lên cấp trên' })
-  @ApiParam({ name: 'id', example: 'req123' })
-  async submitRequest(@Param('id') id: string, @Req() req: any) {
-    return this.workscheduleService.submitRequest(id, req.user);
-  }
-
   @Delete('schedule/requests/:id')
   @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Xóa yêu cầu đăng ký lịch làm việc' })
   @ApiParam({ name: 'id', example: 'req123' })
   async deleteRequest(@Param('id') id: string, @Req() req: any) {

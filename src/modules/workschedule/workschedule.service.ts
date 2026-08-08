@@ -127,10 +127,6 @@ export class WorkscheduleService {
     return this.forward('PATCH', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, dto, null, user);
   }
 
-  async submitRequest(id: string, user: any) {
-    return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/submit`, null, null, user);
-  }
-
   async deleteRequest(id: string, user: any) {
     return this.forward('DELETE', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);
   }
