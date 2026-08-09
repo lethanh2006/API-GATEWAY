@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
+const upstream_error_1 = require("../../common/http/upstream-error");
 let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
     httpService;
     configService;
@@ -43,11 +44,7 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
             return response.data;
         }
         catch (error) {
-            if (error.response) {
-                throw new common_1.HttpException(error.response.data, error.response.status);
-            }
-            this.logger.warn(`Không kết nối được Workschedule Service: ${error.message}`);
-            throw new common_1.BadGatewayException('Workschedule Service hiện không khả dụng');
+            (0, upstream_error_1.throwUpstreamError)(error, 'Dịch vụ lịch làm việc', this.logger);
         }
     }
     async getPendingRequests(query, user) {
@@ -103,9 +100,6 @@ let WorkscheduleService = WorkscheduleService_1 = class WorkscheduleService {
     }
     async updateEntries(id, dto, user) {
         return this.forward('PATCH', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, dto, null, user);
-    }
-    async submitRequest(id, user) {
-        return this.forward('POST', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/submit`, null, null, user);
     }
     async deleteRequest(id, user) {
         return this.forward('DELETE', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);

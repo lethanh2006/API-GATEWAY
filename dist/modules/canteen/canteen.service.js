@@ -8,15 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var CanteenService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CanteenService = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
-let CanteenService = class CanteenService {
+const upstream_error_1 = require("../../common/http/upstream-error");
+let CanteenService = CanteenService_1 = class CanteenService {
     httpService;
     configService;
+    logger = new common_1.Logger(CanteenService_1.name);
     baseUrl;
     constructor(httpService, configService) {
         this.httpService = httpService;
@@ -41,10 +44,7 @@ let CanteenService = class CanteenService {
             return response.data;
         }
         catch (error) {
-            if (error.response) {
-                return error.response.data;
-            }
-            throw error;
+            (0, upstream_error_1.throwUpstreamError)(error, 'Dịch vụ căn tin', this.logger);
         }
     }
     async getMenu() {
@@ -129,7 +129,7 @@ let CanteenService = class CanteenService {
     }
 };
 exports.CanteenService = CanteenService;
-exports.CanteenService = CanteenService = __decorate([
+exports.CanteenService = CanteenService = CanteenService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [axios_1.HttpService,
         config_1.ConfigService])

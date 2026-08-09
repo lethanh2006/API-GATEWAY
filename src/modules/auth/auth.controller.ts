@@ -8,6 +8,8 @@ import {
   Param,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -40,6 +42,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Đăng nhập bước 1 — verify password, gửi OTP (PUBLIC)' })
   async login(@Body() body: LoginDto) {
     return this.authService.login(body);
@@ -47,6 +50,7 @@ export class AuthController {
 
   @Post('verify')
   @Public()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Đăng nhập bước 2 — xác thực OTP, nhận token (PUBLIC)' })
   async verifyOtp(@Body() body: VerifyOtpDto) {
     return this.authService.verifyOtp(body);

@@ -25,7 +25,6 @@ export declare class WorkscheduleService {
     createRequest(dto: any, user: any): Promise<any>;
     getRequestInfo(id: string, user: any): Promise<any>;
     updateEntries(id: string, dto: any, user: any): Promise<any>;
-    submitRequest(id: string, user: any): Promise<any>;
     deleteRequest(id: string, user: any): Promise<any>;
     getMyWorkRequestStats(month: string, user: any): Promise<any>;
     getMyWorkRequests(query: Record<string, string>, user: any): Promise<any>;

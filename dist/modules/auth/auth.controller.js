@@ -77,6 +77,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('login'),
     (0, public_decorator_1.Public)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Đăng nhập bước 1 — verify password, gửi OTP (PUBLIC)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -86,6 +87,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('verify'),
     (0, public_decorator_1.Public)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Đăng nhập bước 2 — xác thực OTP, nhận token (PUBLIC)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),

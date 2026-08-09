@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 export declare class AuthService {
     private readonly httpService;
     private readonly configService;
+    private readonly logger;
     private readonly baseUrl;
     constructor(httpService: HttpService, configService: ConfigService);
     private forward;

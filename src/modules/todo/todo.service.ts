@@ -1,7 +1,8 @@
-import { BadGatewayException, HttpException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { throwUpstreamError } from '../../common/http/upstream-error';
 
 @Injectable()
 export class TodoService {
@@ -34,12 +35,8 @@ export class TodoService {
         })
       );
       return response.data;
-    } catch (error: any) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      }
-      this.logger.warn(`Không kết nối được Todo Service: ${error.message}`);
-      throw new BadGatewayException('Todo Service hiện không khả dụng');
+    } catch (error: unknown) {
+      throwUpstreamError(error, 'Dịch vụ công việc', this.logger);
     }
   }
 

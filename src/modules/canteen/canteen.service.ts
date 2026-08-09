@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { throwUpstreamError } from '../../common/http/upstream-error';
 
 @Injectable()
 export class CanteenService {
+  private readonly logger = new Logger(CanteenService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -33,11 +35,8 @@ export class CanteenService {
         })
       );
       return response.data;
-    } catch (error: any) {
-      if (error.response) {
-        return error.response.data;
-      }
-      throw error;
+    } catch (error: unknown) {
+      throwUpstreamError(error, 'Dịch vụ căn tin', this.logger);
     }
   }
 

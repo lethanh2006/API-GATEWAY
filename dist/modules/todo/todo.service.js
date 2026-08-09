@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
+const upstream_error_1 = require("../../common/http/upstream-error");
 let TodoService = TodoService_1 = class TodoService {
     httpService;
     configService;
@@ -43,11 +44,7 @@ let TodoService = TodoService_1 = class TodoService {
             return response.data;
         }
         catch (error) {
-            if (error.response) {
-                throw new common_1.HttpException(error.response.data, error.response.status);
-            }
-            this.logger.warn(`Không kết nối được Todo Service: ${error.message}`);
-            throw new common_1.BadGatewayException('Todo Service hiện không khả dụng');
+            (0, upstream_error_1.throwUpstreamError)(error, 'Dịch vụ công việc', this.logger);
         }
     }
     async getMyTasks(user) {

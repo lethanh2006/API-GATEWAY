@@ -1,10 +1,12 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { throwUpstreamError } from '../../common/http/upstream-error';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -33,11 +35,8 @@ export class AuthService {
         })
       );
       return response.data;
-    } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      }
-      throw error;
+    } catch (error: unknown) {
+      throwUpstreamError(error, 'Dịch vụ xác thực', this.logger);
     }
   }
 
