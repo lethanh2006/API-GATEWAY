@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import FormData from 'form-data';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 
 export interface UploadedChatImage {
@@ -65,16 +66,22 @@ export class ChatService {
     const form = new FormData();
     form.append('chatId', dto.chatId);
     if (dto.text) form.append('text', dto.text);
-    if (image) {
-      const bytes = Uint8Array.from(image.buffer);
-      form.append('image', new Blob([bytes], { type: image.mimetype }), image.originalname);
-    }
+    form.append('image', image.buffer, {
+      filename: image.originalname || 'chat-image.jpg',
+      contentType: image.mimetype || 'image/jpeg',
+      knownLength: image.buffer.length,
+    });
 
     try {
       const response = await firstValueFrom(
         this.httpService.post(`${this.baseUrl}/api/chat/message`, form, {
-          headers: this.createUserHeaders(user),
+          headers: {
+            ...form.getHeaders(),
+            ...this.createUserHeaders(user),
+          },
           maxBodyLength: 6 * 1024 * 1024,
+          maxContentLength: 6 * 1024 * 1024,
+          timeout: 55_000,
         })
       );
       return response.data;
