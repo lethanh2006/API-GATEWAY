@@ -20,6 +20,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryQueryDto } from './dto/category-query.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 import { TableQueryDto } from './dto/table-query.dto';
+import { UpdateIngredientDto } from './dto/update-ingredient.dto';
+import { IngredientQueryDto } from './dto/ingredient-query.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -226,12 +228,46 @@ export class CanteenController {
 
   // --- 3.5 Nhóm API Quản Lý Kho (Inventory APIs) ---
 
+  @Get('inventory/ingredients')
+  @Public()
+  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu' })
+  async getIngredients(@Query() query: IngredientQueryDto) {
+    return this.canteenService.getIngredients(query);
+  }
+
+  @Get('inventory/ingredients/:id')
+  @Public()
+  @ApiOperation({ summary: 'Lấy thông tin nguyên liệu theo ID' })
+  async getIngredientById(@Param('id') id: string) {
+    return this.canteenService.getIngredientById(id);
+  }
+
   @Post('inventory/ingredients')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Khởi tạo nguyên liệu mới' })
   async createIngredient(@Body() body: CreateIngredientDto, @Req() req: any) {
     return this.canteenService.createIngredient(body, req.user);
+  }
+
+  @Patch('inventory/ingredients/:id')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Cập nhật nguyên liệu (ADMIN,MANAGER)' })
+  async updateIngredient(
+    @Param('id') id: string,
+    @Body() body: UpdateIngredientDto,
+    @Req() req: any,
+  ) {
+    return this.canteenService.updateIngredient(id, body, req.user);
+  }
+
+  @Delete('inventory/ingredients/:id')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Xóa nguyên liệu chưa có lô kho (ADMIN,MANAGER)' })
+  async deleteIngredient(@Param('id') id: string, @Req() req: any) {
+    return this.canteenService.deleteIngredient(id, req.user);
   }
 
   @Post('inventory/batches')

@@ -144,8 +144,41 @@ export class CanteenService {
   }
 
   // --- Inventory APIs ---
+  async getIngredients(params: any) {
+    return this.forward(
+      'GET',
+      '/api/canteen/inventory/ingredients',
+      null,
+      params,
+    );
+  }
+
+  async getIngredientById(id: string) {
+    return this.forward('GET', `/api/canteen/inventory/ingredients/${id}`);
+  }
+
   async createIngredient(dto: any, user: any) {
     return this.forward('POST', '/api/canteen/inventory/ingredients', dto, null, user);
+  }
+
+  async updateIngredient(id: string, dto: any, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/canteen/inventory/ingredients/${id}`,
+      dto,
+      null,
+      user,
+    );
+  }
+
+  async deleteIngredient(id: string, user: any) {
+    return this.forward(
+      'DELETE',
+      `/api/canteen/inventory/ingredients/${id}`,
+      null,
+      null,
+      user,
+    );
   }
 
   async createInventoryBatch(dto: any, user: any) {
