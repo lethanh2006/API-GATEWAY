@@ -109,8 +109,8 @@ export class CanteenService {
   }
 
   // --- Table APIs ---
-  async getAllTables() {
-    return this.forward('GET', '/api/canteen/tables');
+  async getAllTables(params: any) {
+    return this.forward('GET', '/api/canteen/tables', null, params);
   }
 
   async getTableById(id: string) {
@@ -119,6 +119,20 @@ export class CanteenService {
 
   async createTable(dto: any, user: any) {
     return this.forward('POST', '/api/canteen/tables', dto, null, user);
+  }
+
+  async updateTable(id: string, dto: any, user: any) {
+    return this.forward('PATCH', `/api/canteen/tables/${id}`, dto, null, user);
+  }
+
+  async deleteTable(id: string, user: any) {
+    return this.forward(
+      'DELETE',
+      `/api/canteen/tables/${id}`,
+      null,
+      null,
+      user,
+    );
   }
 
   async updateTableStatus(id: string, dto: any, user: any) {

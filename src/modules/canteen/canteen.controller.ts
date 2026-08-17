@@ -18,6 +18,8 @@ import { AllocateTableDto } from './dto/allocate-table.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryQueryDto } from './dto/category-query.dto';
+import { UpdateTableDto } from './dto/update-table.dto';
+import { TableQueryDto } from './dto/table-query.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -163,8 +165,8 @@ export class CanteenController {
   @Get('tables')
   @Public()
   @ApiOperation({ summary: 'Lấy danh sách tất cả các bàn ăn' })
-  async getAllTables() {
-    return this.canteenService.getAllTables();
+  async getAllTables(@Query() query: TableQueryDto) {
+    return this.canteenService.getAllTables(query);
   }
 
   @Get('tables/:id')
@@ -180,6 +182,26 @@ export class CanteenController {
   @ApiOperation({ summary: 'Khởi tạo bàn ăn mới' })
   async createTable(@Body() body: CreateTableDto, @Req() req: any) {
     return this.canteenService.createTable(body, req.user);
+  }
+
+  @Patch('tables/:id')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Cập nhật thông tin bàn ăn (ADMIN,MANAGER)' })
+  async updateTable(
+    @Param('id') id: string,
+    @Body() body: UpdateTableDto,
+    @Req() req: any,
+  ) {
+    return this.canteenService.updateTable(id, body, req.user);
+  }
+
+  @Delete('tables/:id')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Xóa bàn ăn đang trống (ADMIN,MANAGER)' })
+  async deleteTable(@Param('id') id: string, @Req() req: any) {
+    return this.canteenService.deleteTable(id, req.user);
   }
 
   @Patch('tables/:id/status')
