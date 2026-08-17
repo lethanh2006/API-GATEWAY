@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var ChatService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatService = void 0;
@@ -15,6 +18,7 @@ const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
+const form_data_1 = __importDefault(require("form-data"));
 const upstream_error_1 = require("../../common/http/upstream-error");
 let ChatService = ChatService_1 = class ChatService {
     httpService;
@@ -60,18 +64,24 @@ let ChatService = ChatService_1 = class ChatService {
         if (!image) {
             return this.forward('POST', '/api/chat/message', dto, null, user);
         }
-        const form = new FormData();
+        const form = new form_data_1.default();
         form.append('chatId', dto.chatId);
         if (dto.text)
             form.append('text', dto.text);
-        if (image) {
-            const bytes = Uint8Array.from(image.buffer);
-            form.append('image', new Blob([bytes], { type: image.mimetype }), image.originalname);
-        }
+        form.append('image', image.buffer, {
+            filename: image.originalname || 'chat-image.jpg',
+            contentType: image.mimetype || 'image/jpeg',
+            knownLength: image.buffer.length,
+        });
         try {
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(`${this.baseUrl}/api/chat/message`, form, {
-                headers: this.createUserHeaders(user),
+                headers: {
+                    ...form.getHeaders(),
+                    ...this.createUserHeaders(user),
+                },
                 maxBodyLength: 6 * 1024 * 1024,
+                maxContentLength: 6 * 1024 * 1024,
+                timeout: 55_000,
             }));
             return response.data;
         }

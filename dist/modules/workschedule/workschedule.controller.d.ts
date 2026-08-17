@@ -23,7 +23,6 @@ export declare class WorkscheduleController {
     createRequest(body: CreateScheduleRequestDto, req: any): Promise<any>;
     getRequestInfo(id: string, req: any): Promise<any>;
     updateEntries(id: string, body: UpdateScheduleEntriesDto, req: any): Promise<any>;
-    submitRequest(id: string, req: any): Promise<any>;
     deleteRequest(id: string, req: any): Promise<any>;
     getMyWorkRequestStats(month: string, req: any): Promise<any>;
     getMyWorkRequests(query: Record<string, string>, req: any): Promise<any>;

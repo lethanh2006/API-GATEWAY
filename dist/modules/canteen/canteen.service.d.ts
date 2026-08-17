@@ -23,14 +23,25 @@ export declare class CanteenService {
     getNextKitchenOrder(user: any): Promise<any>;
     setKitchenOrderCooking(id: string, user: any): Promise<any>;
     setKitchenOrderReady(id: string, user: any): Promise<any>;
-    getAllTables(): Promise<any>;
+    getAllTables(params: any): Promise<any>;
     getTableById(id: string): Promise<any>;
     createTable(dto: any, user: any): Promise<any>;
+    updateTable(id: string, dto: any, user: any): Promise<any>;
+    deleteTable(id: string, user: any): Promise<any>;
     updateTableStatus(id: string, dto: any, user: any): Promise<any>;
     allocateTables(dto: any, user: any): Promise<any>;
+    getIngredients(params: any): Promise<any>;
+    getIngredientById(id: string): Promise<any>;
     createIngredient(dto: any, user: any): Promise<any>;
+    updateIngredient(id: string, dto: any, user: any): Promise<any>;
+    deleteIngredient(id: string, user: any): Promise<any>;
     createInventoryBatch(dto: any, user: any): Promise<any>;
     getInventoryExpiryAlerts(user: any): Promise<any>;
     consumeIngredient(dto: any, user: any): Promise<any>;
     getTopDishes(limit: number, user: any): Promise<any>;
+    getCategories(params: any): Promise<any>;
+    getCategoryById(id: string): Promise<any>;
+    createCategory(dto: any, user: any): Promise<any>;
+    updateCategory(id: string, dto: any, user: any): Promise<any>;
+    deleteCategory(id: string, user: any): Promise<any>;
 }

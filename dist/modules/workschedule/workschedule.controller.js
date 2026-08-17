@@ -83,9 +83,6 @@ let WorkscheduleController = class WorkscheduleController {
     async updateEntries(id, body, req) {
         return this.workscheduleService.updateEntries(id, body, req.user);
     }
-    async submitRequest(id, req) {
-        return this.workscheduleService.submitRequest(id, req.user);
-    }
     async deleteRequest(id, req) {
         return this.workscheduleService.deleteRequest(id, req.user);
     }
@@ -273,7 +270,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('schedule/requests'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Tạo yêu cầu đăng ký lịch làm việc mới' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo và gửi yêu cầu đăng ký lịch làm việc' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -283,6 +280,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('schedule/requests/:id'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Xem chi tiết một yêu cầu lịch làm việc' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
     __param(0, (0, common_1.Param)('id')),
@@ -294,6 +292,7 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('schedule/requests/:id'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Cập nhật nội dung một yêu cầu lịch làm việc' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
     __param(0, (0, common_1.Param)('id')),
@@ -304,19 +303,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], WorkscheduleController.prototype, "updateEntries", null);
 __decorate([
-    (0, common_1.Post)('schedule/requests/:id/submit'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Nộp yêu cầu đăng ký lịch làm việc lên cấp trên' }),
-    (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], WorkscheduleController.prototype, "submitRequest", null);
-__decorate([
     (0, common_1.Delete)('schedule/requests/:id'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
     (0, swagger_1.ApiOperation)({ summary: 'Xóa yêu cầu đăng ký lịch làm việc' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 'req123' }),
     __param(0, (0, common_1.Param)('id')),

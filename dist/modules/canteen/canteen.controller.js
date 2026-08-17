@@ -30,6 +30,13 @@ const consume_ingredient_dto_1 = require("./dto/consume-ingredient.dto");
 const create_table_dto_1 = require("./dto/create-table.dto");
 const update_table_status_dto_1 = require("./dto/update-table-status.dto");
 const allocate_table_dto_1 = require("./dto/allocate-table.dto");
+const create_category_dto_1 = require("./dto/create-category.dto");
+const update_category_dto_1 = require("./dto/update-category.dto");
+const category_query_dto_1 = require("./dto/category-query.dto");
+const update_table_dto_1 = require("./dto/update-table.dto");
+const table_query_dto_1 = require("./dto/table-query.dto");
+const update_ingredient_dto_1 = require("./dto/update-ingredient.dto");
+const ingredient_query_dto_1 = require("./dto/ingredient-query.dto");
 let CanteenController = class CanteenController {
     canteenService;
     constructor(canteenService) {
@@ -83,8 +90,8 @@ let CanteenController = class CanteenController {
     async setKitchenOrderReady(id, req) {
         return this.canteenService.setKitchenOrderReady(id, req.user);
     }
-    async getAllTables() {
-        return this.canteenService.getAllTables();
+    async getAllTables(query) {
+        return this.canteenService.getAllTables(query);
     }
     async getTableById(id) {
         return this.canteenService.getTableById(id);
@@ -92,14 +99,32 @@ let CanteenController = class CanteenController {
     async createTable(body, req) {
         return this.canteenService.createTable(body, req.user);
     }
+    async updateTable(id, body, req) {
+        return this.canteenService.updateTable(id, body, req.user);
+    }
+    async deleteTable(id, req) {
+        return this.canteenService.deleteTable(id, req.user);
+    }
     async updateTableStatus(id, body, req) {
         return this.canteenService.updateTableStatus(id, body, req.user);
     }
     async allocateTables(body, req) {
         return this.canteenService.allocateTables(body, req.user);
     }
+    async getIngredients(query) {
+        return this.canteenService.getIngredients(query);
+    }
+    async getIngredientById(id) {
+        return this.canteenService.getIngredientById(id);
+    }
     async createIngredient(body, req) {
         return this.canteenService.createIngredient(body, req.user);
+    }
+    async updateIngredient(id, body, req) {
+        return this.canteenService.updateIngredient(id, body, req.user);
+    }
+    async deleteIngredient(id, req) {
+        return this.canteenService.deleteIngredient(id, req.user);
     }
     async createInventoryBatch(body, req) {
         return this.canteenService.createInventoryBatch(body, req.user);
@@ -112,6 +137,21 @@ let CanteenController = class CanteenController {
     }
     async getTopDishes(limit, req) {
         return this.canteenService.getTopDishes(limit, req.user);
+    }
+    async getCategories(query) {
+        return this.canteenService.getCategories(query);
+    }
+    async getCategoryById(id) {
+        return this.canteenService.getCategoryById(id);
+    }
+    async createCategory(body, req) {
+        return this.canteenService.createCategory(body, req.user);
+    }
+    async updateCategory(id, body, req) {
+        return this.canteenService.updateCategory(id, body, req.user);
+    }
+    async deleteCategory(id, req) {
+        return this.canteenService.deleteCategory(id, req.user);
     }
 };
 exports.CanteenController = CanteenController;
@@ -136,7 +176,7 @@ __decorate([
     (0, common_1.Post)('admin/menu'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Tạo mới món ăn' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo mới món ăn (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -147,7 +187,7 @@ __decorate([
     (0, common_1.Put)('admin/menu/:id'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin món ăn' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin món ăn (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
@@ -159,7 +199,7 @@ __decorate([
     (0, common_1.Delete)('admin/menu/:id'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Xóa món ăn khỏi menu' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Xóa món ăn khỏi menu (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -170,7 +210,7 @@ __decorate([
     (0, common_1.Post)('admin/menu/undo'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Hoàn tác (Undo) thao tác sửa đổi vừa thực hiện trên Menu' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Hoàn tác (Undo) thao tác sửa đổi vừa thực hiện trên Menu (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -180,7 +220,7 @@ __decorate([
     (0, common_1.Post)('admin/menu/redo'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Làm lại (Redo) thao tác vừa hoàn tác trên Menu' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Làm lại (Redo) thao tác vừa hoàn tác trên Menu (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -219,7 +259,7 @@ __decorate([
     (0, common_1.Patch)('orders/:id/confirm'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Xác nhận đơn hàng, tính điểm ưu tiên và gửi sự kiện chế biến' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Xác nhận đơn hàng, tính điểm ưu tiên và gửi sự kiện chế biến (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -230,7 +270,7 @@ __decorate([
     (0, common_1.Patch)('orders/:id/complete'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Xác nhận khách đã nhận món ăn thành công, đóng Order' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Xác nhận khách đã nhận món ăn thành công, đóng Order (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -241,7 +281,7 @@ __decorate([
     (0, common_1.Get)('kitchen/queue'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
-    (0, swagger_1.ApiOperation)({ summary: 'Xem danh sách các đơn hàng đang chờ trong hàng đợi ưu tiên' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Xem danh sách các đơn hàng đang chờ trong hàng đợi ưu tiên (ADMIN,MANAGER,CHEF)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -251,7 +291,7 @@ __decorate([
     (0, common_1.Post)('kitchen/next'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
-    (0, swagger_1.ApiOperation)({ summary: 'Lấy đơn hàng có độ ưu tiên cao nhất ra khỏi hàng đợi để chế biến' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy đơn hàng có độ ưu tiên cao nhất ra khỏi hàng đợi để chế biến (ADMIN,MANAGER,CHEF)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -261,7 +301,7 @@ __decorate([
     (0, common_1.Patch)('kitchen/orders/:id/cooking'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
-    (0, swagger_1.ApiOperation)({ summary: 'Chuyển trạng thái đơn hàng sang COOKING' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Chuyển trạng thái đơn hàng sang COOKING (ADMIN,MANAGER,CHEF)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -272,7 +312,7 @@ __decorate([
     (0, common_1.Patch)('kitchen/orders/:id/ready'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
-    (0, swagger_1.ApiOperation)({ summary: 'Đánh dấu món ăn đã chuẩn bị xong, chuyển trạng thái READY' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Đánh dấu món ăn đã chuẩn bị xong, chuyển trạng thái READY (ADMIN,MANAGER,CHEF)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -283,8 +323,9 @@ __decorate([
     (0, common_1.Get)('tables'),
     (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả các bàn ăn' }),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [table_query_dto_1.TableQueryDto]),
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "getAllTables", null);
 __decorate([
@@ -300,7 +341,7 @@ __decorate([
     (0, common_1.Post)('tables'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Khởi tạo bàn ăn mới' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Khởi tạo bàn ăn mới (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -308,10 +349,33 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "createTable", null);
 __decorate([
+    (0, common_1.Patch)('tables/:id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin bàn ăn (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_table_dto_1.UpdateTableDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "updateTable", null);
+__decorate([
+    (0, common_1.Delete)('tables/:id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Xóa bàn ăn đang trống (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "deleteTable", null);
+__decorate([
     (0, common_1.Patch)('tables/:id/status'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.WAITER),
-    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved) (ADMIN,MANAGER,WAITER)' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
@@ -323,7 +387,7 @@ __decorate([
     (0, common_1.Post)('tables/allocate'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.WAITER),
-    (0, swagger_1.ApiOperation)({ summary: 'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách (ADMIN,MANAGER,WAITER)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -331,10 +395,28 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "allocateTables", null);
 __decorate([
+    (0, common_1.Get)('inventory/ingredients'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách nguyên liệu' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ingredient_query_dto_1.IngredientQueryDto]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getIngredients", null);
+__decorate([
+    (0, common_1.Get)('inventory/ingredients/:id'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy thông tin nguyên liệu theo ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getIngredientById", null);
+__decorate([
     (0, common_1.Post)('inventory/ingredients'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Khởi tạo nguyên liệu mới' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Khởi tạo nguyên liệu mới (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -342,10 +424,33 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "createIngredient", null);
 __decorate([
+    (0, common_1.Patch)('inventory/ingredients/:id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật nguyên liệu (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_ingredient_dto_1.UpdateIngredientDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "updateIngredient", null);
+__decorate([
+    (0, common_1.Delete)('inventory/ingredients/:id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Xóa nguyên liệu chưa có lô kho (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "deleteIngredient", null);
+__decorate([
     (0, common_1.Post)('inventory/batches'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng) (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -356,7 +461,7 @@ __decorate([
     (0, common_1.Get)('inventory/expiry-alerts'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
-    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap) (ADMIN,MANAGER,CHEF)' }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -366,7 +471,7 @@ __decorate([
     (0, common_1.Post)('inventory/consume'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER, role_enum_1.Role.CHEF),
-    (0, swagger_1.ApiOperation)({ summary: 'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước) (ADMIN,MANAGER,CHEF)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -377,13 +482,65 @@ __decorate([
     (0, common_1.Get)('analytics/top-dishes'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap) (ADMIN,MANAGER)' }),
     __param(0, (0, common_1.Query)('limit')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], CanteenController.prototype, "getTopDishes", null);
+__decorate([
+    (0, common_1.Get)('categories'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách danh mục món ăn' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [category_query_dto_1.CategoryQueryDto]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getCategories", null);
+__decorate([
+    (0, common_1.Get)('categories/:id'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy thông tin danh mục theo ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "getCategoryById", null);
+__decorate([
+    (0, common_1.Post)('categories'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo danh mục món ăn (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "createCategory", null);
+__decorate([
+    (0, common_1.Patch)('categories/:id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật danh mục món ăn (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_category_dto_1.UpdateCategoryDto, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "updateCategory", null);
+__decorate([
+    (0, common_1.Delete)('categories/:id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_enum_1.Role.ADMIN, role_enum_1.Role.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Xóa danh mục món ăn (ADMIN,MANAGER)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CanteenController.prototype, "deleteCategory", null);
 exports.CanteenController = CanteenController = __decorate([
     (0, swagger_1.ApiTags)('Api Canteen'),
     (0, common_1.Controller)('api/canteen'),

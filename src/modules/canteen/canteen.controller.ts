@@ -48,7 +48,7 @@ export class CanteenController {
   @Post('admin/menu')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Tạo mới món ăn' })
+  @ApiOperation({ summary: 'Tạo mới món ăn (ADMIN,MANAGER)' })
   async createMenuItem(@Body() body: CreateMenuItemDto, @Req() req: any) {
     return this.canteenService.createMenuItem(body, req.user);
   }
@@ -56,7 +56,7 @@ export class CanteenController {
   @Put('admin/menu/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Cập nhật thông tin món ăn' })
+  @ApiOperation({ summary: 'Cập nhật thông tin món ăn (ADMIN,MANAGER)' })
   async updateMenuItem(
     @Param('id') id: string,
     @Body() body: UpdateMenuItemDto,
@@ -68,7 +68,7 @@ export class CanteenController {
   @Delete('admin/menu/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xóa món ăn khỏi menu' })
+  @ApiOperation({ summary: 'Xóa món ăn khỏi menu (ADMIN,MANAGER)' })
   async deleteMenuItem(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.deleteMenuItem(id, req.user);
   }
@@ -76,7 +76,7 @@ export class CanteenController {
   @Post('admin/menu/undo')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Hoàn tác (Undo) thao tác sửa đổi vừa thực hiện trên Menu' })
+  @ApiOperation({ summary: 'Hoàn tác (Undo) thao tác sửa đổi vừa thực hiện trên Menu (ADMIN,MANAGER)' })
   async undoMenuItemChange(@Req() req: any) {
     return this.canteenService.undoMenuItemChange(req.user);
   }
@@ -84,7 +84,7 @@ export class CanteenController {
   @Post('admin/menu/redo')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Làm lại (Redo) thao tác vừa hoàn tác trên Menu' })
+  @ApiOperation({ summary: 'Làm lại (Redo) thao tác vừa hoàn tác trên Menu (ADMIN,MANAGER)' })
   async redoMenuItemChange(@Req() req: any) {
     return this.canteenService.redoMenuItemChange(req.user);
   }
@@ -115,7 +115,7 @@ export class CanteenController {
   @Patch('orders/:id/confirm')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xác nhận đơn hàng, tính điểm ưu tiên và gửi sự kiện chế biến' })
+  @ApiOperation({ summary: 'Xác nhận đơn hàng, tính điểm ưu tiên và gửi sự kiện chế biến (ADMIN,MANAGER)' })
   async confirmOrder(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.confirmOrder(id, req.user);
   }
@@ -123,7 +123,7 @@ export class CanteenController {
   @Patch('orders/:id/complete')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xác nhận khách đã nhận món ăn thành công, đóng Order' })
+  @ApiOperation({ summary: 'Xác nhận khách đã nhận món ăn thành công, đóng Order (ADMIN,MANAGER)' })
   async completeOrder(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.completeOrder(id, req.user);
   }
@@ -133,7 +133,7 @@ export class CanteenController {
   @Get('kitchen/queue')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Xem danh sách các đơn hàng đang chờ trong hàng đợi ưu tiên' })
+  @ApiOperation({ summary: 'Xem danh sách các đơn hàng đang chờ trong hàng đợi ưu tiên (ADMIN,MANAGER,CHEF)' })
   async getKitchenQueue(@Req() req: any) {
     return this.canteenService.getKitchenQueue(req.user);
   }
@@ -141,7 +141,7 @@ export class CanteenController {
   @Post('kitchen/next')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Lấy đơn hàng có độ ưu tiên cao nhất ra khỏi hàng đợi để chế biến' })
+  @ApiOperation({ summary: 'Lấy đơn hàng có độ ưu tiên cao nhất ra khỏi hàng đợi để chế biến (ADMIN,MANAGER,CHEF)' })
   async getNextKitchenOrder(@Req() req: any) {
     return this.canteenService.getNextKitchenOrder(req.user);
   }
@@ -149,7 +149,7 @@ export class CanteenController {
   @Patch('kitchen/orders/:id/cooking')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Chuyển trạng thái đơn hàng sang COOKING' })
+  @ApiOperation({ summary: 'Chuyển trạng thái đơn hàng sang COOKING (ADMIN,MANAGER,CHEF)' })
   async setKitchenOrderCooking(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.setKitchenOrderCooking(id, req.user);
   }
@@ -157,7 +157,7 @@ export class CanteenController {
   @Patch('kitchen/orders/:id/ready')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Đánh dấu món ăn đã chuẩn bị xong, chuyển trạng thái READY' })
+  @ApiOperation({ summary: 'Đánh dấu món ăn đã chuẩn bị xong, chuyển trạng thái READY (ADMIN,MANAGER,CHEF)' })
   async setKitchenOrderReady(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.setKitchenOrderReady(id, req.user);
   }
@@ -181,7 +181,7 @@ export class CanteenController {
   @Post('tables')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Khởi tạo bàn ăn mới' })
+  @ApiOperation({ summary: 'Khởi tạo bàn ăn mới (ADMIN,MANAGER)' })
   async createTable(@Body() body: CreateTableDto, @Req() req: any) {
     return this.canteenService.createTable(body, req.user);
   }
@@ -209,7 +209,7 @@ export class CanteenController {
   @Patch('tables/:id/status')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.WAITER)
-  @ApiOperation({ summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved)' })
+  @ApiOperation({ summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved) (ADMIN,MANAGER,WAITER)' })
   async updateTableStatus(
     @Param('id') id: string,
     @Body() body: UpdateTableStatusDto,
@@ -221,7 +221,7 @@ export class CanteenController {
   @Post('tables/allocate')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.WAITER)
-  @ApiOperation({ summary: 'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách' })
+  @ApiOperation({ summary: 'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách (ADMIN,MANAGER,WAITER)' })
   async allocateTables(@Body() body: AllocateTableDto, @Req() req: any) {
     return this.canteenService.allocateTables(body, req.user);
   }
@@ -245,7 +245,7 @@ export class CanteenController {
   @Post('inventory/ingredients')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Khởi tạo nguyên liệu mới' })
+  @ApiOperation({ summary: 'Khởi tạo nguyên liệu mới (ADMIN,MANAGER)' })
   async createIngredient(@Body() body: CreateIngredientDto, @Req() req: any) {
     return this.canteenService.createIngredient(body, req.user);
   }
@@ -273,7 +273,7 @@ export class CanteenController {
   @Post('inventory/batches')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng)' })
+  @ApiOperation({ summary: 'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng) (ADMIN,MANAGER)' })
   async createInventoryBatch(@Body() body: CreateInventoryBatchDto, @Req() req: any) {
     return this.canteenService.createInventoryBatch(body, req.user);
   }
@@ -281,7 +281,7 @@ export class CanteenController {
   @Get('inventory/expiry-alerts')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap)' })
+  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap) (ADMIN,MANAGER,CHEF)' })
   async getInventoryExpiryAlerts(@Req() req: any) {
     return this.canteenService.getInventoryExpiryAlerts(req.user);
   }
@@ -289,7 +289,7 @@ export class CanteenController {
   @Post('inventory/consume')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước)' })
+  @ApiOperation({ summary: 'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước) (ADMIN,MANAGER,CHEF)' })
   async consumeIngredient(@Body() body: ConsumeIngredientDto, @Req() req: any) {
     return this.canteenService.consumeIngredient(body, req.user);
   }
@@ -299,7 +299,7 @@ export class CanteenController {
   @Get('analytics/top-dishes')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap)' })
+  @ApiOperation({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap) (ADMIN,MANAGER)' })
   async getTopDishes(@Query('limit') limit: number, @Req() req: any) {
     return this.canteenService.getTopDishes(limit, req.user);
   }
