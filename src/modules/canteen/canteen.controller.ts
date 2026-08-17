@@ -15,6 +15,9 @@ import { ConsumeIngredientDto } from './dto/consume-ingredient.dto';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableStatusDto } from './dto/update-table-status.dto';
 import { AllocateTableDto } from './dto/allocate-table.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryQueryDto } from './dto/category-query.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -241,5 +244,52 @@ export class CanteenController {
   @ApiOperation({ summary: 'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap)' })
   async getTopDishes(@Query('limit') limit: number, @Req() req: any) {
     return this.canteenService.getTopDishes(limit, req.user);
+  }
+
+  // --- 3.7 Nhóm API Quản Lý Danh Mục (Category APIs) ---
+
+  @Get('categories')
+  @Public()
+  @ApiOperation({ summary: 'Lấy danh sách danh mục món ăn' })
+  async getCategories(@Query() query: CategoryQueryDto) {
+    return this.canteenService.getCategories(query);
+  }
+
+  @Get('categories/:id')
+  @Public()
+  @ApiOperation({ summary: 'Lấy thông tin danh mục theo ID' })
+  async getCategoryById(@Param('id') id: string) {
+    return this.canteenService.getCategoryById(id);
+  }
+
+  @Post('categories')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Tạo danh mục món ăn (ADMIN,MANAGER)' })
+  async createCategory(
+    @Body() body: CreateCategoryDto,
+    @Req() req: any,
+  ) {
+    return this.canteenService.createCategory(body, req.user);
+  }
+
+  @Patch('categories/:id')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Cập nhật danh mục món ăn (ADMIN,MANAGER)' })
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() body: UpdateCategoryDto,
+    @Req() req: any,
+  ) {
+    return this.canteenService.updateCategory(id, body, req.user);
+  }
+
+  @Delete('categories/:id')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Xóa danh mục món ăn (ADMIN,MANAGER)' })
+  async deleteCategory(@Param('id') id: string, @Req() req: any) {
+    return this.canteenService.deleteCategory(id, req.user);
   }
 }

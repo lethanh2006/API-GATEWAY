@@ -151,4 +151,37 @@ export class CanteenService {
     const params = limit ? { limit } : undefined;
     return this.forward('GET', '/api/canteen/analytics/top-dishes', null, params, user);
   }
+
+  // --- Category APIs ---
+  async getCategories(params: any) {
+    return this.forward('GET', '/api/canteen/categories', null, params);
+  }
+
+  async getCategoryById(id: string) {
+    return this.forward('GET', `/api/canteen/categories/${id}`);
+  }
+
+  async createCategory(dto: any, user: any) {
+    return this.forward('POST', '/api/canteen/categories', dto, null, user);
+  }
+
+  async updateCategory(id: string, dto: any, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/canteen/categories/${id}`,
+      dto,
+      null,
+      user,
+    );
+  }
+
+  async deleteCategory(id: string, user: any) {
+    return this.forward(
+      'DELETE',
+      `/api/canteen/categories/${id}`,
+      null,
+      null,
+      user,
+    );
+  }
 }
