@@ -8,30 +8,43 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var CanteenService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CanteenService = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
 const upstream_error_1 = require("../../common/http/upstream-error");
+const internal_request_signature_service_1 = require("../../common/security/internal-request-signature.service");
+const crypto_1 = require("crypto");
 let CanteenService = CanteenService_1 = class CanteenService {
     httpService;
     configService;
+    signatureService;
+    request;
     logger = new common_1.Logger(CanteenService_1.name);
     baseUrl;
-    constructor(httpService, configService) {
+    constructor(httpService, configService, signatureService, request) {
         this.httpService = httpService;
         this.configService = configService;
+        this.signatureService = signatureService;
+        this.request = request;
         this.baseUrl = this.configService.get('CANTEEN_SERVICE_URL', 'http://localhost:5005');
     }
     async forward(method, path, data, params, user) {
-        const headers = {};
+        const requestId = this.request.requestContext?.requestId ?? (0, crypto_1.randomUUID)();
+        const headers = {
+            'x-request-id': requestId,
+        };
         if (user) {
             const userPayloadStr = JSON.stringify(user);
             const base64User = Buffer.from(userPayloadStr).toString('base64');
-            headers['x-user-payload'] = base64User;
+            Object.assign(headers, this.signatureService.signUserPayload(base64User, requestId));
         }
         try {
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService.request({
@@ -163,8 +176,10 @@ let CanteenService = CanteenService_1 = class CanteenService {
 };
 exports.CanteenService = CanteenService;
 exports.CanteenService = CanteenService = CanteenService_1 = __decorate([
-    (0, common_1.Injectable)(),
+    (0, common_1.Injectable)({ scope: common_1.Scope.REQUEST }),
+    __param(3, (0, common_1.Inject)(core_1.REQUEST)),
     __metadata("design:paramtypes", [axios_1.HttpService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        internal_request_signature_service_1.InternalRequestSignatureService, Object])
 ], CanteenService);
 //# sourceMappingURL=canteen.service.js.map

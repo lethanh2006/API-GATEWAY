@@ -1,11 +1,15 @@
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 export declare class CanteenService {
     private readonly httpService;
     private readonly configService;
+    private readonly signatureService;
+    private readonly request;
     private readonly logger;
     private readonly baseUrl;
-    constructor(httpService: HttpService, configService: ConfigService);
+    constructor(httpService: HttpService, configService: ConfigService, signatureService: InternalRequestSignatureService, request: RequestWithContext);
     private forward;
     getMenu(): Promise<any>;
     searchMenu(query: string): Promise<any>;

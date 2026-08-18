@@ -1,27 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { throwUpstreamError } from '../../common/http/upstream-error';
+import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import { randomUUID } from 'crypto';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class CanteenService {
   private readonly logger = new Logger(CanteenService.name);
   private readonly baseUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly signatureService: InternalRequestSignatureService,
+    @Inject(REQUEST) private readonly request: RequestWithContext,
   ) {
     this.baseUrl = this.configService.get<string>('CANTEEN_SERVICE_URL', 'http://localhost:5005');
   }
 
   private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
-    const headers: Record<string, string> = {};
+    const requestId = this.request.requestContext?.requestId ?? randomUUID();
+    const headers: Record<string, string> = {
+      'x-request-id': requestId,
+    };
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
-      headers['x-user-payload'] = base64User;
+      Object.assign(
+        headers,
+        this.signatureService.signUserPayload(base64User, requestId),
+      );
     }
 
     try {

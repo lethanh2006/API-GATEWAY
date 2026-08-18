@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const canteen_controller_1 = require("./canteen.controller");
 const canteen_service_1 = require("./canteen.service");
+const internal_request_signature_service_1 = require("../../common/security/internal-request-signature.service");
 let CanteenModule = class CanteenModule {
 };
 exports.CanteenModule = CanteenModule;
@@ -18,7 +19,7 @@ exports.CanteenModule = CanteenModule = __decorate([
     (0, common_1.Module)({
         imports: [axios_1.HttpModule],
         controllers: [canteen_controller_1.CanteenController],
-        providers: [canteen_service_1.CanteenService],
+        providers: [canteen_service_1.CanteenService, internal_request_signature_service_1.InternalRequestSignatureService],
     })
 ], CanteenModule);
 //# sourceMappingURL=canteen.module.js.map
