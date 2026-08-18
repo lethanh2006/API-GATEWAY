@@ -17,12 +17,14 @@ const chat_module_1 = require("./modules/chat/chat.module");
 const todo_module_1 = require("./modules/todo/todo.module");
 const workschedule_module_1 = require("./modules/workschedule/workschedule.module");
 const canteen_module_1 = require("./modules/canteen/canteen.module");
+const core_module_1 = require("./core/core.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            core_module_1.CoreModule,
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
                 envFilePath: '.env',

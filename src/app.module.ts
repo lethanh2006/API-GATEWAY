@@ -10,9 +10,11 @@ import { ChatModule } from './modules/chat/chat.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
 import { CanteenModule } from './modules/canteen/canteen.module';
+import { CoreModule } from './core/core.module';
 
 @Module({
   imports: [
+    CoreModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
