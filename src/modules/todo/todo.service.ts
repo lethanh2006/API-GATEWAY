@@ -1,23 +1,30 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { REQUEST } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import { throwUpstreamError } from '../../common/http/upstream-error';
+import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { randomUUID } from 'node:crypto';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class TodoService {
   private readonly logger = new Logger(TodoService.name);
   private readonly baseUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(REQUEST) private readonly request: RequestWithContext,
   ) {
     this.baseUrl = this.configService.get<string>('TODO_SERVICE_URL', 'http://localhost:5003');
   }
 
   private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
-    const headers: Record<string, string> = {};
+    const requestId = this.request.requestContext?.requestId ?? randomUUID();
+    const headers: Record<string, string> = {
+      'x-request-id': requestId,
+    };
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
