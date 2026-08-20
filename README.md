@@ -35,7 +35,7 @@ CANTEEN_SERVICE_URL=http://localhost:5005
 PAYMENT_SERVICE_URL=http://localhost:5006
 JWT_SECRET=your_jwt_secret
 CANTEEN_INTERNAL_SECRET=replace_with_a_long_random_shared_secret
-PAYMENT_INTERNAL_SECRET=replace_with_a_different_long_random_shared_secret
+PAYMENT_INTERNAL_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_PAYMENT_SECRET
 ```
 
 `CANTEEN_INTERNAL_SECRET` phải giống cấu hình của Canteen;
