@@ -25,22 +25,33 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
-    })
+    }),
   );
 
   // 4. Configure Centralized Swagger UI route using native SwaggerModule scanning
   const config = new DocumentBuilder()
-    .setTitle(process.env.TITTLE_SWAGGER || 'Centralized API Gateway')
-    .setDescription(process.env.CONTENT_SWAGGER || 'API Gateway for Microservices')
+    .setTitle(
+      process.env.TITLE_SWAGGER ||
+        process.env.TITTLE_SWAGGER ||
+        'Centralized API Gateway',
+    )
+    .setDescription(
+      process.env.CONTENT_SWAGGER || 'API Gateway for Microservices',
+    )
     .setVersion(process.env.VERSION_SWAGGER || '1.0.0')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(process.env.ENDPOINT_SWAGGER || 'api-docs', app, document);
+  SwaggerModule.setup(
+    process.env.ENDPOINT_SWAGGER || 'api-docs',
+    app,
+    document,
+  );
 
   // 5. Setup WebSocket / Socket.io reverse proxy for Chat Service
-  const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://localhost:5002';
+  const chatServiceUrl =
+    process.env.CHAT_SERVICE_URL || 'http://localhost:5002';
   const socketProxy = createProxyMiddleware('/socket.io', {
     target: chatServiceUrl,
     changeOrigin: true,
@@ -49,7 +60,9 @@ async function bootstrap() {
       console.error('[Socket Proxy Error]', err.message);
       if (typeof response?.writeHead === 'function' && !response.headersSent) {
         response.writeHead(502, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: 'Chat realtime hiện không khả dụng' }));
+        response.end(
+          JSON.stringify({ message: 'Chat realtime hiện không khả dụng' }),
+        );
       }
     },
   });
@@ -60,7 +73,9 @@ async function bootstrap() {
   // 6. Start the API Gateway HTTP Server
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`[Gateway] đang khởi chạy thành công tại: http://localhost:${port}`);
+  console.log(
+    `[Gateway] đang khởi chạy thành công tại: http://localhost:${port}`,
+  );
 
   // 7. Bind WebSocket Upgrade listener for Socket.io traffic
   const server = app.getHttpServer();

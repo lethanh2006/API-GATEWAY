@@ -18,6 +18,7 @@ A centralized, production-ready NestJS API Gateway that routes client requests, 
 - **Todo Service:** `/api/todo`
 - **Workschedule Service:** `/api/workschedule`
 - **Canteen Service:** `/api/canteen`
+- **Payment Service:** `/api/payment`
 
 ## Environment Variables
 
@@ -27,10 +28,16 @@ Copy the template from `.env.example` and set the following parameters:
 PORT=3000
 AUTH_SERVICE_URL=http://localhost:4000
 USER_SERVICE_URL=http://localhost:5000
-MAIL_SERVICE_URL=http://localhost:5001
 CHAT_SERVICE_URL=http://localhost:5002
 TODO_SERVICE_URL=http://localhost:5003
 WORKSCHEDULE_SERVICE_URL=http://localhost:5004
 CANTEEN_SERVICE_URL=http://localhost:5005
 PAYMENT_SERVICE_URL=http://localhost:5006
 JWT_SECRET=your_jwt_secret
+CANTEEN_INTERNAL_SECRET=replace_with_a_long_random_shared_secret
+PAYMENT_INTERNAL_SECRET=replace_with_a_different_long_random_shared_secret
+```
+
+`CANTEEN_INTERNAL_SECRET` phải giống cấu hình của Canteen;
+`PAYMENT_INTERNAL_SECRET` phải giống cấu hình của Payment. Mỗi secret cần ít nhất
+32 ký tự và phải được thay riêng theo từng môi trường.
