@@ -1,8 +1,14 @@
-const CREATE_QR_CONTEXT_VERSION = 'payment.create-qr.v1';
+const CREATE_QR_CONTEXT_VERSION = 'payment.create-qr.v2';
 
 export function createQrRequestContext(
   orderId: string,
+  orderUserId: string,
   amount: number,
 ): string {
-  return JSON.stringify([CREATE_QR_CONTEXT_VERSION, orderId, amount]);
+  return JSON.stringify([
+    CREATE_QR_CONTEXT_VERSION,
+    orderId,
+    orderUserId,
+    amount,
+  ]);
 }

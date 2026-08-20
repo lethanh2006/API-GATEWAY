@@ -55,16 +55,16 @@ export class PaymentService {
 
   async createQr(orderId: string, user: GatewayUser) {
     const order = await this.getAuthoritativeOrder(orderId, user);
-    this.assertOrderCanBePaid(order, user);
+    const orderUserId = this.assertOrderCanBePaid(order, user);
 
     const amount = Number(order.finalAmount);
     return this.forwardPayment(
       'POST',
       '/api/payment/create-qr',
-      { orderId, amount },
+      { orderId, orderUserId, amount },
       undefined,
       user,
-      createQrRequestContext(orderId, amount),
+      createQrRequestContext(orderId, orderUserId, amount),
     );
   }
 
@@ -138,9 +138,15 @@ export class PaymentService {
     }
   }
 
-  private assertOrderCanBePaid(order: CanteenOrder, user: GatewayUser): void {
+  private assertOrderCanBePaid(
+    order: CanteenOrder,
+    user: GatewayUser,
+  ): string {
     const userId = user._id ?? user.id;
     const ownerId = this.idString(order.userId);
+    if (!ownerId) {
+      throw new ConflictException('Đơn hàng không có chủ sở hữu hợp lệ');
+    }
     const privileged = new Set(['admin', 'manager', 'cashier']).has(
       user.role?.toLowerCase() ?? '',
     );
@@ -168,6 +174,7 @@ export class PaymentService {
         'Số tiền đơn hàng không hợp lệ để tạo VietQR',
       );
     }
+    return ownerId;
   }
 
   private async forwardPayment(

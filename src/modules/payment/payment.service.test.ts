@@ -120,6 +120,7 @@ test('luôn lấy số tiền chính thức từ Canteen trước khi tạo QR',
   assert.equal(harness.requestCalls.length, 1);
   assert.deepEqual(harness.requestCalls[0]?.data, {
     orderId: 'order-123',
+    orderUserId: 'user-123',
     amount: 347_000,
   });
 });
@@ -152,6 +153,11 @@ test('chỉ chủ đơn hoặc vai trò đặc quyền mới được tạo QR',
       });
 
       assert.equal(harness.requestCalls.length, 1);
+      assert.deepEqual(harness.requestCalls[0]?.data, {
+        orderId: 'order-123',
+        orderUserId: 'user-123',
+        amount: 125_000,
+      });
     });
   }
 });
@@ -220,7 +226,8 @@ test('ký riêng yêu cầu đến Canteen và Payment rồi chỉ forward dữ 
       {
         requestId: 'request-123',
         target: 'payment',
-        context: '["payment.create-qr.v1","order-123",125000]',
+        context:
+          '["payment.create-qr.v2","order-123","user-123",125000]',
       },
     ],
   );
@@ -233,7 +240,11 @@ test('ký riêng yêu cầu đến Canteen và Payment rồi chỉ forward dữ 
   assert.deepEqual(harness.requestCalls[0], {
     method: 'POST',
     url: 'http://payment.test/api/payment/create-qr',
-    data: { orderId: 'order-123', amount: 125_000 },
+    data: {
+      orderId: 'order-123',
+      orderUserId: 'user-123',
+      amount: 125_000,
+    },
     params: undefined,
     headers: {
       'x-request-id': 'request-123',
