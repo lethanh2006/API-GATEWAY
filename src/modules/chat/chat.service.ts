@@ -1,9 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { REQUEST } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import FormData from 'form-data';
 import { throwUpstreamError } from '../../common/http/upstream-error';
+import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { randomUUID } from 'node:crypto';
 
 export interface UploadedChatImage {
   buffer: Buffer;
@@ -11,20 +14,24 @@ export interface UploadedChatImage {
   originalname: string;
 }
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
   private readonly baseUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(REQUEST) private readonly request: RequestWithContext,
   ) {
     this.baseUrl = this.configService.get<string>('CHAT_SERVICE_URL', 'http://localhost:5002');
   }
 
   private createUserHeaders(user?: any) {
-    const headers: Record<string, string> = {};
+    const requestId = this.request.requestContext?.requestId ?? randomUUID();
+    const headers: Record<string, string> = {
+      'x-request-id': requestId,
+    };
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
