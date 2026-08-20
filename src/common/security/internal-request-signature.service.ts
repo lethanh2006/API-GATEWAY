@@ -19,6 +19,7 @@ export class InternalRequestSignatureService {
     payload: string,
     requestId: string,
     target: InternalService = 'canteen',
+    context?: string,
   ): Record<string, string> {
     const secret = this.secrets[target];
     if (!secret || (this.production && secret.length < 32)) {
@@ -31,8 +32,11 @@ export class InternalRequestSignatureService {
     }
 
     const timestamp = Date.now().toString();
+    const signedMessage = context
+      ? `${timestamp}.${requestId}.${payload}.${context}`
+      : `${timestamp}.${requestId}.${payload}`;
     const signature = createHmac('sha256', secret)
-      .update(`${timestamp}.${requestId}.${payload}`)
+      .update(signedMessage)
       .digest('hex');
 
     return {

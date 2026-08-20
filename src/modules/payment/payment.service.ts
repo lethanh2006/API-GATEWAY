@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import { createQrRequestContext } from './payment-request-context';
 
 interface GatewayUser {
   _id?: string;
@@ -56,12 +57,14 @@ export class PaymentService {
     const order = await this.getAuthoritativeOrder(orderId, user);
     this.assertOrderCanBePaid(order, user);
 
+    const amount = Number(order.finalAmount);
     return this.forwardPayment(
       'POST',
       '/api/payment/create-qr',
-      { orderId, amount: order.finalAmount },
+      { orderId, amount },
       undefined,
       user,
+      createQrRequestContext(orderId, amount),
     );
   }
 
@@ -173,6 +176,7 @@ export class PaymentService {
     data: unknown,
     params: unknown,
     user: GatewayUser,
+    signatureContext?: string,
   ) {
     const requestId = this.requestId();
     try {
@@ -182,7 +186,12 @@ export class PaymentService {
           url: `${this.paymentUrl}${path}`,
           data,
           params,
-          headers: this.signedUserHeaders(user, requestId, 'payment'),
+          headers: this.signedUserHeaders(
+            user,
+            requestId,
+            'payment',
+            signatureContext,
+          ),
         }),
       );
       return response.data;
@@ -195,11 +204,17 @@ export class PaymentService {
     user: GatewayUser,
     requestId: string,
     target: 'canteen' | 'payment',
+    signatureContext?: string,
   ): Record<string, string> {
     const payload = Buffer.from(JSON.stringify(user)).toString('base64');
     return {
       'x-request-id': requestId,
-      ...this.signatureService.signUserPayload(payload, requestId, target),
+      ...this.signatureService.signUserPayload(
+        payload,
+        requestId,
+        target,
+        signatureContext,
+      ),
     };
   }
 

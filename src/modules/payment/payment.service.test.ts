@@ -21,6 +21,7 @@ interface SignatureCall {
   payload: string;
   requestId: string;
   target: 'canteen' | 'payment';
+  context?: string;
 }
 
 const validOrder: TestOrder = {
@@ -72,8 +73,9 @@ function createHarness(order: TestOrder = validOrder) {
       payload: string,
       requestId: string,
       target: 'canteen' | 'payment',
+      context?: string,
     ) => {
-      signatureCalls.push({ payload, requestId, target });
+      signatureCalls.push({ payload, requestId, target, context });
       return {
         'x-user-payload': payload,
         'x-user-timestamp': '1700000000000',
@@ -204,13 +206,22 @@ test('ký riêng yêu cầu đến Canteen và Payment rồi chỉ forward dữ 
   await harness.service.createQr('order-123', user);
 
   assert.deepEqual(
-    harness.signatureCalls.map(({ requestId, target }) => ({
+    harness.signatureCalls.map(({ requestId, target, context }) => ({
       requestId,
       target,
+      context,
     })),
     [
-      { requestId: 'request-123', target: 'canteen' },
-      { requestId: 'request-123', target: 'payment' },
+      {
+        requestId: 'request-123',
+        target: 'canteen',
+        context: undefined,
+      },
+      {
+        requestId: 'request-123',
+        target: 'payment',
+        context: '["payment.create-qr.v1","order-123",125000]',
+      },
     ],
   );
   for (const call of harness.signatureCalls) {
