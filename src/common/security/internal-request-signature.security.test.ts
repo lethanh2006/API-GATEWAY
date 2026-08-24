@@ -36,4 +36,16 @@ test('từ chối gọi Auth/User khi không có secret mạnh', () => {
     () => service.signUserPayload('payload', 'request-123', 'user'),
     ServiceUnavailableException,
   );
+
+  const placeholderService = new InternalRequestSignatureService(
+    new ConfigService({
+      AUTH_INTERNAL_SECRET: 'replace_with_at_least_32_random_characters',
+      JWT_SECRET: strongSecret,
+      NODE_ENV: 'development',
+    }),
+  );
+  assert.throws(
+    () => placeholderService.signUserPayload('payload', 'request-123', 'auth'),
+    ServiceUnavailableException,
+  );
 });

@@ -2,6 +2,12 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHmac } from 'crypto';
 
+const FORBIDDEN_INTERNAL_SECRETS = new Set([
+  'replace_with_at_least_32_random_characters',
+  'your-super-secret-key-chatapp',
+  'your_jwt_secret_here',
+]);
+
 @Injectable()
 export class InternalRequestSignatureService {
   private readonly secrets: Record<InternalService, string | undefined>;
@@ -30,7 +36,12 @@ export class InternalRequestSignatureService {
     const secret = this.secrets[target];
     const signatureRequired =
       this.production || target === 'auth' || target === 'user';
-    if (!secret || (signatureRequired && Buffer.byteLength(secret) < 32)) {
+    if (
+      !secret ||
+      (signatureRequired &&
+        (Buffer.byteLength(secret) < 32 ||
+          FORBIDDEN_INTERNAL_SECRETS.has(secret.toLowerCase())))
+    ) {
       if (signatureRequired) {
         throw new ServiceUnavailableException(
           `Gateway chưa được cấu hình để gọi dịch vụ ${target}`,
