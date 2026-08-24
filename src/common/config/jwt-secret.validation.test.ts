@@ -5,6 +5,10 @@ import { requireJwtSecret } from './jwt-secret';
 test('từ chối JWT secret bị thiếu hoặc quá ngắn', () => {
   assert.throws(() => requireJwtSecret(undefined), /JWT_SECRET/);
   assert.throws(() => requireJwtSecret('short-secret'), /ít nhất 32 byte/);
+  assert.throws(
+    () => requireJwtSecret('replace_with_at_least_32_random_characters'),
+    /JWT_SECRET/,
+  );
 });
 
 test('trả về JWT secret hợp lệ đã được chuẩn hóa', () => {
