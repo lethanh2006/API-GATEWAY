@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -22,6 +23,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 
@@ -34,8 +36,14 @@ export class ChatController {
   @Post('chat/new')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Tạo cuộc trò chuyện mới' })
-  async createChat(@Body() body: CreateChatDto, @Req() req: any) {
-    return this.chatService.createChat(body, req.user);
+  async createChat(
+    @Body() body: CreateChatDto,
+    @Req() req: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.chatService.createChat(body, req.user);
+    response.status(result.statusCode);
+    return result.body;
   }
 
   @Get('chat/all')

@@ -14,6 +14,11 @@ export interface UploadedChatImage {
   originalname: string;
 }
 
+export interface ProxiedChatResponse {
+  statusCode: number;
+  body: unknown;
+}
+
 @Injectable({ scope: Scope.REQUEST })
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
@@ -40,7 +45,14 @@ export class ChatService {
     return headers;
   }
 
-  private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
+  private async forward(
+    method: string,
+    path: string,
+    data?: any,
+    params?: any,
+    user?: any,
+    preserveStatus = false,
+  ) {
     try {
       const response = await firstValueFrom(
         this.httpService.request({
@@ -51,14 +63,20 @@ export class ChatService {
           headers: this.createUserHeaders(user),
         })
       );
+      if (preserveStatus) {
+        return {
+          statusCode: response.status,
+          body: response.data,
+        };
+      }
       return response.data;
     } catch (error: unknown) {
       throwUpstreamError(error, 'Dịch vụ trò chuyện', this.logger);
     }
   }
 
-  async createChat(dto: any, user: any) {
-    return this.forward('POST', '/api/chat/chat/new', dto, null, user);
+  async createChat(dto: any, user: any): Promise<ProxiedChatResponse> {
+    return this.forward('POST', '/api/chat/chat/new', dto, null, user, true);
   }
 
   async getAllChats(user: any) {

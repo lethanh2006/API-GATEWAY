@@ -58,6 +58,7 @@ export class AuthController {
 
   @Post('refresh')
   @Public()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Làm mới Access Token (PUBLIC)' })
   async refresh(@Body() body: any) {
     return this.authService.refresh(body);
@@ -65,6 +66,7 @@ export class AuthController {
 
   @Post('login-google')
   @Public()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Đăng nhập bằng Google (PUBLIC)' })
   async loginWithGoogle(@Body() body: LoginGoogleDto) {
     return this.authService.loginWithGoogle(body);

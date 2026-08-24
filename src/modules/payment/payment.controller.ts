@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   Headers,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -71,6 +73,7 @@ export class PaymentController {
   }
 
   @Post(['webhooks/casso', 'webhook/casso', 'callback'])
+  @HttpCode(HttpStatus.OK)
   @Public()
   @ApiOperation({ summary: 'Webhook Casso V2 (xác thực bằng HMAC-SHA512)' })
   forwardCassoWebhook(

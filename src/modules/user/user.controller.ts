@@ -6,6 +6,8 @@ import {
   Param,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
@@ -62,6 +64,7 @@ export class UserController {
   // USER — cập nhật thông tin tên người dùng
   // ============================================================
   @Post('update/user')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cập nhật tên hiển thị của người dùng (USER)',
