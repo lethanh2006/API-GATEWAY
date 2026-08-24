@@ -22,6 +22,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { UpdateEmailDto, LoginGoogleDto } from './dto/update-email.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('api/auth')
 @ApiTags('Api Auth')
@@ -60,7 +61,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Làm mới Access Token (PUBLIC)' })
-  async refresh(@Body() body: any) {
+  async refresh(@Body() body: RefreshTokenDto) {
     return this.authService.refresh(body);
   }
 
