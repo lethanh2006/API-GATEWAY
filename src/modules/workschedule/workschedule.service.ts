@@ -81,8 +81,8 @@ export class WorkscheduleService {
     return this.forward('POST', '/api/workschedule/attendance/scan', dto, null, user);
   }
 
-  async getMyAttendance(user: any) {
-    return this.forward('GET', '/api/workschedule/attendance/my', null, null, user);
+  async getMyAttendance(query: Record<string, string>, user: any) {
+    return this.forward('GET', '/api/workschedule/attendance/my', null, query, user);
   }
 
   async generateQrToken(user: any) {

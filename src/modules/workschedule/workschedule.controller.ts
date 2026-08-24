@@ -84,8 +84,11 @@ export class WorkscheduleController {
   @Get('attendance/my')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy danh sách điểm danh cá nhân' })
-  async getMyAttendance(@Req() req: any) {
-    return this.workscheduleService.getMyAttendance(req.user);
+  async getMyAttendance(
+    @Query() query: Record<string, string>,
+    @Req() req: any,
+  ) {
+    return this.workscheduleService.getMyAttendance(query, req.user);
   }
 
   @Post('attendance/qr/generate')
