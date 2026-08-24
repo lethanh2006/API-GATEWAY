@@ -68,6 +68,11 @@ export class CreateOrderItemDto {
   note?: string;
 }
 
+export enum OrderPaymentMethod {
+  CASH = 'CASH',
+  VIETQR = 'VIETQR',
+}
+
 export class CreateOrderDto {
   @ApiPropertyOptional({
     example: '6691ab2d5cf2a13ba0d7d810',
@@ -89,13 +94,13 @@ export class CreateOrderDto {
 
   @ApiPropertyOptional({
     example: 'CASH',
-    enum: ['CASH', 'VNPAY', 'MOMO', 'VIETQR'],
+    enum: OrderPaymentMethod,
     description: 'Phương thức thanh toán',
     default: 'CASH',
   })
   @IsOptional()
-  @IsEnum(['CASH', 'VNPAY', 'MOMO', 'VIETQR'], {
+  @IsEnum(OrderPaymentMethod, {
     message: 'Phương thức thanh toán không hợp lệ',
   })
-  paymentMethod?: string;
+  paymentMethod?: OrderPaymentMethod;
 }

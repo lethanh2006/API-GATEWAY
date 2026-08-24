@@ -22,6 +22,8 @@ import { UpdateTableDto } from './dto/update-table.dto';
 import { TableQueryDto } from './dto/table-query.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { IngredientQueryDto } from './dto/ingredient-query.dto';
+import { OrderQueryDto } from './dto/order-query.dto';
+import { CancelOrderDto } from './dto/cancel-order.dto';
 
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
@@ -98,6 +100,22 @@ export class CanteenController {
     return this.canteenService.createOrder(body, req.user);
   }
 
+  @Get('orders')
+  @ApiBearerAuth()
+  @Roles(
+    Role.ADMIN,
+    Role.MANAGER,
+    Role.CASHIER,
+    Role.WAITER,
+    Role.CHEF,
+  )
+  @ApiOperation({
+    summary: 'Lấy danh sách đơn hàng có lọc và phân trang cho nhân viên vận hành',
+  })
+  async getOrders(@Query() query: OrderQueryDto, @Req() req: any) {
+    return this.canteenService.getOrders(query, req.user);
+  }
+
   @Get('orders/my-orders')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Xem lịch sử đơn hàng cá nhân' })
@@ -112,18 +130,37 @@ export class CanteenController {
     return this.canteenService.getOrderById(id, req.user);
   }
 
+  @Patch('orders/:id/cancel')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Hủy đơn hàng (chủ đơn hoặc nhân viên có quyền vận hành)',
+  })
+  async cancelOrder(
+    @Param('id') id: string,
+    @Body() body: CancelOrderDto,
+    @Req() req: any,
+  ) {
+    return this.canteenService.cancelOrder(id, body, req.user);
+  }
+
   @Patch('orders/:id/confirm')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xác nhận đơn hàng, tính điểm ưu tiên và gửi sự kiện chế biến (ADMIN,MANAGER)' })
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CASHIER, Role.WAITER)
+  @ApiOperation({
+    summary:
+      'Xác nhận đơn hàng, tính điểm ưu tiên và gửi sự kiện chế biến (ADMIN,MANAGER,CASHIER,WAITER)',
+  })
   async confirmOrder(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.confirmOrder(id, req.user);
   }
 
   @Patch('orders/:id/complete')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xác nhận khách đã nhận món ăn thành công, đóng Order (ADMIN,MANAGER)' })
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CASHIER, Role.WAITER)
+  @ApiOperation({
+    summary:
+      'Xác nhận khách đã nhận món ăn thành công, đóng Order (ADMIN,MANAGER,CASHIER,WAITER)',
+  })
   async completeOrder(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.completeOrder(id, req.user);
   }

@@ -87,12 +87,26 @@ export class CanteenService {
     return this.forward('POST', '/api/canteen/orders', dto, null, user);
   }
 
+  async getOrders(params: any, user: any) {
+    return this.forward('GET', '/api/canteen/orders', null, params, user);
+  }
+
   async getMyOrders(user: any) {
     return this.forward('GET', '/api/canteen/orders/my-orders', null, null, user);
   }
 
   async getOrderById(id: string, user: any) {
     return this.forward('GET', `/api/canteen/orders/${id}`, null, null, user);
+  }
+
+  async cancelOrder(id: string, dto: any, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/canteen/orders/${encodeURIComponent(id)}/cancel`,
+      dto,
+      null,
+      user,
+    );
   }
 
   async confirmOrder(id: string, user: any) {
