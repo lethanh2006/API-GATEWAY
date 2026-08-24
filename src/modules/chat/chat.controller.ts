@@ -1,6 +1,5 @@
 import {
   Body,
-  BadRequestException,
   Controller,
   Get,
   Param,
@@ -26,6 +25,7 @@ import {
 import type { Response } from 'express';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { filterSupportedChatImage } from './chat-image-upload';
 
 @ApiTags('Api Chat')
 @Controller('api/chat')
@@ -59,12 +59,7 @@ export class ChatController {
     FileInterceptor('image', {
       limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (_req, file, callback) =>
-        callback(
-          file.mimetype.startsWith('image/')
-            ? null
-            : new BadRequestException('Chỉ chấp nhận tệp hình ảnh'),
-          file.mimetype.startsWith('image/')
-        ),
+        filterSupportedChatImage(file, callback),
     })
   )
   @ApiConsumes('multipart/form-data')
