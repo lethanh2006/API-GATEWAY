@@ -66,7 +66,13 @@ export class UserService {
   }
 
   async getFullProfileByAdmin(userId: string, user: any) {
-    return this.forward('GET', `/api/user/user/${userId}`, null, null, user);
+    return this.forward(
+      'GET',
+      `/api/user/internal/${encodeURIComponent(userId)}`,
+      null,
+      null,
+      user,
+    );
   }
 
   async getAllUsers(user: any) {
