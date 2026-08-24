@@ -47,6 +47,14 @@ export class CanteenController {
     return this.canteenService.searchMenu(query || '');
   }
 
+  @Get('admin/menu')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Lấy toàn bộ món và danh mục, kể cả dữ liệu đang ẩn' })
+  async getAdminMenu(@Req() req: any) {
+    return this.canteenService.getAdminMenu(req.user);
+  }
+
   @Post('admin/menu')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)

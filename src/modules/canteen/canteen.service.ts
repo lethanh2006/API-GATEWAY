@@ -62,6 +62,10 @@ export class CanteenService {
     return this.forward('GET', '/api/canteen/menu/search', null, params);
   }
 
+  async getAdminMenu(user: any) {
+    return this.forward('GET', '/api/canteen/admin/menu', null, null, user);
+  }
+
   async createMenuItem(dto: any, user: any) {
     return this.forward('POST', '/api/canteen/admin/menu', dto, null, user);
   }
