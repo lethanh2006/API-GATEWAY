@@ -5,6 +5,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { RequestWithContext } from '../../../../../common/interfaces/request-context.interface';
 import { firstValueFrom } from 'rxjs';
+import { requireJwtSecret } from '../../../../../common/config/jwt-secret';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
@@ -14,10 +15,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
+    const jwtSecret = requireJwtSecret(
+      configService.get<string>('JWT_SECRET'),
+    );
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'your-super-secret-key-chatapp',
+      secretOrKey: jwtSecret,
+      algorithms: ['HS256'],
       passReqToCallback: true,
     });
     this.authServiceUrl = this.configService.get<string>(
