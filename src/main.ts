@@ -7,9 +7,15 @@ import * as bodyParser from 'body-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { PinoNestLogger, logAndRecordException } from '@nrapp/observability';
+import { createValidationException } from './common/validation/validation-exception';
+import { gatewayAppLogger } from './common/observability/structured-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: new PinoNestLogger(gatewayAppLogger),
+  });
+  app.enableShutdownHooks();
 
   // 1. Configure bodyParser JSON payload limits
   app.use(bodyParser.json({ limit: '10mb' }));
@@ -25,6 +31,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
+      exceptionFactory: createValidationException,
     }),
   );
 
@@ -57,11 +64,33 @@ async function bootstrap() {
     changeOrigin: true,
     ws: true,
     onError: (err: any, _req: any, response: any) => {
-      console.error('[Socket Proxy Error]', err.message);
+      const result = logAndRecordException(
+        gatewayAppLogger,
+        'chat.socket_proxy.failed',
+        err,
+        {
+          'server.address': 'chat',
+          'network.protocol.name': 'socket.io',
+          'http.response.status_code': 502,
+        },
+        {
+          classification: {
+            statusCode: 502,
+            code: 'CHAT_SOCKET_PROXY_UNAVAILABLE',
+            expected: false,
+            retryable: true,
+          },
+        },
+      );
       if (typeof response?.writeHead === 'function' && !response.headersSent) {
         response.writeHead(502, { 'Content-Type': 'application/json' });
         response.end(
-          JSON.stringify({ message: 'Chat realtime hiện không khả dụng' }),
+          JSON.stringify({
+            statusCode: 502,
+            code: 'CHAT_REALTIME_UNAVAILABLE',
+            message: 'Chat realtime hiện không khả dụng',
+            errorId: result.errorId,
+          }),
         );
       }
     },
@@ -73,8 +102,13 @@ async function bootstrap() {
   // 6. Start the API Gateway HTTP Server
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(
-    `[Gateway] đang khởi chạy thành công tại: http://localhost:${port}`,
+  gatewayAppLogger.info(
+    {
+      'event.name': 'gateway.started',
+      'server.address': '0.0.0.0',
+      'server.port': Number(port),
+    },
+    'Gateway started',
   );
 
   // 7. Bind WebSocket Upgrade listener for Socket.io traffic

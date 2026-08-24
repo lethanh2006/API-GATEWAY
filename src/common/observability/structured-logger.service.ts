@@ -1,30 +1,58 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
+import {
+  createAppLogger,
+  logAndRecordException,
+  type ClassificationOverrides,
+} from '@nrapp/observability';
 
 export type LogDetails = Record<string, unknown>;
 
-/** Xuất log JSON ra stdout/stderr để collector trung tâm đọc. */
+export const gatewayAppLogger: ReturnType<typeof createAppLogger> =
+  createAppLogger({ serviceName: 'gateway' });
+
+/** Adapter log dùng chung cho Gateway; Pino tự gắn trace/request context. */
 @Injectable()
 export class StructuredLoggerService {
-  private readonly logger = new Logger("Gateway");
+  readonly raw: ReturnType<typeof createAppLogger> = gatewayAppLogger;
 
-  info(event: string, details: LogDetails): void {
-    this.logger.log(this.serialize(event, details));
+  info(eventName: string, details: LogDetails = {}, message?: string): void {
+    this.raw.info(
+      { ...details, 'event.name': eventName },
+      message ?? eventName,
+    );
   }
 
-  warn(event: string, details: LogDetails): void {
-    this.logger.warn(this.serialize(event, details));
+  warn(eventName: string, details: LogDetails = {}, message?: string): void {
+    this.raw.warn(
+      { ...details, 'event.name': eventName },
+      message ?? eventName,
+    );
   }
 
-  error(event: string, details: LogDetails, stack?: string): void {
-    this.logger.error(this.serialize(event, details), stack);
+  error(eventName: string, details: LogDetails = {}, message?: string): void {
+    this.raw.error(
+      { ...details, 'event.name': eventName },
+      message ?? eventName,
+    );
   }
 
-  private serialize(event: string, details: LogDetails): string {
-    return JSON.stringify({
-      timestamp: new Date().toISOString(),
-      service: "gateway",
-      event,
-      ...details,
-    });
+  unexpected(
+    eventName: string,
+    error: unknown,
+    details: LogDetails = {},
+    classification?: ClassificationOverrides,
+  ): { errorId: string; recordedOnSpan: boolean } {
+    const result = logAndRecordException(
+      this.raw,
+      eventName,
+      error,
+      details,
+      classification ? { classification } : undefined,
+    );
+
+    return {
+      errorId: result.errorId,
+      recordedOnSpan: result.recordedOnSpan,
+    };
   }
 }

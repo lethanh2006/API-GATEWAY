@@ -1,21 +1,19 @@
-import { Global, MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
-import { GlobalExceptionFilter } from "../common/filters/global-exception.filter";
-import { HttpLoggingInterceptor } from "../common/interceptors/http-logging.interceptor";
-import { RateLimitMiddleware } from "../common/middleware/rate-limit.middleware";
-import { RequestIdMiddleware } from "../common/middleware/request-id.middleware";
-import { StructuredLoggerService } from "../common/observability/structured-logger.service";
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
+import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
+import { RateLimitMiddleware } from '../common/middleware/rate-limit.middleware';
+import { RequestIdMiddleware } from '../common/middleware/request-id.middleware';
+import { RequestOutcomeMiddleware } from '../common/middleware/request-outcome.middleware';
+import { StructuredLoggerService } from '../common/observability/structured-logger.service';
+import { TelemetryLifecycleService } from '../common/observability/telemetry-lifecycle.service';
 
 @Global()
 @Module({
   imports: [ConfigModule],
   providers: [
     StructuredLoggerService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpLoggingInterceptor,
-    },
+    TelemetryLifecycleService,
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
@@ -25,6 +23,8 @@ import { StructuredLoggerService } from "../common/observability/structured-logg
 })
 export class CoreModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestIdMiddleware, RateLimitMiddleware).forRoutes("*");
+    consumer
+      .apply(RequestIdMiddleware, RequestOutcomeMiddleware, RateLimitMiddleware)
+      .forRoutes('*');
   }
 }

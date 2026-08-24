@@ -2,21 +2,21 @@ import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
-  HttpException,
-  HttpStatus,
   Injectable,
-} from "@nestjs/common";
-import { HttpAdapterHost } from "@nestjs/core";
-import type { RequestWithContext } from "../interfaces/request-context.interface";
-import { StructuredLoggerService } from "../observability/structured-logger.service";
-import { toError } from "../utils/error.util";
-
-interface RequestUser {
-  _id?: unknown;
-  id?: unknown;
-}
-
-type RequestWithUser = RequestWithContext & { user?: RequestUser | null };
+} from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import {
+  classifyException,
+  createErrorId,
+  handleOriginHttpException,
+} from '@nrapp/observability';
+import { UpstreamHttpException } from '../http/upstream-error';
+import type { RequestWithContext } from '../interfaces/request-context.interface';
+import {
+  requestRouteTemplate,
+  setRequestOutcome,
+} from '../middleware/request-outcome.middleware';
+import { StructuredLoggerService } from '../observability/structured-logger.service';
 
 @Catch()
 @Injectable()
@@ -29,51 +29,84 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
     const httpContext = host.switchToHttp();
-    const request = httpContext.getRequest<RequestWithUser>();
-    const statusCode =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-    const error = toError(exception);
-    const requestContext = request.requestContext;
-    const userId = request.user?._id ?? request.user?.id;
-    const logDetails = {
-      requestId: requestContext?.requestId ?? "unknown",
-      ...(userId !== undefined && userId !== null
-        ? { userId: String(userId) }
-        : {}),
+    const request = httpContext.getRequest<RequestWithContext>();
+    const requestId = request.requestContext?.requestId ?? 'unknown';
+    const route = requestRouteTemplate(request);
+    const context = {
+      requestId,
       method: request.method,
-      path: request.originalUrl ?? request.url,
-      statusCode,
-      durationMs: requestContext
-        ? Number(process.hrtime.bigint() - requestContext.startedAt) / 1e6
-        : 0,
-      errorName: error.name,
-      message: error.message,
+      route,
     };
+    const classification = classifyException(exception);
 
-    if (statusCode >= 500) {
-      this.logger.error("http_request_failed", logDetails, error.stack);
-    } else {
-      this.logger.warn("http_request_rejected", logDetails);
+    if (
+      exception instanceof UpstreamHttpException &&
+      !classification.expected
+    ) {
+      const errorId = exception.errorId ?? createErrorId();
+      this.logger.warn(
+        'http.upstream.failed',
+        {
+          request_id: requestId,
+          'http.request.method': request.method,
+          'http.route': route,
+          'http.response.status_code': classification.statusCode,
+          'error.code': classification.code,
+          'error.id': errorId,
+          'server.address': exception.originService,
+        },
+        'Upstream service returned an unexpected error',
+      );
+
+      httpAdapter.reply(
+        httpContext.getResponse(),
+        {
+          statusCode: classification.statusCode,
+          code: 'INTERNAL_ERROR',
+          message: 'Internal server error',
+          requestId,
+          errorId,
+        },
+        classification.statusCode,
+      );
+      return;
     }
 
-    const exceptionResponse =
-      exception instanceof HttpException ? exception.getResponse() : null;
-    const responseBody =
-      exceptionResponse !== null &&
-      typeof exceptionResponse === "object" &&
-      !Array.isArray(exceptionResponse)
-        ? {
-            ...(exceptionResponse as Record<string, unknown>),
-            requestId: requestContext?.requestId ?? "unknown",
-          }
-        : {
-            statusCode,
-            message: exceptionResponse ?? "Internal server error",
-            requestId: requestContext?.requestId ?? "unknown",
-          };
+    const result = handleOriginHttpException(
+      this.logger.raw,
+      exception,
+      context,
+    );
 
-    httpAdapter.reply(httpContext.getResponse(), responseBody, statusCode);
+    if (result.classification.expected) {
+      if (result.statusCode === 404) {
+        result.body.message = 'Không tìm thấy tài nguyên';
+      }
+      const responseCode = String(
+        result.body.code ?? result.classification.code,
+      );
+      const fields =
+        typeof result.body.details === 'object' &&
+        result.body.details !== null &&
+        !Array.isArray(result.body.details) &&
+        Array.isArray((result.body.details as Record<string, unknown>).fields)
+          ? ((result.body.details as Record<string, unknown>)
+              .fields as string[])
+          : undefined;
+
+      setRequestOutcome(request, {
+        code: responseCode,
+        ...(fields?.length ? { validationFields: fields } : {}),
+        ...(exception instanceof UpstreamHttpException
+          ? { originService: exception.originService }
+          : {}),
+      });
+    }
+
+    httpAdapter.reply(
+      httpContext.getResponse(),
+      result.body,
+      result.statusCode,
+    );
   }
 }

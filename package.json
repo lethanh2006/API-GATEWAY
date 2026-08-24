@@ -6,11 +6,12 @@
   "scripts": {
     "build": "nest build",
     "test": "npm run build && node --test dist/common/middleware/request-id.middleware.test.js dist/common/interceptors/http-logging.interceptor.test.js dist/modules/payment/payment.service.test.js",
+    "test:observability": "npm run build && LOG_FORMAT=json OTEL_SDK_DISABLED=true node --test dist/common/observability/gateway-observability.test.js",
     "format": "prettier --write \"src/**/*.ts\"",
-    "start": "nest start",
-    "dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "start": "node --require @nrapp/observability/register ./node_modules/@nestjs/cli/bin/nest.js start",
+    "dev": "node --require @nrapp/observability/register ./node_modules/@nestjs/cli/bin/nest.js start --watch",
+    "start:debug": "node --require @nrapp/observability/register ./node_modules/@nestjs/cli/bin/nest.js start --debug --watch",
+    "start:prod": "node --require @nrapp/observability/register dist/main"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.0",
@@ -20,6 +21,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.4.4",
+    "@nrapp/observability": "file:../logger/packages/observability",
     "axios": "^1.15.0",
     "body-parser": "^1.20.3",
     "class-transformer": "^0.5.1",
