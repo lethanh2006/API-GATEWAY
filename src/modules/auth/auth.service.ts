@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { randomUUID } from 'node:crypto';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     @Inject(REQUEST) private readonly request: RequestWithContext,
+    private readonly signatureService: InternalRequestSignatureService,
   ) {
     this.baseUrl = this.configService.get<string>('AUTH_SERVICE_URL', 'http://localhost:4000');
   }
@@ -28,7 +30,15 @@ export class AuthService {
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
-      headers['x-user-payload'] = base64User;
+      Object.assign(
+        headers,
+        this.signatureService.signUserPayload(
+          base64User,
+          requestId,
+          'auth',
+          `${method.toUpperCase()}:${path}`,
+        ),
+      );
     }
 
     try {
@@ -87,7 +97,13 @@ export class AuthService {
     return this.forward('DELETE', `/api/auth/users/${userId}`, null, null, user);
   }
 
-  async updateUserRole(userId: string, role: string) {
-    return this.forward('PATCH', `/api/auth/users/${userId}/role`, { role });
+  async updateUserRole(userId: string, role: string, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/auth/users/${userId}/role`,
+      { role },
+      null,
+      user,
+    );
   }
 }

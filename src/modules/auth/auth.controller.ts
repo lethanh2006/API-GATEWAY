@@ -124,8 +124,9 @@ export class AuthController {
   @ApiParam({ name: 'userId', example: '1' })
   async updateUserRole(
     @Param('userId') userId: string,
-    @Body() body: { role: string }
+    @Body() body: { role: string },
+    @Req() req: any,
   ) {
-    return this.authService.updateUserRole(userId, body.role);
+    return this.authService.updateUserRole(userId, body.role, req.user);
   }
 }

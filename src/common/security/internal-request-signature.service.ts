@@ -9,8 +9,14 @@ export class InternalRequestSignatureService {
 
   constructor(configService: ConfigService) {
     this.secrets = {
+      auth:
+        configService.get<string>('AUTH_INTERNAL_SECRET')?.trim() ||
+        configService.get<string>('JWT_SECRET')?.trim(),
       canteen: configService.get<string>('CANTEEN_INTERNAL_SECRET')?.trim(),
       payment: configService.get<string>('PAYMENT_INTERNAL_SECRET')?.trim(),
+      user:
+        configService.get<string>('USER_INTERNAL_SECRET')?.trim() ||
+        configService.get<string>('JWT_SECRET')?.trim(),
     };
     this.production = configService.get<string>('NODE_ENV') === 'production';
   }
@@ -22,8 +28,10 @@ export class InternalRequestSignatureService {
     context?: string,
   ): Record<string, string> {
     const secret = this.secrets[target];
-    if (!secret || (this.production && secret.length < 32)) {
-      if (this.production) {
+    const signatureRequired =
+      this.production || target === 'auth' || target === 'user';
+    if (!secret || (signatureRequired && Buffer.byteLength(secret) < 32)) {
+      if (signatureRequired) {
         throw new ServiceUnavailableException(
           `Gateway chưa được cấu hình để gọi dịch vụ ${target}`,
         );
@@ -47,4 +55,4 @@ export class InternalRequestSignatureService {
   }
 }
 
-export type InternalService = 'canteen' | 'payment';
+export type InternalService = 'auth' | 'canteen' | 'payment' | 'user';
