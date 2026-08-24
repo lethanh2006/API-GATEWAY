@@ -7,6 +7,8 @@ import { throwUpstreamError } from '../../common/http/upstream-error';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { randomUUID } from 'node:crypto';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import type { MyTaskQueryDto, TaskQueryDto } from './dto/task-query.dto';
+import type { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodoService {
@@ -19,10 +21,19 @@ export class TodoService {
     @Inject(REQUEST) private readonly request: RequestWithContext,
     private readonly signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>('TODO_SERVICE_URL', 'http://localhost:5003');
+    this.baseUrl = this.configService.get<string>(
+      'TODO_SERVICE_URL',
+      'http://localhost:5003',
+    );
   }
 
-  private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
+  private async forward(
+    method: string,
+    path: string,
+    data?: any,
+    params?: any,
+    user?: any,
+  ) {
     const requestId = this.request.requestContext?.requestId ?? randomUUID();
     const headers: Record<string, string> = {
       'x-request-id': requestId,
@@ -49,7 +60,7 @@ export class TodoService {
           data,
           params,
           headers,
-        })
+        }),
       );
       return response.data;
     } catch (error: unknown) {
@@ -57,12 +68,18 @@ export class TodoService {
     }
   }
 
-  async getMyTasks(user: any) {
-    return this.forward('GET', '/api/todo/my-tasks', null, null, user);
+  async getMyTasks(query: MyTaskQueryDto, user: any) {
+    return this.forward('GET', '/api/todo/my-tasks', null, query, user);
   }
 
   async updateTaskStatus(id: string, status: string, user: any) {
-    return this.forward('PATCH', `/api/todo/${encodeURIComponent(id)}/status`, { status }, null, user);
+    return this.forward(
+      'PATCH',
+      `/api/todo/${encodeURIComponent(id)}/status`,
+      { status },
+      null,
+      user,
+    );
   }
 
   async createTask(dto: any, user: any) {
@@ -70,14 +87,46 @@ export class TodoService {
   }
 
   async assignTask(id: string, assignedTo: string, user: any) {
-    return this.forward('PATCH', `/api/todo/${encodeURIComponent(id)}/assign`, { assignedTo }, null, user);
+    return this.forward(
+      'PATCH',
+      `/api/todo/${encodeURIComponent(id)}/assign`,
+      { assignedTo },
+      null,
+      user,
+    );
   }
 
-  async getAllTasks(user: any) {
-    return this.forward('GET', '/api/todo', null, null, user);
+  async updateTask(id: string, dto: UpdateTaskDto, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/todo/${encodeURIComponent(id)}`,
+      dto,
+      null,
+      user,
+    );
+  }
+
+  async getAllTasks(query: TaskQueryDto, user: any) {
+    return this.forward('GET', '/api/todo', null, query, user);
+  }
+
+  async getTaskById(id: string, user: any) {
+    return this.forward(
+      'GET',
+      `/api/todo/${encodeURIComponent(id)}`,
+      null,
+      null,
+      user,
+    );
   }
 
   async deleteTask(id: string, user: any) {
-    return this.forward('DELETE', `/api/todo/${encodeURIComponent(id)}`, null, null, user);
+    return this.forward(
+      'DELETE',
+      `/api/todo/${encodeURIComponent(id)}`,
+      null,
+      null,
+      user,
+    );
   }
 }
