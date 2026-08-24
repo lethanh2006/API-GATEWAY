@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { WorkscheduleController } from './workschedule.controller';
 import { WorkscheduleService } from './workschedule.service';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [UpstreamHttpModule],
   controllers: [WorkscheduleController],
   providers: [WorkscheduleService, InternalRequestSignatureService],
 })
