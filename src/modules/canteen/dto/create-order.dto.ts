@@ -1,5 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsNumber, Min, IsArray, ValidateNested, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsMongoId,
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsArray,
+  ValidateNested,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class OrderSelectedOptionDto {
@@ -8,53 +19,83 @@ export class OrderSelectedOptionDto {
   @IsString({ message: 'Tên tùy chọn phải là chuỗi ký tự' })
   name: string;
 
-  @ApiProperty({ example: 5000, description: 'Giá của tùy chọn kèm theo (VND)' })
-  @IsNotEmpty({ message: 'Giá tùy chọn không được để trống' })
-  @IsNumber({}, { message: 'Giá tùy chọn phải là số' })
+  @ApiPropertyOptional({
+    example: 5000,
+    description: 'Giá legacy do client gửi; Canteen không dùng để tính tiền',
+    deprecated: true,
+  })
+  @IsOptional()
+  @IsInt({ message: 'Giá tùy chọn phải là số nguyên VND' })
   @Min(0, { message: 'Giá tùy chọn phải lớn hơn hoặc bằng 0' })
-  price: number;
+  @Max(Number.MAX_SAFE_INTEGER, {
+    message: 'Giá tùy chọn vượt giới hạn hỗ trợ',
+  })
+  price?: number;
 }
 
 export class CreateOrderItemDto {
-  @ApiProperty({ example: '6691ab2d5cf2a13ba0d7d8c5', description: 'ID món ăn (menuItemId)' })
+  @ApiProperty({
+    example: '6691ab2d5cf2a13ba0d7d8c5',
+    description: 'ID món ăn (menuItemId)',
+  })
   @IsNotEmpty({ message: 'ID món ăn (menuItemId) không được để trống' })
-  @IsString({ message: 'ID món ăn phải là chuỗi ObjectId' })
+  @IsMongoId({ message: 'ID món ăn không đúng định dạng ObjectId' })
   menuItemId: string;
 
   @ApiProperty({ example: 2, description: 'Số lượng đặt mua', default: 1 })
   @IsNotEmpty({ message: 'Số lượng không được để trống' })
-  @IsNumber({}, { message: 'Số lượng phải là số' })
+  @IsInt({ message: 'Số lượng phải là số nguyên' })
   @Min(1, { message: 'Số lượng phải lớn hơn hoặc bằng 1' })
+  @Max(Number.MAX_SAFE_INTEGER, { message: 'Số lượng vượt giới hạn hỗ trợ' })
   quantity: number;
 
-  @ApiPropertyOptional({ type: [OrderSelectedOptionDto], description: 'Danh sách tùy chọn chọn thêm' })
+  @ApiPropertyOptional({
+    type: [OrderSelectedOptionDto],
+    description: 'Danh sách tùy chọn chọn thêm',
+  })
   @IsOptional()
   @IsArray({ message: 'Danh sách tùy chọn phải là mảng' })
   @ValidateNested({ each: true })
   @Type(() => OrderSelectedOptionDto)
   selectedOptions?: OrderSelectedOptionDto[];
 
-  @ApiPropertyOptional({ example: 'Ít cay, không lấy rau thơm', description: 'Ghi chú cho món ăn' })
+  @ApiPropertyOptional({
+    example: 'Ít cay, không lấy rau thơm',
+    description: 'Ghi chú cho món ăn',
+  })
   @IsOptional()
   @IsString({ message: 'Ghi chú phải là chuỗi ký tự' })
   note?: string;
 }
 
 export class CreateOrderDto {
-  @ApiPropertyOptional({ example: '6691ab2d5cf2a13ba0d7d810', description: 'ID bàn ăn (tableId, để trống nếu mang đi - Takeaway)' })
+  @ApiPropertyOptional({
+    example: '6691ab2d5cf2a13ba0d7d810',
+    description: 'ID bàn ăn (tableId, để trống nếu mang đi - Takeaway)',
+  })
   @IsOptional()
-  @IsString({ message: 'ID bàn ăn (tableId) phải là chuỗi ObjectId' })
+  @IsMongoId({ message: 'ID bàn ăn không đúng định dạng ObjectId' })
   tableId?: string;
 
-  @ApiProperty({ type: [CreateOrderItemDto], description: 'Danh sách món ăn trong giỏ hàng' })
+  @ApiProperty({
+    type: [CreateOrderItemDto],
+    description: 'Danh sách món ăn trong giỏ hàng',
+  })
   @IsNotEmpty({ message: 'Danh sách món ăn (items) không được để trống' })
   @IsArray({ message: 'Danh sách món ăn phải là mảng' })
   @ValidateNested({ each: true })
   @Type(() => CreateOrderItemDto)
   items: CreateOrderItemDto[];
 
-  @ApiPropertyOptional({ example: 'CASH', enum: ['CASH', 'VNPAY', 'MOMO', 'VIETQR'], description: 'Phương thức thanh toán', default: 'CASH' })
+  @ApiPropertyOptional({
+    example: 'CASH',
+    enum: ['CASH', 'VNPAY', 'MOMO', 'VIETQR'],
+    description: 'Phương thức thanh toán',
+    default: 'CASH',
+  })
   @IsOptional()
-  @IsEnum(['CASH', 'VNPAY', 'MOMO', 'VIETQR'], { message: 'Phương thức thanh toán không hợp lệ' })
+  @IsEnum(['CASH', 'VNPAY', 'MOMO', 'VIETQR'], {
+    message: 'Phương thức thanh toán không hợp lệ',
+  })
   paymentMethod?: string;
 }
