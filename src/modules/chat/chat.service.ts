@@ -7,6 +7,7 @@ import FormData from 'form-data';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { randomUUID } from 'node:crypto';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 
 export interface UploadedChatImage {
   buffer: Buffer;
@@ -28,11 +29,12 @@ export class ChatService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     @Inject(REQUEST) private readonly request: RequestWithContext,
+    private readonly signatureService: InternalRequestSignatureService,
   ) {
     this.baseUrl = this.configService.get<string>('CHAT_SERVICE_URL', 'http://localhost:5002');
   }
 
-  private createUserHeaders(user?: any) {
+  private createUserHeaders(method: string, path: string, user?: any) {
     const requestId = this.request.requestContext?.requestId ?? randomUUID();
     const headers: Record<string, string> = {
       'x-request-id': requestId,
@@ -40,7 +42,15 @@ export class ChatService {
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
-      headers['x-user-payload'] = base64User;
+      Object.assign(
+        headers,
+        this.signatureService.signUserPayload(
+          base64User,
+          requestId,
+          'chat',
+          `${method.toUpperCase()}:${path}`,
+        ),
+      );
     }
     return headers;
   }
@@ -60,7 +70,7 @@ export class ChatService {
           url: `${this.baseUrl}${path}`,
           data,
           params,
-          headers: this.createUserHeaders(user),
+          headers: this.createUserHeaders(method, path, user),
         })
       );
       if (preserveStatus) {
@@ -102,7 +112,7 @@ export class ChatService {
         this.httpService.post(`${this.baseUrl}/api/chat/message`, form, {
           headers: {
             ...form.getHeaders(),
-            ...this.createUserHeaders(user),
+            ...this.createUserHeaders('POST', '/api/chat/message', user),
           },
           maxBodyLength: 6 * 1024 * 1024,
           maxContentLength: 6 * 1024 * 1024,
