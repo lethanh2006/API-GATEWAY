@@ -31,16 +31,16 @@ export class TodoController {
 
   @Post()
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Tạo công việc mới (chỉ Admin)' })
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Tạo công việc mới (ADMIN, MANAGER, CHEF)' })
   async createTask(@Body() body: CreateTaskDto, @Req() req: any) {
     return this.todoService.createTask(body, req.user);
   }
 
   @Patch(':id/assign')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Giao lại công việc cho người dùng (chỉ Admin)' })
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Giao lại công việc cho người dùng (ADMIN, MANAGER, CHEF)' })
   @ApiParam({ name: 'id', example: 'taskId123' })
   async assignTask(@Param('id') id: string, @Body() body: AssignTaskDto, @Req() req: any) {
     return this.todoService.assignTask(id, body.assignedTo, req.user);
@@ -48,16 +48,16 @@ export class TodoController {
 
   @Get()
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Lấy tất cả công việc (chỉ Admin)' })
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Lấy tất cả công việc (ADMIN, MANAGER, CHEF)' })
   async getAllTasks(@Req() req: any) {
     return this.todoService.getAllTasks(req.user);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Xóa công việc (chỉ Admin)' })
+  @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
+  @ApiOperation({ summary: 'Xóa công việc (ADMIN, MANAGER, CHEF)' })
   @ApiParam({ name: 'id', example: 'taskId123' })
   async deleteTask(@Param('id') id: string, @Req() req: any) {
     return this.todoService.deleteTask(id, req.user);
