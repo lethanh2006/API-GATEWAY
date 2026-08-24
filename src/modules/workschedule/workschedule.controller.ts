@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, UseGuards, HttpCode } from '@nestjs/common';
 import { WorkscheduleService } from './workschedule.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
@@ -157,6 +157,19 @@ export class WorkscheduleController {
   @ApiOperation({ summary: 'Tạo và gửi yêu cầu đăng ký lịch làm việc' })
   async createRequest(@Body() body: CreateScheduleRequestDto, @Req() req: any) {
     return this.workscheduleService.createRequest(body, req.user);
+  }
+
+  @Post('schedule/requests/:id/resubmit')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Chỉnh sửa và gửi lại yêu cầu lịch bị từ chối' })
+  @ApiParam({ name: 'id', example: 'req123' })
+  async resubmitRequest(
+    @Param('id') id: string,
+    @Body() body: UpdateScheduleEntriesDto,
+    @Req() req: any,
+  ) {
+    return this.workscheduleService.resubmitRequest(id, body, req.user);
   }
 
   @Get('schedule/requests/:id')

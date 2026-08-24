@@ -123,6 +123,16 @@ export class WorkscheduleService {
     return this.forward('POST', '/api/workschedule/schedule/requests', dto, null, user);
   }
 
+  async resubmitRequest(id: string, dto: any, user: any) {
+    return this.forward(
+      'POST',
+      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/resubmit`,
+      dto,
+      null,
+      user,
+    );
+  }
+
   async getRequestInfo(id: string, user: any) {
     return this.forward('GET', `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`, null, null, user);
   }
