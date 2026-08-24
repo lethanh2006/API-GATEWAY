@@ -49,3 +49,25 @@ test('từ chối gọi Auth/User khi không có secret mạnh', () => {
     ServiceUnavailableException,
   );
 });
+
+test('ký identity Todo và ràng buộc method/path', () => {
+  const service = new InternalRequestSignatureService(
+    new ConfigService({
+      TODO_INTERNAL_SECRET: strongSecret,
+      NODE_ENV: 'development',
+    }),
+  );
+  const headers = service.signUserPayload(
+    'encoded-user',
+    'request-456',
+    'todo',
+    'PATCH:/api/todo/task-id/status',
+  );
+  const expected = createHmac('sha256', strongSecret)
+    .update(
+      `${headers['x-user-timestamp']}.request-456.encoded-user.PATCH:/api/todo/task-id/status`,
+    )
+    .digest('hex');
+
+  assert.equal(headers['x-user-signature'], expected);
+});

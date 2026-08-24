@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { randomUUID } from 'node:crypto';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodoService {
@@ -16,6 +17,7 @@ export class TodoService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     @Inject(REQUEST) private readonly request: RequestWithContext,
+    private readonly signatureService: InternalRequestSignatureService,
   ) {
     this.baseUrl = this.configService.get<string>('TODO_SERVICE_URL', 'http://localhost:5003');
   }
@@ -28,7 +30,15 @@ export class TodoService {
     if (user) {
       const userPayloadStr = JSON.stringify(user);
       const base64User = Buffer.from(userPayloadStr).toString('base64');
-      headers['x-user-payload'] = base64User;
+      Object.assign(
+        headers,
+        this.signatureService.signUserPayload(
+          base64User,
+          requestId,
+          'todo',
+          `${method.toUpperCase()}:${path}`,
+        ),
+      );
     }
 
     try {
