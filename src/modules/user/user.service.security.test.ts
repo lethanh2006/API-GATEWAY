@@ -39,7 +39,7 @@ test('admin profile dùng internal endpoint và identity đã ký', async () => 
 
   assert.equal(
     capturedRequest?.url,
-    'http://user:5000/api/user/internal/target-user',
+    'http://user:5000/api/user/internal/admin/target-user',
   );
   const headers = capturedRequest?.headers as Record<string, string>;
   assert.equal(headers['x-request-id'], 'request-123');
