@@ -1,3 +1,5 @@
+import '@nrapp/observability/register';
+
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -7,7 +9,11 @@ import * as bodyParser from 'body-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { PinoNestLogger, logAndRecordException } from '@nrapp/observability';
+import {
+  PinoNestLogger,
+  flushLoggerAndShutdownTelemetry,
+  logAndRecordException,
+} from '@nrapp/observability';
 import { createValidationException } from './common/validation/validation-exception';
 import { gatewayAppLogger } from './common/observability/structured-logger.service';
 
@@ -118,4 +124,8 @@ async function bootstrap() {
   });
 }
 
-bootstrap();
+void bootstrap().catch(async (error: unknown) => {
+  logAndRecordException(gatewayAppLogger, 'gateway.bootstrap.failed', error);
+  await flushLoggerAndShutdownTelemetry(gatewayAppLogger, 3_000);
+  process.exitCode = 1;
+});

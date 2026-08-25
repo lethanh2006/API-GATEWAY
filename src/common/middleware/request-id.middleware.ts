@@ -1,12 +1,17 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { runWithLogContext } from '@nrapp/observability';
-import { randomUUID } from 'node:crypto';
+import {
+  CLIENT_REQUEST_ID_HEADER,
+  REQUEST_ID_HEADER,
+  createRequestCorrelation,
+  runWithLogContext,
+} from '@nrapp/observability';
 import type { NextFunction, Response } from 'express';
 import type { RequestWithContext } from '../interfaces/request-context.interface';
 
-export const REQUEST_ID_HEADER = 'x-request-id';
-export const CLIENT_REQUEST_ID_HEADER = 'x-client-request-id';
-export const SAFE_REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+export {
+  CLIENT_REQUEST_ID_HEADER,
+  REQUEST_ID_HEADER,
+} from '@nrapp/observability';
 
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
@@ -16,17 +21,14 @@ export class RequestIdMiddleware implements NestMiddleware {
     next: NextFunction,
   ): void {
     const incomingRequestId = request.headers[REQUEST_ID_HEADER];
-    const clientRequestId =
-      typeof incomingRequestId === 'string' &&
-      SAFE_REQUEST_ID.test(incomingRequestId)
-        ? incomingRequestId
-        : undefined;
-    const requestId = randomUUID();
+    const { requestId, clientRequestId } = createRequestCorrelation(
+      incomingRequestId,
+      { trustIncoming: false },
+    );
 
     request.requestContext = {
       requestId,
       ...(clientRequestId ? { clientRequestId } : {}),
-      startedAt: process.hrtime.bigint(),
     };
     request.headers[REQUEST_ID_HEADER] = requestId;
     if (clientRequestId) {

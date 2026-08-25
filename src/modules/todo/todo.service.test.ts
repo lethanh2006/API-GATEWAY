@@ -37,7 +37,6 @@ function createHarness() {
   const request = {
     requestContext: {
       requestId: 'request-todo-123',
-      startedAt: process.hrtime.bigint(),
     },
   } as RequestWithContext;
   const signatureService = {

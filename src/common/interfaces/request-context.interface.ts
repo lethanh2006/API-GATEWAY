@@ -10,7 +10,6 @@ export interface GatewayRequestOutcome {
 export interface GatewayRequestContext {
   requestId: string;
   clientRequestId?: string;
-  startedAt: bigint;
   outcome?: GatewayRequestOutcome;
 }
 

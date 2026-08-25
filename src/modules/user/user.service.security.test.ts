@@ -22,7 +22,6 @@ test('admin profile dùng internal endpoint và identity đã ký', async () => 
   const request = {
     requestContext: {
       requestId: 'request-123',
-      startedAt: process.hrtime.bigint(),
     },
   } as RequestWithContext;
   const service = new UserService(

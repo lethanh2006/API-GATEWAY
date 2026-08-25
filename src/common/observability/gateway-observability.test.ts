@@ -143,7 +143,6 @@ test('validation 422 chỉ tạo một terminal event và không log field value
   const request = fakeRequest({
     requestContext: {
       requestId: 'req-422',
-      startedAt: process.hrtime.bigint(),
     },
   });
   const response = new FakeResponse();
@@ -173,6 +172,50 @@ test('validation 422 chỉ tạo một terminal event và không log field value
   assert.doesNotMatch(JSON.stringify(events), /secret@example\.com/);
 });
 
+test('các 4xx dự kiến còn lại đều tạo đúng một terminal event', () => {
+  const cases = [
+    { statusCode: 400, code: 'BAD_REQUEST', level: 'info' },
+    { statusCode: 401, code: 'UNAUTHORIZED', level: 'info' },
+    { statusCode: 403, code: 'FORBIDDEN', level: 'warn' },
+    { statusCode: 409, code: 'CONFLICT', level: 'info' },
+  ];
+
+  for (const testCase of cases) {
+    const events: LoggedEvent[] = [];
+    const logger = fakeLogger(events);
+    const request = fakeRequest({
+      requestContext: { requestId: `req-${testCase.statusCode}` },
+    });
+    const response = new FakeResponse();
+    new RequestOutcomeMiddleware(logger).use(
+      request,
+      response as never,
+      () => {},
+    );
+
+    createFilter(logger).catch(
+      new HttpException(
+        {
+          statusCode: testCase.statusCode,
+          code: testCase.code,
+          message: 'Yêu cầu không hợp lệ',
+        },
+        testCase.statusCode,
+      ),
+      filterHost(request, response),
+    );
+
+    assert.equal(events.length, 1);
+    assert.equal(events[0].level, testCase.level);
+    assert.equal(events[0].eventName, 'http.request.rejected');
+    assert.equal(events[0].fields['error.code'], testCase.code);
+    assert.equal(
+      events[0].fields['http.response.status_code'],
+      testCase.statusCode,
+    );
+  }
+});
+
 test('404 không trả raw path và chỉ log route unmatched', () => {
   const events: LoggedEvent[] = [];
   const logger = fakeLogger(events);
@@ -182,7 +225,6 @@ test('404 không trả raw path và chỉ log route unmatched', () => {
     originalUrl: '/private-user-slug?token=secret',
     requestContext: {
       requestId: 'req-404',
-      startedAt: process.hrtime.bigint(),
     },
   });
   const response = new FakeResponse();
@@ -222,7 +264,6 @@ test('rate limit 429 đi qua cùng terminal logging contract', () => {
     const request = fakeRequest({
       requestContext: {
         requestId: `req-${index}`,
-        startedAt: process.hrtime.bigint(),
       },
     });
     const response = new FakeResponse();
@@ -250,7 +291,6 @@ test('lỗi 500 do Gateway sở hữu chỉ ghi một detailed origin event', ()
     route: { path: '/api/users/:id' },
     requestContext: {
       requestId: 'req-500',
-      startedAt: process.hrtime.bigint(),
     },
   });
   const response = new FakeResponse();
@@ -283,7 +323,6 @@ test('upstream 5xx chỉ ghi summary và giữ nguyên errorId từ service gố
   const request = fakeRequest({
     requestContext: {
       requestId: 'req-upstream',
-      startedAt: process.hrtime.bigint(),
     },
   });
   const response = new FakeResponse();
