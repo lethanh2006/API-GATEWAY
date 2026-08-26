@@ -4,16 +4,14 @@ import {
   logAndRecordException,
   type ClassificationOverrides,
 } from '@nrapp/observability';
+import { appLogger } from './app-logger';
 
 export type LogDetails = Record<string, unknown>;
-
-export const gatewayAppLogger: ReturnType<typeof createAppLogger> =
-  createAppLogger({ serviceName: 'gateway' });
 
 /** Adapter log dùng chung cho Gateway; Pino tự gắn trace/request context. */
 @Injectable()
 export class StructuredLoggerService {
-  readonly raw: ReturnType<typeof createAppLogger> = gatewayAppLogger;
+  readonly raw: ReturnType<typeof createAppLogger> = appLogger;
 
   info(eventName: string, details: LogDetails = {}, message?: string): void {
     this.raw.info(

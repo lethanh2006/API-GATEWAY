@@ -10,17 +10,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import {
-  PinoNestLogger,
   flushLoggerAndShutdownTelemetry,
   logAndRecordException,
 } from '@nrapp/observability';
 import { createValidationException } from './common/validation/validation-exception';
-import { gatewayAppLogger } from './common/observability/structured-logger.service';
+import { appLogger, nestLogger } from './common/observability/app-logger';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: new PinoNestLogger(gatewayAppLogger),
-  });
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, { logger: nestLogger });
   app.enableShutdownHooks();
 
   // 1. Configure bodyParser JSON payload limits
@@ -71,7 +68,7 @@ async function bootstrap() {
     ws: true,
     onError: (err: any, _req: any, response: any) => {
       const result = logAndRecordException(
-        gatewayAppLogger,
+        appLogger,
         'chat.socket_proxy.failed',
         err,
         {
@@ -108,7 +105,7 @@ async function bootstrap() {
   // 6. Start the API Gateway HTTP Server
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
-  gatewayAppLogger.info(
+  appLogger.info(
     {
       'event.name': 'gateway.started',
       'server.address': '0.0.0.0',
@@ -125,7 +122,22 @@ async function bootstrap() {
 }
 
 void bootstrap().catch(async (error: unknown) => {
-  logAndRecordException(gatewayAppLogger, 'gateway.bootstrap.failed', error);
-  await flushLoggerAndShutdownTelemetry(gatewayAppLogger, 3_000);
+  logAndRecordException(
+    appLogger,
+    'process.bootstrap.failed',
+    error,
+    {},
+    {
+      message: 'Không thể khởi động API Gateway',
+      classification: {
+        statusCode: 500,
+        code: 'BOOTSTRAP_FAILED',
+        expected: false,
+        retryable: false,
+        logLevel: 'fatal',
+      },
+    },
+  );
+  await flushLoggerAndShutdownTelemetry(appLogger, 3_000);
   process.exitCode = 1;
 });
