@@ -20,9 +20,4 @@ export class AppController {
       ],
     };
   }
-
-  @Get('health')
-  getHealth() {
-    return { status: 'ok', service: 'gateway' };
-  }
 }

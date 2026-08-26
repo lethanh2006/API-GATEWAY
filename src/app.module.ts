@@ -12,10 +12,12 @@ import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
 import { CanteenModule } from './modules/canteen/canteen.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { CoreModule } from './core/core.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
     CoreModule,
+    HealthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
