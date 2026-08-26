@@ -27,8 +27,8 @@ export class CreateInventoryBatchDto {
   quantity: number;
 
   @ApiProperty({
-    example: '2026-08-15',
-    description: 'Hạn sử dụng (YYYY-MM-DD)',
+    example: '2030-12-31',
+    description: 'Hạn sử dụng phải ở tương lai (ISO 8601, ví dụ YYYY-MM-DD)',
   })
   @IsNotEmpty({ message: 'Hạn sử dụng (expiryDate) không được để trống' })
   @IsDateString(

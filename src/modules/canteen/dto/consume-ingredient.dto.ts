@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsNumber, Min } from 'class-validator';
 
 export class ConsumeIngredientDto {
   @ApiProperty({
@@ -7,7 +7,7 @@ export class ConsumeIngredientDto {
     description: 'ID nguyên liệu (Ingredient ID)',
   })
   @IsNotEmpty({ message: 'ID nguyên liệu (ingredientId) không được để trống' })
-  @IsString({ message: 'ID nguyên liệu phải là chuỗi ObjectId' })
+  @IsMongoId({ message: 'ID nguyên liệu không đúng định dạng ObjectId' })
   ingredientId: string;
 
   @ApiProperty({ example: 5, description: 'Số lượng khấu trừ sau khi nấu ăn' })

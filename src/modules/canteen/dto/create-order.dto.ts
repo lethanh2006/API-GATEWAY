@@ -8,6 +8,7 @@ import {
   Min,
   Max,
   IsArray,
+  ArrayMinSize,
   ValidateNested,
   IsEnum,
 } from 'class-validator';
@@ -42,7 +43,7 @@ export class CreateOrderItemDto {
   @IsMongoId({ message: 'ID món ăn không đúng định dạng ObjectId' })
   menuItemId: string;
 
-  @ApiProperty({ example: 2, description: 'Số lượng đặt mua', default: 1 })
+  @ApiProperty({ example: 2, description: 'Số lượng đặt mua' })
   @IsNotEmpty({ message: 'Số lượng không được để trống' })
   @IsInt({ message: 'Số lượng phải là số nguyên' })
   @Min(1, { message: 'Số lượng phải lớn hơn hoặc bằng 1' })
@@ -84,10 +85,12 @@ export class CreateOrderDto {
 
   @ApiProperty({
     type: [CreateOrderItemDto],
-    description: 'Danh sách món ăn trong giỏ hàng',
+    minItems: 1,
+    description: 'Danh sách món của đơn hàng; cần ít nhất một món',
   })
   @IsNotEmpty({ message: 'Danh sách món ăn (items) không được để trống' })
   @IsArray({ message: 'Danh sách món ăn phải là mảng' })
+  @ArrayMinSize(1, { message: 'Đơn hàng phải có ít nhất một món ăn' })
   @ValidateNested({ each: true })
   @Type(() => CreateOrderItemDto)
   items: CreateOrderItemDto[];

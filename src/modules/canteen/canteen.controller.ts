@@ -17,7 +17,12 @@ import { RolesGuard } from '../auth/common/guard/role/role.guard';
 import { Roles } from '../../common/decorators/role.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums/role.enum';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -48,7 +53,7 @@ export class CanteenController {
   @Get('menu')
   @Public()
   @ApiOperation({
-    summary: 'Lấy toàn bộ thực đơn đang bán (phân nhóm theo Category)',
+    summary: 'Lấy thực đơn đang bán, phân nhóm theo danh mục đang hoạt động',
   })
   async getMenu() {
     return this.canteenService.getMenu();
@@ -57,7 +62,15 @@ export class CanteenController {
   @Get('menu/search')
   @Public()
   @ApiOperation({
-    summary: 'Tìm kiếm món ăn real-time bằng thuật toán Trie Prefix Tree',
+    summary: 'Tìm kiếm món ăn đang bán theo tên',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description:
+      'Chuỗi con trong tên món; không phân biệt hoa thường; bỏ trống để lấy toàn bộ món đang bán',
+    example: 'cơm tấm',
   })
   async searchMenu(@Query('q') query: string) {
     return this.canteenService.searchMenu(query || '');
@@ -96,7 +109,9 @@ export class CanteenController {
   @Delete('admin/menu/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xóa món ăn khỏi menu (ADMIN,MANAGER)' })
+  @ApiOperation({
+    summary: 'Xóa món ăn và lưu dữ liệu vào lịch sử hoàn tác (ADMIN,MANAGER)',
+  })
   async deleteMenuItem(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.deleteMenuItem(id, req.user);
   }
@@ -127,7 +142,7 @@ export class CanteenController {
   @Post('orders')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Tạo giỏ hàng và đặt món (Trạng thái ban đầu: CREATED)',
+    summary: 'Tạo đơn hàng với trạng thái ban đầu CREATED',
   })
   async createOrder(@Body() body: CreateOrderDto, @Req() req: any) {
     return this.canteenService.createOrder(body, req.user);
@@ -200,7 +215,7 @@ export class CanteenController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({
     summary:
-      'Xem danh sách các đơn hàng đang chờ trong hàng đợi ưu tiên (ADMIN,MANAGER,CHEF)',
+      'Lấy các đơn CONFIRMED, sắp xếp theo điểm ưu tiên (ADMIN,MANAGER,CHEF)',
   })
   async getKitchenQueue(@Req() req: any) {
     return this.canteenService.getKitchenQueue(req.user);
@@ -211,7 +226,7 @@ export class CanteenController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({
     summary:
-      'Lấy đơn hàng có độ ưu tiên cao nhất ra khỏi hàng đợi để chế biến (ADMIN,MANAGER,CHEF)',
+      'Nhận đơn CONFIRMED ưu tiên cao nhất và chuyển sang COOKING (ADMIN,MANAGER,CHEF)',
   })
   async getNextKitchenOrder(@Req() req: any) {
     return this.canteenService.getNextKitchenOrder(req.user);
@@ -242,7 +257,9 @@ export class CanteenController {
 
   @Get('tables')
   @Public()
-  @ApiOperation({ summary: 'Lấy danh sách tất cả các bàn ăn' })
+  @ApiOperation({
+    summary: 'Lấy danh sách bàn ăn có tìm kiếm, sắp xếp và phân trang',
+  })
   async getAllTables(@Query() query: TableQueryDto) {
     return this.canteenService.getAllTables(query);
   }
@@ -302,7 +319,7 @@ export class CanteenController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.WAITER)
   @ApiOperation({
     summary:
-      'Giải thuật Phân Bổ & Gộp Bàn Tự Động cho nhóm khách (ADMIN,MANAGER,WAITER)',
+      'Phân bổ hoặc gộp bàn trống tự động cho nhóm khách (ADMIN,MANAGER,WAITER)',
   })
   async allocateTables(@Body() body: AllocateTableDto, @Req() req: any) {
     return this.canteenService.allocateTables(body, req.user);
@@ -312,7 +329,9 @@ export class CanteenController {
 
   @Get('inventory/ingredients')
   @Public()
-  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu' })
+  @ApiOperation({
+    summary: 'Lấy danh sách nguyên liệu có tìm kiếm, sắp xếp và phân trang',
+  })
   async getIngredients(@Query() query: IngredientQueryDto) {
     return this.canteenService.getIngredients(query);
   }
@@ -356,8 +375,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
-    summary:
-      'Nhập lô hàng mới (đẩy vào Min Heap quản lý hạn sử dụng) (ADMIN,MANAGER)',
+    summary: 'Nhập một lô nguyên liệu mới (ADMIN,MANAGER)',
   })
   async createInventoryBatch(
     @Body() body: CreateInventoryBatchDto,
@@ -371,7 +389,7 @@ export class CanteenController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({
     summary:
-      'Lấy danh sách nguyên liệu sắp hết hạn cần sử dụng trước (Min Heap) (ADMIN,MANAGER,CHEF)',
+      'Lấy các lô còn hạn và còn tồn kho theo hạn dùng gần nhất (ADMIN,MANAGER,CHEF)',
   })
   async getInventoryExpiryAlerts(@Req() req: any) {
     return this.canteenService.getInventoryExpiryAlerts(req.user);
@@ -382,7 +400,7 @@ export class CanteenController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({
     summary:
-      'Khấu trừ nguyên liệu sau khi nấu ăn (tự động trừ lô hết hạn trước) (ADMIN,MANAGER,CHEF)',
+      'Khấu trừ nguyên liệu theo nguyên tắc hết hạn trước FEFO (ADMIN,MANAGER,CHEF)',
   })
   async consumeIngredient(@Body() body: ConsumeIngredientDto, @Req() req: any) {
     return this.canteenService.consumeIngredient(body, req.user);
@@ -395,7 +413,17 @@ export class CanteenController {
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary:
-      'Trả về Top K món ăn bán chạy nhất (sử dụng Top-K Min Heap) (ADMIN,MANAGER)',
+      'Lấy các món có tổng số lượng đặt cao nhất trong đơn chưa hủy (ADMIN,MANAGER)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    default: 10,
+    minimum: 1,
+    maximum: 100,
+    description: 'Số món tối đa cần trả về',
+    example: 10,
   })
   async getTopDishes(@Query('limit') limit: number, @Req() req: any) {
     return this.canteenService.getTopDishes(limit, req.user);
@@ -405,7 +433,9 @@ export class CanteenController {
 
   @Get('categories')
   @Public()
-  @ApiOperation({ summary: 'Lấy danh sách danh mục món ăn' })
+  @ApiOperation({
+    summary: 'Lấy danh sách danh mục có tìm kiếm, sắp xếp và phân trang',
+  })
   async getCategories(@Query() query: CategoryQueryDto) {
     return this.canteenService.getCategories(query);
   }
@@ -440,7 +470,9 @@ export class CanteenController {
   @Delete('categories/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Xóa danh mục món ăn (ADMIN,MANAGER)' })
+  @ApiOperation({
+    summary: 'Xóa danh mục chưa có món ăn liên quan (ADMIN,MANAGER)',
+  })
   async deleteCategory(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.deleteCategory(id, req.user);
   }
