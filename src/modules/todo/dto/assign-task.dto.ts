@@ -9,14 +9,23 @@ export enum TaskStatus {
 }
 
 export class AssignTaskDto {
-  @ApiProperty({ example: 'userId456', description: 'ID của người dùng được giao việc' })
+  @ApiProperty({
+    example: 'userId456',
+    description: 'ID của người dùng được giao việc',
+  })
   @IsNotEmpty({ message: 'assignedTo không được để trống' })
   @IsMongoId({ message: 'assignedTo phải là MongoDB ObjectId hợp lệ' })
   assignedTo: string;
 }
 export class UpdateTaskStatusDto {
-  @ApiProperty({ enum: TaskStatus, example: TaskStatus.DONE, description: 'Trạng thái mới của công việc' })
+  @ApiProperty({
+    enum: TaskStatus,
+    example: TaskStatus.DONE,
+    description: 'Trạng thái mới của công việc',
+  })
   @IsNotEmpty({ message: 'status không được để trống' })
-  @IsEnum(TaskStatus, { message: 'status phải là todo, in_progress, done hoặc cancelled' })
+  @IsEnum(TaskStatus, {
+    message: 'status phải là todo, in_progress, done hoặc cancelled',
+  })
   status: TaskStatus;
 }

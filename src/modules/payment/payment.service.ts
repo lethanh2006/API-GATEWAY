@@ -138,10 +138,7 @@ export class PaymentService {
     }
   }
 
-  private assertOrderCanBePaid(
-    order: CanteenOrder,
-    user: GatewayUser,
-  ): string {
+  private assertOrderCanBePaid(order: CanteenOrder, user: GatewayUser): string {
     const userId = user._id ?? user.id;
     const ownerId = this.idString(order.userId);
     if (!ownerId) {

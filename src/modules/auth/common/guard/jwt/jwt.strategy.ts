@@ -15,9 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    const jwtSecret = requireJwtSecret(
-      configService.get<string>('JWT_SECRET'),
-    );
+    const jwtSecret = requireJwtSecret(configService.get<string>('JWT_SECRET'));
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

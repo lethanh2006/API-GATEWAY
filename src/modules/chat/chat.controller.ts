@@ -60,7 +60,7 @@ export class ChatController {
       limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (_req, file, callback) =>
         filterSupportedChatImage(file, callback),
-    })
+    }),
   )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -78,7 +78,7 @@ export class ChatController {
   async sendMessage(
     @Body() body: SendMessageDto,
     @UploadedFile() image: UploadedChatImage | undefined,
-    @Req() req: any
+    @Req() req: any,
   ) {
     return this.chatService.sendMessage(body, image, req.user);
   }

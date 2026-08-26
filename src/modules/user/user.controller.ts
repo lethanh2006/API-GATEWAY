@@ -9,7 +9,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
@@ -83,7 +88,10 @@ export class UserController {
     summary: 'Xem full profile của user bất kỳ (ADMIN) — BFF aggregate',
   })
   @ApiParam({ name: 'userId', example: '1' })
-  async getFullProfileByAdmin(@Param('userId') userId: string, @Req() req: any) {
+  async getFullProfileByAdmin(
+    @Param('userId') userId: string,
+    @Req() req: any,
+  ) {
     return this.userService.getFullProfileByAdmin(userId, req.user);
   }
 }

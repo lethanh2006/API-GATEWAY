@@ -73,10 +73,4 @@ export class InternalRequestSignatureService {
 }
 
 export type InternalService =
-  | 'auth'
-  | 'canteen'
-  | 'chat'
-  | 'payment'
-  | 'todo'
-  | 'user'
-  | 'workschedule';
+  'auth' | 'canteen' | 'chat' | 'payment' | 'todo' | 'user' | 'workschedule';

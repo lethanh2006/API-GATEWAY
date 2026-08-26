@@ -19,10 +19,19 @@ export class AuthService {
     @Inject(REQUEST) private readonly request: RequestWithContext,
     private readonly signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>('AUTH_SERVICE_URL', 'http://localhost:4000');
+    this.baseUrl = this.configService.get<string>(
+      'AUTH_SERVICE_URL',
+      'http://localhost:4000',
+    );
   }
 
-  private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
+  private async forward(
+    method: string,
+    path: string,
+    data?: any,
+    params?: any,
+    user?: any,
+  ) {
     const requestId = this.request.requestContext?.requestId ?? randomUUID();
     const headers: Record<string, string> = {
       'x-request-id': requestId,
@@ -49,7 +58,7 @@ export class AuthService {
           data,
           params,
           headers,
-        })
+        }),
       );
       return response.data;
     } catch (error: unknown) {
@@ -94,7 +103,13 @@ export class AuthService {
   }
 
   async deleteUserByAdmin(userId: string, user: any) {
-    return this.forward('DELETE', `/api/auth/users/${userId}`, null, null, user);
+    return this.forward(
+      'DELETE',
+      `/api/auth/users/${userId}`,
+      null,
+      null,
+      user,
+    );
   }
 
   async updateUserRole(userId: string, role: string, user: any) {

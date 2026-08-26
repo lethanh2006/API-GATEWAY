@@ -22,7 +22,10 @@ export enum ScheduleEntryType {
 }
 
 export class ScheduleEntryDto {
-  @ApiProperty({ example: '2026-07-20', description: 'Ngày của lịch làm việc (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '2026-07-20',
+    description: 'Ngày của lịch làm việc (YYYY-MM-DD)',
+  })
   @IsDateString()
   date: string;
 
@@ -42,12 +45,18 @@ export class ScheduleEntryDto {
 }
 
 export class CreateScheduleRequestDto {
-  @ApiProperty({ example: '2026-07-20', description: 'Ngày đầu tiên của tuần đăng ký (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '2026-07-20',
+    description: 'Ngày đầu tiên của tuần đăng ký (YYYY-MM-DD)',
+  })
   @IsNotEmpty({ message: 'week_start không được để trống' })
   @IsDateString()
   week_start: string;
 
-  @ApiProperty({ type: [ScheduleEntryDto], description: 'Chi tiết lịch đăng ký từng ngày trong tuần' })
+  @ApiProperty({
+    type: [ScheduleEntryDto],
+    description: 'Chi tiết lịch đăng ký từng ngày trong tuần',
+  })
   @IsArray({ message: 'entries phải là một mảng' })
   @ArrayMinSize(1)
   @ArrayMaxSize(7)

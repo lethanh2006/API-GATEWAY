@@ -31,7 +31,10 @@ export class ChatService {
     @Inject(REQUEST) private readonly request: RequestWithContext,
     private readonly signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>('CHAT_SERVICE_URL', 'http://localhost:5002');
+    this.baseUrl = this.configService.get<string>(
+      'CHAT_SERVICE_URL',
+      'http://localhost:5002',
+    );
   }
 
   private createUserHeaders(method: string, path: string, user?: any) {
@@ -71,7 +74,7 @@ export class ChatService {
           data,
           params,
           headers: this.createUserHeaders(method, path, user),
-        })
+        }),
       );
       if (preserveStatus) {
         return {
@@ -117,7 +120,7 @@ export class ChatService {
           maxBodyLength: 6 * 1024 * 1024,
           maxContentLength: 6 * 1024 * 1024,
           timeout: 55_000,
-        })
+        }),
       );
       return response.data;
     } catch (error: unknown) {
@@ -126,6 +129,12 @@ export class ChatService {
   }
 
   async getMessages(chatId: string, user: any) {
-    return this.forward('GET', `/api/chat/message/${encodeURIComponent(chatId)}`, null, null, user);
+    return this.forward(
+      'GET',
+      `/api/chat/message/${encodeURIComponent(chatId)}`,
+      null,
+      null,
+      user,
+    );
   }
 }

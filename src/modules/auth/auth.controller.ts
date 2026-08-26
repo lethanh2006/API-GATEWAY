@@ -11,7 +11,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './common/guard/jwt/jwt.guard';
 import { RolesGuard } from './common/guard/role/role.guard';
@@ -44,7 +49,9 @@ export class AuthController {
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Đăng nhập bước 1 — verify password, gửi OTP (PUBLIC)' })
+  @ApiOperation({
+    summary: 'Đăng nhập bước 1 — verify password, gửi OTP (PUBLIC)',
+  })
   async login(@Body() body: LoginDto) {
     return this.authService.login(body);
   }
@@ -52,7 +59,9 @@ export class AuthController {
   @Post('verify')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Đăng nhập bước 2 — xác thực OTP, nhận token (PUBLIC)' })
+  @ApiOperation({
+    summary: 'Đăng nhập bước 2 — xác thực OTP, nhận token (PUBLIC)',
+  })
   async verifyOtp(@Body() body: VerifyOtpDto) {
     return this.authService.verifyOtp(body);
   }
@@ -107,7 +116,10 @@ export class AuthController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Lấy thông tin auth của user bất kỳ (ADMIN)' })
   @ApiParam({ name: 'userId', example: '1' })
-  async getUserProfileByAdmin(@Param('userId') userId: string, @Req() req: any) {
+  async getUserProfileByAdmin(
+    @Param('userId') userId: string,
+    @Req() req: any,
+  ) {
     return this.authService.getUserProfileByAdmin(userId, req.user);
   }
 

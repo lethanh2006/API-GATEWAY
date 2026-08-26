@@ -33,12 +33,13 @@ export class RolesGuard implements CanActivate {
           status: HttpStatus.UNAUTHORIZED,
           error: 'Bạn chưa đăng nhập',
         },
-        HttpStatus.UNAUTHORIZED
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
     const hasRole = requiredRoles.some(
-      (role) => user.role?.toString().toUpperCase() === role.toString().toUpperCase()
+      (role) =>
+        user.role?.toString().toUpperCase() === role.toString().toUpperCase(),
     );
 
     if (!hasRole) {
@@ -47,7 +48,7 @@ export class RolesGuard implements CanActivate {
           status: HttpStatus.FORBIDDEN,
           error: `Bạn không có quyền. Yêu cầu: ${requiredRoles.join(', ')}`,
         },
-        HttpStatus.FORBIDDEN
+        HttpStatus.FORBIDDEN,
       );
     }
 

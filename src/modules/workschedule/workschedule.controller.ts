@@ -1,13 +1,36 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, UseGuards, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Req,
+  UseGuards,
+  HttpCode,
+} from '@nestjs/common';
 import { WorkscheduleService } from './workschedule.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
 import { Roles } from '../../common/decorators/role.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums/role.enum';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { CreateScheduleRequestDto } from './dto/create-request.dto';
-import { UpdateScheduleEntriesDto, UpdatePolicyDto, ScanAttendanceDto, RejectRequestDto, BulkApproveDto } from './dto/update-entries.dto';
+import {
+  UpdateScheduleEntriesDto,
+  UpdatePolicyDto,
+  ScanAttendanceDto,
+  RejectRequestDto,
+  BulkApproveDto,
+} from './dto/update-entries.dto';
 import { CreateWorkRequestDto } from './dto/work-request.dto';
 
 @ApiTags('Api Workschedule')
@@ -23,16 +46,26 @@ export class WorkscheduleController {
   @Get('schedule/pending')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Lấy danh sách yêu cầu lịch làm việc chờ phê duyệt (Admin)' })
-  async getPendingRequests(@Query() query: Record<string, string>, @Req() req: any) {
+  @ApiOperation({
+    summary: 'Lấy danh sách yêu cầu lịch làm việc chờ phê duyệt (Admin)',
+  })
+  async getPendingRequests(
+    @Query() query: Record<string, string>,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.getPendingRequests(query, req.user);
   }
 
   @Get('schedule/all')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Lấy tất cả danh sách yêu cầu lịch làm việc (Admin)' })
-  async getAllRequests(@Query() query: Record<string, string>, @Req() req: any) {
+  @ApiOperation({
+    summary: 'Lấy tất cả danh sách yêu cầu lịch làm việc (Admin)',
+  })
+  async getAllRequests(
+    @Query() query: Record<string, string>,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.getAllRequests(query, req.user);
   }
 
@@ -50,14 +83,20 @@ export class WorkscheduleController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' })
   @ApiParam({ name: 'id', example: 'req123' })
-  async rejectRequest(@Param('id') id: string, @Body() body: RejectRequestDto, @Req() req: any) {
+  async rejectRequest(
+    @Param('id') id: string,
+    @Body() body: RejectRequestDto,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.rejectRequest(id, body, req.user);
   }
 
   @Post('schedule/requests/bulk-approve')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
-  @ApiOperation({ summary: 'Phê duyệt hàng loạt yêu cầu lịch làm việc (Admin)' })
+  @ApiOperation({
+    summary: 'Phê duyệt hàng loạt yêu cầu lịch làm việc (Admin)',
+  })
   async bulkApprove(@Body() body: BulkApproveDto, @Req() req: any) {
     return this.workscheduleService.bulkApprove(body, req.user);
   }
@@ -148,7 +187,10 @@ export class WorkscheduleController {
   @Get('schedule/my')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy danh sách lịch làm việc của bản thân' })
-  async getMySchedules(@Query() query: Record<string, string>, @Req() req: any) {
+  async getMySchedules(
+    @Query() query: Record<string, string>,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.getMySchedules(query, req.user);
   }
 
@@ -186,7 +228,11 @@ export class WorkscheduleController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Cập nhật nội dung một yêu cầu lịch làm việc' })
   @ApiParam({ name: 'id', example: 'req123' })
-  async updateEntries(@Param('id') id: string, @Body() body: UpdateScheduleEntriesDto, @Req() req: any) {
+  async updateEntries(
+    @Param('id') id: string,
+    @Body() body: UpdateScheduleEntriesDto,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.updateEntries(id, body, req.user);
   }
 
@@ -213,13 +259,18 @@ export class WorkscheduleController {
   @Get('requests/my')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy lịch sử đơn từ của bản thân' })
-  async getMyWorkRequests(@Query() query: Record<string, string>, @Req() req: any) {
+  async getMyWorkRequests(
+    @Query() query: Record<string, string>,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.getMyWorkRequests(query, req.user);
   }
 
   @Post('requests')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Tạo đơn nghỉ, đi muộn, về sớm, OT, công tác hoặc remote' })
+  @ApiOperation({
+    summary: 'Tạo đơn nghỉ, đi muộn, về sớm, OT, công tác hoặc remote',
+  })
   async createWorkRequest(@Body() body: CreateWorkRequestDto, @Req() req: any) {
     return this.workscheduleService.createWorkRequest(body, req.user);
   }
@@ -236,7 +287,10 @@ export class WorkscheduleController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy danh sách đơn từ để quản lý xử lý' })
-  async getAdminWorkRequests(@Query() query: Record<string, string>, @Req() req: any) {
+  async getAdminWorkRequests(
+    @Query() query: Record<string, string>,
+    @Req() req: any,
+  ) {
     return this.workscheduleService.getAdminWorkRequests(query, req.user);
   }
 

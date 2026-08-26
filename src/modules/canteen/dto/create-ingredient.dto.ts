@@ -12,7 +12,10 @@ export class CreateIngredientDto {
   @IsString({ message: 'Đơn vị tính phải là chuỗi ký tự' })
   unit: string;
 
-  @ApiProperty({ example: 10, description: 'Ngưỡng cảnh báo tồn kho tối thiểu' })
+  @ApiProperty({
+    example: 10,
+    description: 'Ngưỡng cảnh báo tồn kho tối thiểu',
+  })
   @IsNotEmpty({ message: 'Ngưỡng cảnh báo tối thiểu không được để trống' })
   @IsNumber({}, { message: 'Ngưỡng cảnh báo tối thiểu phải là số' })
   @Min(0, { message: 'Ngưỡng cảnh báo tối thiểu phải lớn hơn hoặc bằng 0' })

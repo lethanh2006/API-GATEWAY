@@ -19,10 +19,19 @@ export class UserService {
     @Inject(REQUEST) private readonly request: RequestWithContext,
     private readonly signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>('USER_SERVICE_URL', 'http://localhost:5000');
+    this.baseUrl = this.configService.get<string>(
+      'USER_SERVICE_URL',
+      'http://localhost:5000',
+    );
   }
 
-  private async forward(method: string, path: string, data?: any, params?: any, user?: any) {
+  private async forward(
+    method: string,
+    path: string,
+    data?: any,
+    params?: any,
+    user?: any,
+  ) {
     const requestId = this.request.requestContext?.requestId ?? randomUUID();
     const headers: Record<string, string> = {
       'x-request-id': requestId,
@@ -49,7 +58,7 @@ export class UserService {
           data,
           params,
           headers,
-        })
+        }),
       );
       return response.data;
     } catch (error: unknown) {
