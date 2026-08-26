@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
-import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
 
 @Module({
   imports: [UpstreamHttpModule],
   controllers: [TodoController],
-  providers: [TodoService, InternalRequestSignatureService],
+  providers: [TodoService],
 })
 export class TodoModule {}

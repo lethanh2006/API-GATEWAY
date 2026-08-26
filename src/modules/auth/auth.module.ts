@@ -4,20 +4,13 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './common/guard/jwt/jwt.strategy';
 import { JwtAuthGuard } from './common/guard/jwt/jwt.guard';
 import { RolesGuard } from './common/guard/role/role.guard';
-import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
 
 @Global()
 @Module({
   imports: [UpstreamHttpModule],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    JwtAuthGuard,
-    RolesGuard,
-    InternalRequestSignatureService,
-  ],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
   exports: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}
