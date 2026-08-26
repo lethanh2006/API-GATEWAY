@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
-  Logger,
   Scope,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
@@ -33,7 +32,6 @@ interface CanteenOrder {
 
 @Injectable({ scope: Scope.REQUEST })
 export class PaymentService {
-  private readonly logger = new Logger(PaymentService.name);
   private readonly paymentUrl: string;
   private readonly canteenUrl: string;
 
@@ -116,7 +114,7 @@ export class PaymentService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ thanh toán', this.logger);
+      throwUpstreamError(error, 'Dịch vụ thanh toán');
     }
   }
 
@@ -134,7 +132,7 @@ export class PaymentService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ căn tin', this.logger);
+      throwUpstreamError(error, 'Dịch vụ căn tin');
     }
   }
 
@@ -200,7 +198,7 @@ export class PaymentService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ thanh toán', this.logger);
+      throwUpstreamError(error, 'Dịch vụ thanh toán');
     }
   }
 

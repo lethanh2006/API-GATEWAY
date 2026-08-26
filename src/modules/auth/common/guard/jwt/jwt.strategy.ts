@@ -29,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
     );
   }
 
-  async validate(request: RequestWithContext, _payload: unknown) {
+  async validate(request: RequestWithContext) {
     const authorization = request.headers.authorization;
     const requestId = request.requestContext?.requestId;
     if (!authorization) throw new UnauthorizedException('Thiếu access token');

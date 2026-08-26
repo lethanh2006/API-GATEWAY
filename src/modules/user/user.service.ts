@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
@@ -10,7 +10,6 @@ import { InternalRequestSignatureService } from '../../common/security/internal-
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
-  private readonly logger = new Logger(UserService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -62,7 +61,7 @@ export class UserService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ người dùng', this.logger);
+      throwUpstreamError(error, 'Dịch vụ người dùng');
     }
   }
 

@@ -27,7 +27,7 @@ export class JwtAuthGuard extends AuthGuard('jwt-1gio') {
       const isValid = await super.canActivate(context);
       if (!isValid) return false;
       return true;
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Unauthorized: Invalid or expired token');
     }
   }

@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
@@ -22,7 +22,6 @@ export interface ProxiedChatResponse {
 
 @Injectable({ scope: Scope.REQUEST })
 export class ChatService {
-  private readonly logger = new Logger(ChatService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -84,7 +83,7 @@ export class ChatService {
       }
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ trò chuyện', this.logger);
+      throwUpstreamError(error, 'Dịch vụ trò chuyện');
     }
   }
 
@@ -124,7 +123,7 @@ export class ChatService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ trò chuyện', this.logger);
+      throwUpstreamError(error, 'Dịch vụ trò chuyện');
     }
   }
 

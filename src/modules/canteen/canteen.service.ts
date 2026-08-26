@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -10,7 +10,6 @@ import { randomUUID } from 'crypto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CanteenService {
-  private readonly logger = new Logger(CanteenService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -57,7 +56,7 @@ export class CanteenService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ căn tin', this.logger);
+      throwUpstreamError(error, 'Dịch vụ căn tin');
     }
   }
 

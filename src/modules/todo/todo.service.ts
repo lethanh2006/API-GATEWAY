@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
@@ -12,7 +12,6 @@ import type { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodoService {
-  private readonly logger = new Logger(TodoService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -64,7 +63,7 @@ export class TodoService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ công việc', this.logger);
+      throwUpstreamError(error, 'Dịch vụ công việc');
     }
   }
 

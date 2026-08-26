@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
@@ -10,7 +10,6 @@ import { InternalRequestSignatureService } from '../../common/security/internal-
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   private readonly baseUrl: string;
 
   constructor(
@@ -62,7 +61,7 @@ export class AuthService {
       );
       return response.data;
     } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ xác thực', this.logger);
+      throwUpstreamError(error, 'Dịch vụ xác thực');
     }
   }
 

@@ -35,7 +35,7 @@ function safeFields(data: Record<string, unknown>): string[] {
       values
         .filter((field): field is string => typeof field === 'string')
         .map((field) => field.trim())
-        .filter((field) => /^[A-Za-z0-9_.\[\]-]{1,100}$/.test(field)),
+        .filter((field) => /^[A-Za-z0-9_.[\]-]{1,100}$/.test(field)),
     ),
   ].slice(0, 50);
 }
@@ -120,11 +120,7 @@ export class UpstreamTransportException extends BadGatewayException {
   }
 }
 
-export function throwUpstreamError(
-  error: unknown,
-  serviceName: string,
-  _logger?: unknown,
-): never {
+export function throwUpstreamError(error: unknown, serviceName: string): never {
   if (isAxiosError(error) && error.response) {
     const { data, status } = error.response;
     if (!Number.isInteger(status) || status < 400 || status > 599) {
