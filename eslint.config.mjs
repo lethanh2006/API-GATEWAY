@@ -38,4 +38,10 @@ export default tseslint.config(
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'off',
+    },
+  },
 );
