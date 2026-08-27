@@ -1,15 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  Patch,
+  Post,
   Query,
   Req,
   UseGuards,
-  HttpCode,
 } from '@nestjs/common';
 import { WorkscheduleService } from './workschedule.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
@@ -70,6 +71,7 @@ export class WorkscheduleController {
   }
 
   @Post('schedule/requests/:id/approve')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Duyệt yêu cầu lịch làm việc (Admin)' })
@@ -79,6 +81,7 @@ export class WorkscheduleController {
   }
 
   @Post('schedule/requests/:id/reject')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Từ chối yêu cầu lịch làm việc (Admin)' })
@@ -92,6 +95,7 @@ export class WorkscheduleController {
   }
 
   @Post('schedule/requests/bulk-approve')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({
@@ -114,6 +118,7 @@ export class WorkscheduleController {
   // ============================================================
 
   @Post('attendance/scan')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Điểm danh bằng quét QR Code' })
   async scanAttendance(@Body() body: ScanAttendanceDto, @Req() req: any) {
@@ -295,6 +300,7 @@ export class WorkscheduleController {
   }
 
   @Post('requests/:id/approve')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiParam({ name: 'id' })
@@ -304,6 +310,7 @@ export class WorkscheduleController {
   }
 
   @Post('requests/:id/reject')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiParam({ name: 'id' })
