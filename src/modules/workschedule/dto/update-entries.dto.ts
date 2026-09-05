@@ -21,15 +21,15 @@ export class UpdateScheduleEntriesDto {
   })
   @IsArray({ message: 'entries phải là một mảng' })
   @ArrayMinSize(1)
-  @ArrayMaxSize(7)
+  @ArrayMaxSize(31)
   @ValidateNested({ each: true })
   @Type(() => ScheduleEntryDto)
   entries: ScheduleEntryDto[];
 }
 export class UpdatePolicyDto {
   @ApiProperty({
-    example: '08:00',
-    description: 'Thời gian bắt đầu được đăng ký điểm danh hàng ngày',
+    example: '2026-09-05T00:00:00+07:00',
+    description: 'Thời điểm bắt đầu nhận đăng ký lịch làm việc',
     required: false,
   })
   @IsOptional()
@@ -37,8 +37,9 @@ export class UpdatePolicyDto {
   registration_start?: string;
 
   @ApiProperty({
-    example: '17:30',
-    description: 'Thời gian kết thúc được đăng ký điểm danh hàng ngày',
+    example: '2026-09-30T23:59:59+07:00',
+    description:
+      'Thời điểm kết thúc nhận đăng ký, cùng tháng với thời điểm bắt đầu',
     required: false,
   })
   @IsOptional()
@@ -47,7 +48,7 @@ export class UpdatePolicyDto {
 
   @ApiProperty({
     example: false,
-    description: 'Chốt bảng điểm danh (khóa chỉnh sửa)',
+    description: 'Tạm dừng nhận đăng ký lịch làm việc',
     required: false,
   })
   @IsOptional()

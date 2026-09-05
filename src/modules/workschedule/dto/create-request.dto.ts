@@ -5,10 +5,10 @@ import {
   IsArray,
   IsDateString,
   IsEnum,
-  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
+  Matches,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -46,20 +46,22 @@ export class ScheduleEntryDto {
 
 export class CreateScheduleRequestDto {
   @ApiProperty({
-    example: '2026-07-20',
-    description: 'Ngày đầu tiên của tuần đăng ký (YYYY-MM-DD)',
+    example: '2026-09',
+    description: 'Tháng đăng ký lịch làm việc (YYYY-MM)',
   })
-  @IsNotEmpty({ message: 'week_start không được để trống' })
-  @IsDateString()
-  week_start: string;
+  @IsString()
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, {
+    message: 'month phải có định dạng YYYY-MM',
+  })
+  month: string;
 
   @ApiProperty({
     type: [ScheduleEntryDto],
-    description: 'Chi tiết lịch đăng ký từng ngày trong tuần',
+    description: 'Chi tiết lịch đăng ký từng ngày trong tháng',
   })
   @IsArray({ message: 'entries phải là một mảng' })
   @ArrayMinSize(1)
-  @ArrayMaxSize(7)
+  @ArrayMaxSize(31)
   @ValidateNested({ each: true })
   @Type(() => ScheduleEntryDto)
   entries: ScheduleEntryDto[];
