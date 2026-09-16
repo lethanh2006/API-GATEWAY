@@ -18,6 +18,11 @@ import { appLogger, nestLogger } from './common/observability/app-logger';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { logger: nestLogger });
+
+  // VPS topology: Internet -> host Nginx -> Gateway container.
+  // Trust exactly one HTTP proxy so request.ip resolves to the real client IP.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.enableShutdownHooks();
 
   // 1. Configure bodyParser JSON payload limits
