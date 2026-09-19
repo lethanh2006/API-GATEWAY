@@ -44,6 +44,11 @@ export class OrderQueryDto {
   @IsMongoId({ message: 'ID người đặt hàng không đúng định dạng ObjectId' })
   userId?: string;
 
+  @ApiPropertyOptional({ description: 'Lọc danh sách món theo ID bàn ăn' })
+  @IsOptional()
+  @IsMongoId({ message: 'ID bàn ăn không đúng định dạng ObjectId' })
+  tableId?: string;
+
   @ApiPropertyOptional({
     example: '2026-08-01T00:00:00.000Z',
     description: 'Thời điểm bắt đầu khoảng lọc (ISO 8601)',

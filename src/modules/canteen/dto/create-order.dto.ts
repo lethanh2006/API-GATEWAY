@@ -71,17 +71,15 @@ export class CreateOrderItemDto {
 
 export enum OrderPaymentMethod {
   CASH = 'CASH',
-  VIETQR = 'VIETQR',
 }
 
 export class CreateOrderDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: '6691ab2d5cf2a13ba0d7d810',
-    description: 'ID bàn ăn (tableId, để trống nếu mang đi - Takeaway)',
+    description: 'ID bàn ăn; nhân viên phải chọn bàn trước khi gọi món',
   })
-  @IsOptional()
   @IsMongoId({ message: 'ID bàn ăn không đúng định dạng ObjectId' })
-  tableId?: string;
+  tableId: string;
 
   @ApiProperty({
     type: [CreateOrderItemDto],
