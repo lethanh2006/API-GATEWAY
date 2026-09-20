@@ -4,8 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { RequestWithContext } from '../../../../../common/interfaces/request-context.interface';
-import { firstValueFrom } from 'rxjs';
-import { requireJwtSecret } from '../../../../../common/config/jwt-secret';
+import { createJwtKey } from '../../../../../common/config/jwt-secret';
+import { performance } from 'node:perf_hooks';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
@@ -15,11 +15,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    const jwtSecret = requireJwtSecret(configService.get<string>('JWT_SECRET'));
+    const jwtKey = createJwtKey(configService.get<string>('JWT_SECRET'));
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: jwtSecret,
+      // passport-jwt types omit KeyObject, which jsonwebtoken accepts at runtime.
+      secretOrKeyProvider: (_request, _token, done) =>
+        done(null, jwtKey as unknown as Buffer),
       algorithms: ['HS256'],
       passReqToCallback: true,
     });
@@ -34,18 +36,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
     const requestId = request.requestContext?.requestId;
     if (!authorization) throw new UnauthorizedException('Thiếu access token');
 
+    const started = performance.now();
     try {
-      const { data } = await firstValueFrom(
-        this.httpService.post(
-          `${this.authServiceUrl}/api/auth/introspect`,
-          {},
-          {
-            headers: {
-              Authorization: authorization,
-              ...(requestId ? { 'x-request-id': requestId } : {}),
-            },
+      const { data } = await this.httpService.axiosRef.post(
+        `${this.authServiceUrl}/api/auth/introspect`,
+        {},
+        {
+          headers: {
+            Authorization: authorization,
+            ...(requestId ? { 'x-request-id': requestId } : {}),
           },
-        ),
+        },
       );
       if (!data?.valid || !data?.user) {
         throw new UnauthorizedException('Token không còn hiệu lực');
@@ -53,6 +54,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
       return data.user;
     } catch {
       throw new UnauthorizedException('Token không còn hiệu lực');
+    } finally {
+      if (request.requestContext) {
+        (request.requestContext.perf ??= {}).authMs =
+          performance.now() - started;
+      }
     }
   }
 }

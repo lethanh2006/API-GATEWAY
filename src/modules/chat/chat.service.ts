@@ -7,6 +7,7 @@ import FormData from 'form-data';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { randomUUID } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 
 export interface UploadedChatImage {
@@ -65,16 +66,15 @@ export class ChatService {
     user?: any,
     preserveStatus = false,
   ) {
+    const started = performance.now();
     try {
-      const response = await firstValueFrom(
-        this.httpService.request({
-          method,
-          url: `${this.baseUrl}${path}`,
-          data,
-          params,
-          headers: this.createUserHeaders(method, path, user),
-        }),
-      );
+      const response = await this.httpService.axiosRef.request({
+        method,
+        url: `${this.baseUrl}${path}`,
+        data,
+        params,
+        headers: this.createUserHeaders(method, path, user),
+      });
       if (preserveStatus) {
         return {
           statusCode: response.status,
@@ -84,6 +84,11 @@ export class ChatService {
       return response.data;
     } catch (error: unknown) {
       throwUpstreamError(error, 'Dịch vụ trò chuyện');
+    } finally {
+      if (this.request.requestContext) {
+        (this.request.requestContext.perf ??= {}).upstreamMs =
+          performance.now() - started;
+      }
     }
   }
 

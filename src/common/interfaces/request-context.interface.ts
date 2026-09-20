@@ -11,6 +11,10 @@ export interface GatewayRequestContext {
   requestId: string;
   clientRequestId?: string;
   outcome?: GatewayRequestOutcome;
+  perf?: {
+    authMs?: number;
+    upstreamMs?: number;
+  };
 }
 
 export interface RequestWithContext extends Request {

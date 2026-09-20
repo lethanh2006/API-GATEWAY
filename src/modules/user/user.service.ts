@@ -2,10 +2,10 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
-import { firstValueFrom } from 'rxjs';
 import { throwUpstreamError } from '../../common/http/upstream-error';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { randomUUID } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -49,19 +49,23 @@ export class UserService {
       );
     }
 
+    const started = performance.now();
     try {
-      const response = await firstValueFrom(
-        this.httpService.request({
-          method,
-          url: `${this.baseUrl}${path}`,
-          data,
-          params,
-          headers,
-        }),
-      );
+      const response = await this.httpService.axiosRef.request({
+        method,
+        url: `${this.baseUrl}${path}`,
+        data,
+        params,
+        headers,
+      });
       return response.data;
     } catch (error: unknown) {
       throwUpstreamError(error, 'Dịch vụ người dùng');
+    } finally {
+      if (this.request.requestContext) {
+        (this.request.requestContext.perf ??= {}).upstreamMs =
+          performance.now() - started;
+      }
     }
   }
 

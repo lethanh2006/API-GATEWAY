@@ -5,7 +5,6 @@ import type { HttpService } from '@nestjs/axios';
 import type { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { of } from 'rxjs';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import type { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import { MyTaskQueryDto, type TaskQueryDto } from './dto/task-query.dto';
@@ -25,9 +24,11 @@ function createHarness() {
   const requestCalls: Array<Record<string, unknown>> = [];
   const signatureCalls: SignatureCall[] = [];
   const httpService = {
-    request: (options: Record<string, unknown>) => {
-      requestCalls.push(options);
-      return of({ data: { ok: true } });
+    axiosRef: {
+      request: (options: Record<string, unknown>) => {
+        requestCalls.push(options);
+        return Promise.resolve({ data: { ok: true } });
+      },
     },
   } as unknown as HttpService;
   const configService = {

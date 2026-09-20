@@ -10,6 +10,7 @@ import type {
   RequestWithContext,
 } from '../interfaces/request-context.interface';
 import { StructuredLoggerService } from '../observability/structured-logger.service';
+import { performance } from 'node:perf_hooks';
 
 function notFoundSampleRate(): number {
   const configured = Number(process.env.LOG_HTTP_404_SAMPLE_RATE);
@@ -47,8 +48,37 @@ export class RequestOutcomeMiddleware implements NestMiddleware {
     response: Response,
     next: NextFunction,
   ): void {
-    response.once('finish', () => this.recordRejection(request, response));
+    const traceMinMs = Number(process.env.PERF_TRACE_MIN_MS || 0);
+    const started = traceMinMs > 0 ? performance.now() : 0;
+    response.once('finish', () => {
+      this.recordRejection(request, response);
+      if (started && performance.now() - started >= traceMinMs) {
+        this.recordTiming(request, response, performance.now() - started);
+      }
+    });
     next();
+  }
+
+  private recordTiming(
+    request: RequestWithContext,
+    response: Response,
+    totalMs: number,
+  ): void {
+    const authMs = request.requestContext?.perf?.authMs ?? 0;
+    const upstreamMs = request.requestContext?.perf?.upstreamMs ?? 0;
+    this.logger.info('http.request.perf', {
+      request_id: request.requestContext?.requestId ?? 'unknown',
+      'http.request.method': request.method,
+      'http.route': requestRouteTemplate(request),
+      'http.response.status_code': response.statusCode,
+      total_ms: Math.round(totalMs * 100) / 100,
+      auth_ms: Math.round(authMs * 100) / 100,
+      upstream_ms: Math.round(upstreamMs * 100) / 100,
+      other_ms: Math.max(
+        0,
+        Math.round((totalMs - authMs - upstreamMs) * 100) / 100,
+      ),
+    });
   }
 
   private recordRejection(

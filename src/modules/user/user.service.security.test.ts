@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { of } from 'rxjs';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { UserService } from './user.service';
@@ -10,9 +9,11 @@ import { UserService } from './user.service';
 test('admin profile dùng internal endpoint và identity đã ký', async () => {
   let capturedRequest: Record<string, unknown> | undefined;
   const httpService = {
-    request: (config: Record<string, unknown>) => {
-      capturedRequest = config;
-      return of({ data: { user: { _id: 'target-user' } } });
+    axiosRef: {
+      request: (config: Record<string, unknown>) => {
+        capturedRequest = config;
+        return Promise.resolve({ data: { user: { _id: 'target-user' } } });
+      },
     },
   } as unknown as HttpService;
   const config = new ConfigService({
