@@ -83,7 +83,7 @@ export class CanteenController {
   @Post('admin/menu')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Tạo mới món ăn (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Tạo mới món ăn (ADMIN)' })
   async createMenuItem(@Body() body: CreateMenuItemDto, @Req() req: any) {
     return this.canteenService.createMenuItem(body, req.user);
   }
@@ -91,7 +91,7 @@ export class CanteenController {
   @Put('admin/menu/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Cập nhật thông tin món ăn (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Cập nhật thông tin món ăn (ADMIN)' })
   async updateMenuItem(
     @Param('id') id: string,
     @Body() body: UpdateMenuItemDto,
@@ -104,7 +104,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Xóa món ăn và lưu dữ liệu vào lịch sử hoàn tác (ADMIN,MANAGER)',
+    summary: 'Xóa món ăn và lưu dữ liệu vào lịch sử hoàn tác (ADMIN)',
   })
   async deleteMenuItem(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.deleteMenuItem(id, req.user);
@@ -114,8 +114,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary:
-      'Hoàn tác (Undo) thao tác sửa đổi vừa thực hiện trên Menu (ADMIN,MANAGER)',
+    summary: 'Hoàn tác (Undo) thao tác sửa đổi vừa thực hiện trên Menu (ADMIN)',
   })
   async undoMenuItemChange(@Req() req: any) {
     return this.canteenService.undoMenuItemChange(req.user);
@@ -125,7 +124,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Làm lại (Redo) thao tác vừa hoàn tác trên Menu (ADMIN,MANAGER)',
+    summary: 'Làm lại (Redo) thao tác vừa hoàn tác trên Menu (ADMIN)',
   })
   async redoMenuItemChange(@Req() req: any) {
     return this.canteenService.redoMenuItemChange(req.user);
@@ -211,7 +210,7 @@ export class CanteenController {
   @Post('tables')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Khởi tạo bàn ăn mới (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Khởi tạo bàn ăn mới (ADMIN)' })
   async createTable(@Body() body: CreateTableDto, @Req() req: any) {
     return this.canteenService.createTable(body, req.user);
   }
@@ -219,7 +218,7 @@ export class CanteenController {
   @Patch('tables/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Cập nhật thông tin bàn ăn (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Cập nhật thông tin bàn ăn (ADMIN)' })
   async updateTable(
     @Param('id') id: string,
     @Body() body: UpdateTableDto,
@@ -231,7 +230,7 @@ export class CanteenController {
   @Delete('tables/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Xóa bàn ăn đang trống (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Xóa bàn ăn đang trống (ADMIN)' })
   async deleteTable(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.deleteTable(id, req.user);
   }
@@ -240,8 +239,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary:
-      'Cập nhật trạng thái bàn ăn (empty, occupied, reserved) (ADMIN,MANAGER,WAITER)',
+    summary: 'Cập nhật trạng thái bàn ăn (empty, occupied, reserved) (ADMIN)',
   })
   async updateTableStatus(
     @Param('id') id: string,
@@ -272,7 +270,7 @@ export class CanteenController {
   @Post('categories')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Tạo danh mục món ăn (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Tạo danh mục món ăn (ADMIN)' })
   async createCategory(@Body() body: CreateCategoryDto, @Req() req: any) {
     return this.canteenService.createCategory(body, req.user);
   }
@@ -280,7 +278,7 @@ export class CanteenController {
   @Patch('categories/:id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Cập nhật danh mục món ăn (ADMIN,MANAGER)' })
+  @ApiOperation({ summary: 'Cập nhật danh mục món ăn (ADMIN)' })
   async updateCategory(
     @Param('id') id: string,
     @Body() body: UpdateCategoryDto,
@@ -293,7 +291,7 @@ export class CanteenController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Xóa danh mục chưa có món ăn liên quan (ADMIN,MANAGER)',
+    summary: 'Xóa danh mục chưa có món ăn liên quan (ADMIN)',
   })
   async deleteCategory(@Param('id') id: string, @Req() req: any) {
     return this.canteenService.deleteCategory(id, req.user);

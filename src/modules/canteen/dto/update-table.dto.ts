@@ -19,10 +19,4 @@ export class UpdateTableDto {
   @IsNumber()
   @Min(1)
   capacity?: number;
-
-  @ApiPropertyOptional({ description: 'Đường dẫn QR Code bàn ăn' })
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  qrCodeUrl?: string;
 }

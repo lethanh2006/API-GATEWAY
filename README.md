@@ -18,7 +18,6 @@ A centralized, production-ready NestJS API Gateway that routes client requests, 
 - **Todo Service:** `/api/todo`
 - **Workschedule Service:** `/api/workschedule`
 - **Canteen Service:** `/api/canteen`
-- **Payment Service:** `/api/payment`
 
 ## Environment Variables
 
@@ -32,12 +31,20 @@ CHAT_SERVICE_URL=http://localhost:5002
 TODO_SERVICE_URL=http://localhost:5003
 WORKSCHEDULE_SERVICE_URL=http://localhost:5004
 CANTEEN_SERVICE_URL=http://localhost:5005
-PAYMENT_SERVICE_URL=http://localhost:5006
 JWT_SECRET=your_jwt_secret
 CANTEEN_INTERNAL_SECRET=replace_with_a_long_random_shared_secret
-PAYMENT_INTERNAL_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_PAYMENT_SECRET
 ```
 
-`CANTEEN_INTERNAL_SECRET` phải giống cấu hình của Canteen;
-`PAYMENT_INTERNAL_SECRET` phải giống cấu hình của Payment. Mỗi secret cần ít nhất
-32 ký tự và phải được thay riêng theo từng môi trường.
+`CANTEEN_INTERNAL_SECRET` phải giống cấu hình của Canteen, có ít nhất 32 ký tự
+và được thay riêng theo từng môi trường.
+
+## Luồng căn tin nhân viên
+
+Nhân viên chọn bàn rồi tạo đơn với `tableId`, danh sách món và `paymentMethod: CASH`.
+Giá món/tùy chọn được tính tại Canteen; client chỉ gửi tên tùy chọn.
+Admin xem/lọc đơn theo bàn và xác nhận `PATCH /api/canteen/orders/:id/payment/cash`.
+Đơn mới có trạng thái `CREATED`, `COMPLETED` hoặc `CANCELLED`;
+thanh toán có `PENDING` hoặc `PAID`.
+
+Các API quản lý món, danh mục, bàn và đơn vẫn được giữ. Đã gỡ DTO/API bếp,
+kho, nguyên liệu, phân bàn tự động và tích hợp QR/Casso khỏi Gateway.

@@ -10,7 +10,6 @@ import { ChatModule } from './modules/chat/chat.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
 import { CanteenModule } from './modules/canteen/canteen.module';
-import { PaymentModule } from './modules/payment/payment.module';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './modules/health/health.module';
 
@@ -29,7 +28,6 @@ import { HealthModule } from './modules/health/health.module';
     TodoModule,
     WorkscheduleModule,
     CanteenModule,
-    PaymentModule,
   ],
   controllers: [AppController],
   providers: [],

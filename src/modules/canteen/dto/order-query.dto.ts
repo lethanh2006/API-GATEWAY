@@ -12,18 +12,13 @@ import {
 
 export enum OrderStatusQuery {
   CREATED = 'CREATED',
-  CONFIRMED = 'CONFIRMED',
-  COOKING = 'COOKING',
-  READY = 'READY',
   COMPLETED = 'COMPLETED',
-  PAID = 'PAID',
   CANCELLED = 'CANCELLED',
 }
 
 export enum OrderPaymentStatusQuery {
   PENDING = 'PENDING',
   PAID = 'PAID',
-  REFUNDED = 'REFUNDED',
 }
 
 export class OrderQueryDto {

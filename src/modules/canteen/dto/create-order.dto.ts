@@ -19,19 +19,6 @@ export class OrderSelectedOptionDto {
   @IsNotEmpty({ message: 'Tên tùy chọn không được để trống' })
   @IsString({ message: 'Tên tùy chọn phải là chuỗi ký tự' })
   name: string;
-
-  @ApiPropertyOptional({
-    example: 5000,
-    description: 'Giá legacy do client gửi; Canteen không dùng để tính tiền',
-    deprecated: true,
-  })
-  @IsOptional()
-  @IsInt({ message: 'Giá tùy chọn phải là số nguyên VND' })
-  @Min(0, { message: 'Giá tùy chọn phải lớn hơn hoặc bằng 0' })
-  @Max(Number.MAX_SAFE_INTEGER, {
-    message: 'Giá tùy chọn vượt giới hạn hỗ trợ',
-  })
-  price?: number;
 }
 
 export class CreateOrderItemDto {
