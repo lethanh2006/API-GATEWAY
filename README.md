@@ -1,27 +1,59 @@
-# API Gateway Service
+# NRApp API Gateway
 
-A centralized, production-ready NestJS API Gateway that routes client requests, enables CORS, validates inputs, and handles reverse proxying for real-time WebSockets (Socket.io) to upstream microservices.
+The NRApp API Gateway is a NestJS service that provides the public HTTP entry
+point for the NRApp backend. It validates requests and access tokens, applies
+common request controls, forwards calls to internal services, and proxies the
+Chat Socket.IO connection.
 
-## Features
+## Responsibilities
 
-- **Centralized Routing:** Single entrypoint routing to multiple upstream microservices.
-- **WebSocket Reverse Proxy:** Built-in Socket.io proxying with automatic upgrade handling for the Chat Service.
-- **Auto-generated Documentation:** Embedded OpenAPI Swagger documentation.
-- **Global Validation Pipes:** Whitelisting and automatic DTO validation.
-- **Security Headers:** CORS configured for dynamic environments.
+- Routes REST traffic to Auth, User, Chat, Todo, Workschedule, and Canteen.
+- Validates JWT access tokens through the Auth service introspection endpoint.
+- Adds request IDs and signs the authenticated user payload before forwarding it
+  to internal services.
+- Applies DTO validation, role checks, a per-instance IP rate limit, and the
+  shared exception/logging pipeline.
+- Serves Swagger UI at `/api-docs` and liveness at `/health` or `/health/live`.
+- Proxies both HTTP polling and WebSocket upgrades under `/socket.io` to Chat.
 
-## Microservices Proxied
+The Gateway is the client-facing boundary. Services should be reached through
+this Gateway in normal application use.
 
-- **Authentication Service:** `/api/auth`
-- **User Service:** `/api/user`
-- **Chat Service:** `/api/chat` & `/socket.io`
-- **Todo Service:** `/api/todo`
-- **Workschedule Service:** `/api/workschedule`
-- **Canteen Service:** `/api/canteen`
+## Routed service prefixes
 
-## Environment Variables
+| Prefix | Upstream responsibility |
+| --- | --- |
+| `/api/auth` | Registration, OTP login, Google login, token refresh, and account administration |
+| `/api/user` | User profiles, directory data, and profile updates |
+| `/api/chat` | Conversations, messages, and image uploads |
+| `/api/todo` | Task creation, assignment, updates, status changes, and queries |
+| `/api/workschedule` | Work schedules, HR requests, attendance, and attendance policy |
+| `/api/canteen` | Menu, categories, tables, and cash canteen orders |
+| `/socket.io` | Chat realtime transport |
 
-Copy the template from `.env.example` and set the following parameters:
+The exact request and response contracts live in the controllers and DTOs under
+`src/modules`. Swagger is the quickest way to inspect the Gateway-facing API.
+
+## Request flow
+
+```text
+Client
+  -> Gateway request ID and rate limit
+  -> JWT introspection for protected routes
+  -> controller DTO and role validation
+  -> signed internal request to the selected service
+  -> normalized response or structured upstream error
+```
+
+Public routes are marked with the `@Public()` decorator. Protected routes use the
+Bearer access token and the role metadata declared by each controller. Internal
+service URLs and shared signing secrets are supplied through environment
+variables; they are never sent by the mobile client.
+
+## Configuration
+
+Copy `.env.example` to `.env` and set values for the environment. The important
+settings are:
 
 ```env
 PORT=3000
@@ -31,20 +63,49 @@ CHAT_SERVICE_URL=http://localhost:5002
 TODO_SERVICE_URL=http://localhost:5003
 WORKSCHEDULE_SERVICE_URL=http://localhost:5004
 CANTEEN_SERVICE_URL=http://localhost:5005
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=replace_with_at_least_32_random_bytes
 CANTEEN_INTERNAL_SECRET=replace_with_a_long_random_shared_secret
 ```
 
-`CANTEEN_INTERNAL_SECRET` phải giống cấu hình của Canteen, có ít nhất 32 ký tự
-và được thay riêng theo từng môi trường.
+`AUTH_INTERNAL_SECRET`, `USER_INTERNAL_SECRET`, `CHAT_INTERNAL_SECRET`,
+`TODO_INTERNAL_SECRET`, and `WORKSCHEDULE_INTERNAL_SECRET` may be supplied when
+an upstream uses a dedicated signing secret. If a dedicated secret is empty, the
+Gateway keeps the existing JWT-secret compatibility path. The in-memory rate
+limit defaults to 120 requests per 60 seconds per Gateway instance and can be
+changed with `RATE_LIMIT_WINDOW_MS` and `RATE_LIMIT_MAX_REQUESTS`.
 
-## Luồng căn tin nhân viên
+The observability variables in `.env.example` control log format, log level,
+trace export, and Swagger metadata. Do not commit a real `.env` file.
 
-Nhân viên chọn bàn rồi tạo đơn với `tableId`, danh sách món và `paymentMethod: CASH`.
-Giá món/tùy chọn được tính tại Canteen; client chỉ gửi tên tùy chọn.
-Admin xem/lọc đơn theo bàn và xác nhận `PATCH /api/canteen/orders/:id/payment/cash`.
-Đơn mới có trạng thái `CREATED`, `COMPLETED` hoặc `CANCELLED`;
-thanh toán có `PENDING` hoặc `PAID`.
+## Local development
 
-Các API quản lý món, danh mục, bàn và đơn vẫn được giữ. Đã gỡ DTO/API bếp,
-kho, nguyên liệu, phân bàn tự động và tích hợp QR/Casso khỏi Gateway.
+The Gateway depends on the local Logger observability package. Keep the Logger
+repository beside this repository in the backend directory, then run:
+
+```bash
+npm ci --prefix ../logger/packages/observability --no-audit --no-fund
+npm ci
+cp .env.example .env
+npm run start:dev
+```
+
+Useful checks:
+
+```bash
+npm run lint
+npm run format:check
+npm test
+npm run build
+```
+
+The default local Gateway address is `http://localhost:3000`; Swagger is at
+`http://localhost:3000/api-docs`.
+
+## CI/CD
+
+`.github/workflows/ci.yml` calls the pinned reusable Node.js quality workflow in
+[Logger](https://github.com/lethanh2006/Logger). It runs dependency and security
+checks, lint, formatting, tests, and the build. A successful push to the default
+branch triggers `.github/workflows/cd.yml`, which deploys the exact commit to the
+VPS through the pinned reusable deployment workflow. See [.github/CI.md](.github/CI.md)
+for the required repository secret and release details.
