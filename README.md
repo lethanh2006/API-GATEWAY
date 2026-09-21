@@ -1,59 +1,59 @@
-# NRApp API Gateway
+# API Gateway NRApp
 
-The NRApp API Gateway is a NestJS service that provides the public HTTP entry
-point for the NRApp backend. It validates requests and access tokens, applies
-common request controls, forwards calls to internal services, and proxies the
-Chat Socket.IO connection.
+API Gateway NRApp là dịch vụ NestJS cung cấp điểm vào HTTP công khai cho backend
+NRApp. Gateway kiểm tra request và access token, áp dụng các kiểm soát dùng
+chung, chuyển tiếp request đến các service nội bộ và proxy kết nối Socket.IO của
+Chat.
 
-## Responsibilities
+## Trách nhiệm
 
-- Routes REST traffic to Auth, User, Chat, Todo, Workschedule, and Canteen.
-- Validates JWT access tokens through the Auth service introspection endpoint.
-- Adds request IDs and signs the authenticated user payload before forwarding it
-  to internal services.
-- Applies DTO validation, role checks, a per-instance IP rate limit, and the
-  shared exception/logging pipeline.
-- Serves Swagger UI at `/api-docs` and liveness at `/health` or `/health/live`.
-- Proxies both HTTP polling and WebSocket upgrades under `/socket.io` to Chat.
+- Định tuyến REST đến Auth, User, Chat, Todo, Workschedule và Canteen.
+- Kiểm tra JWT access token thông qua endpoint introspection của Auth.
+- Gắn request ID và ký payload người dùng đã xác thực trước khi chuyển tiếp đến
+  service nội bộ.
+- Áp dụng validation DTO, kiểm tra role, giới hạn request theo IP trên từng
+  instance và pipeline exception/logging dùng chung.
+- Cung cấp Swagger UI tại `/api-docs` và liveness tại `/health` hoặc
+  `/health/live`.
+- Proxy cả HTTP polling và WebSocket upgrade dưới `/socket.io` đến Chat.
 
-The Gateway is the client-facing boundary. Services should be reached through
-this Gateway in normal application use.
+Gateway là ranh giới phía client. Trong luồng sử dụng thông thường, client cần
+truy cập các service thông qua Gateway.
 
-## Routed service prefixes
+## Các prefix được định tuyến
 
-| Prefix | Upstream responsibility |
+| Prefix | Nghiệp vụ upstream |
 | --- | --- |
-| `/api/auth` | Registration, OTP login, Google login, token refresh, and account administration |
-| `/api/user` | User profiles, directory data, and profile updates |
-| `/api/chat` | Conversations, messages, and image uploads |
-| `/api/todo` | Task creation, assignment, updates, status changes, and queries |
-| `/api/workschedule` | Work schedules, HR requests, attendance, and attendance policy |
-| `/api/canteen` | Menu, categories, tables, and cash canteen orders |
-| `/socket.io` | Chat realtime transport |
+| `/api/auth` | Đăng ký, đăng nhập OTP, đăng nhập Google, làm mới token và quản trị tài khoản |
+| `/api/user` | Hồ sơ người dùng, danh bạ và cập nhật hồ sơ |
+| `/api/chat` | Cuộc trò chuyện, tin nhắn và tải ảnh |
+| `/api/todo` | Tạo, giao, cập nhật, đổi trạng thái và truy vấn công việc |
+| `/api/workschedule` | Lịch làm việc, đơn nhân sự, chấm công và chính sách chấm công |
+| `/api/canteen` | Thực đơn, danh mục, bàn và đơn căn tin tiền mặt |
+| `/socket.io` | Kênh realtime của Chat |
 
-The exact request and response contracts live in the controllers and DTOs under
-`src/modules`. Swagger is the quickest way to inspect the Gateway-facing API.
+Hợp đồng request và response cụ thể nằm trong controller và DTO dưới
+`src/modules`. Swagger là cách nhanh nhất để xem API mà Gateway cung cấp.
 
-## Request flow
+## Luồng request
 
 ```text
 Client
-  -> Gateway request ID and rate limit
-  -> JWT introspection for protected routes
-  -> controller DTO and role validation
-  -> signed internal request to the selected service
-  -> normalized response or structured upstream error
+  -> Gateway gắn request ID và giới hạn request
+  -> Introspection JWT với route cần xác thực
+  -> Validation DTO và role tại controller
+  -> Ký request nội bộ rồi chuyển đến service tương ứng
+  -> Response hoặc upstream error có cấu trúc
 ```
 
-Public routes are marked with the `@Public()` decorator. Protected routes use the
-Bearer access token and the role metadata declared by each controller. Internal
-service URLs and shared signing secrets are supplied through environment
-variables; they are never sent by the mobile client.
+Các route công khai được đánh dấu bằng decorator `@Public()`. Route bảo vệ dùng
+Bearer access token và metadata role được khai báo tại từng controller. URL
+service nội bộ và secret dùng để ký được cấu hình bằng biến môi trường; các giá
+trị này không được gửi từ ứng dụng mobile.
 
-## Configuration
+## Cấu hình
 
-Copy `.env.example` to `.env` and set values for the environment. The important
-settings are:
+Sao chép `.env.example` thành `.env` rồi điền giá trị theo môi trường:
 
 ```env
 PORT=3000
@@ -67,20 +67,20 @@ JWT_SECRET=replace_with_at_least_32_random_bytes
 CANTEEN_INTERNAL_SECRET=replace_with_a_long_random_shared_secret
 ```
 
-`AUTH_INTERNAL_SECRET`, `USER_INTERNAL_SECRET`, `CHAT_INTERNAL_SECRET`,
-`TODO_INTERNAL_SECRET`, and `WORKSCHEDULE_INTERNAL_SECRET` may be supplied when
-an upstream uses a dedicated signing secret. If a dedicated secret is empty, the
-Gateway keeps the existing JWT-secret compatibility path. The in-memory rate
-limit defaults to 120 requests per 60 seconds per Gateway instance and can be
-changed with `RATE_LIMIT_WINDOW_MS` and `RATE_LIMIT_MAX_REQUESTS`.
+Có thể cấu hình riêng `AUTH_INTERNAL_SECRET`, `USER_INTERNAL_SECRET`,
+`CHAT_INTERNAL_SECRET`, `TODO_INTERNAL_SECRET` và
+`WORKSCHEDULE_INTERNAL_SECRET` khi upstream dùng secret riêng. Nếu secret riêng
+bỏ trống, Gateway giữ cơ chế tương thích dùng `JWT_SECRET`. Giới hạn request mặc
+định trong bộ nhớ là 120 request mỗi 60 giây trên mỗi Gateway instance; có thể
+đổi bằng `RATE_LIMIT_WINDOW_MS` và `RATE_LIMIT_MAX_REQUESTS`.
 
-The observability variables in `.env.example` control log format, log level,
-trace export, and Swagger metadata. Do not commit a real `.env` file.
+Các biến observability trong `.env.example` điều khiển định dạng log, log level,
+trace export và metadata Swagger. Không commit file `.env` thật.
 
-## Local development
+## Chạy local
 
-The Gateway depends on the local Logger observability package. Keep the Logger
-repository beside this repository in the backend directory, then run:
+Gateway dùng package observability cục bộ của Logger. Đặt repository Logger cạnh
+repository này trong thư mục backend, sau đó chạy:
 
 ```bash
 npm ci --prefix ../logger/packages/observability --no-audit --no-fund
@@ -89,7 +89,7 @@ cp .env.example .env
 npm run start:dev
 ```
 
-Useful checks:
+Các lệnh kiểm tra:
 
 ```bash
 npm run lint
@@ -98,14 +98,14 @@ npm test
 npm run build
 ```
 
-The default local Gateway address is `http://localhost:3000`; Swagger is at
+Gateway local mặc định ở `http://localhost:3000`; Swagger ở
 `http://localhost:3000/api-docs`.
 
 ## CI/CD
 
-`.github/workflows/ci.yml` calls the pinned reusable Node.js quality workflow in
-[Logger](https://github.com/lethanh2006/Logger). It runs dependency and security
-checks, lint, formatting, tests, and the build. A successful push to the default
-branch triggers `.github/workflows/cd.yml`, which deploys the exact commit to the
-VPS through the pinned reusable deployment workflow. See [.github/CI.md](.github/CI.md)
-for the required repository secret and release details.
+`.github/workflows/ci.yml` gọi reusable workflow kiểm tra Node.js được pin trong
+[Logger](https://github.com/lethanh2006/Logger). Workflow chạy kiểm tra dependency
+và bảo mật, lint, format, test và build. Push thành công vào nhánh mặc định sẽ
+kích hoạt `.github/workflows/cd.yml` để deploy đúng commit lên VPS thông qua
+reusable deployment workflow đã pin. Xem [.github/CI.md](.github/CI.md) để biết
+secret cần thiết và quy trình phát hành.
