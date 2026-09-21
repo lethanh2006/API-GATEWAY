@@ -13,9 +13,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { WorkscheduleService } from './workschedule.service';
-import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
-import { RolesGuard } from '../auth/common/guard/role/role.guard';
-import { Public, Role, Roles } from '../../common/auth';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Public } from '../../common/decorators/public.decorator';
+import { Role } from '../../common/enums/role.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
 import {
   ApiTags,
   ApiOperation,

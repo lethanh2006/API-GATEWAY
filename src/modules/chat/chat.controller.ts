@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ChatService, type UploadedChatImage } from './chat.service';
-import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
-import { RolesGuard } from '../auth/common/guard/role/role.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import {
   ApiBearerAuth,
   ApiBody,

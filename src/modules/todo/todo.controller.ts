@@ -11,9 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
-import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
-import { RolesGuard } from '../auth/common/guard/role/role.guard';
-import { Role, Roles } from '../../common/auth';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Role } from '../../common/enums/role.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
 import {
   ApiTags,
   ApiOperation,

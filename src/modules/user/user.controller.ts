@@ -16,9 +16,10 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
-import { RolesGuard } from '../auth/common/guard/role/role.guard';
-import { Role, Roles } from '../../common/auth';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Role } from '../../common/enums/role.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('api/user')

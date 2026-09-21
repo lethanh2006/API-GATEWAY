@@ -3,8 +3,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { createJwtKey } from '../../../../../common/jwt-secret';
-import type { RequestWithContext } from '../../../../../common/request-context';
+import { createJwtKey } from '../config/jwt-secret';
+import type { RequestWithContext } from '../interfaces/request-context.interface';
 import { performance } from 'node:perf_hooks';
 
 @Injectable()

@@ -22,8 +22,7 @@ npm ci --no-audit --no-fund
 npm audit --omit=dev --audit-level=critical
 npm run lint
 npm run format:check
-npm test -- --ci --runInBand
-npm run build
+npm test
 ```
 
 ## CD lên VPS

@@ -2,11 +2,11 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
-import type { RequestWithContext } from '../../common/request-context';
-import { throwUpstreamError } from '../../common/upstream-error';
+import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { throwUpstreamError } from '../../common/http/upstream-error';
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { InternalRequestSignatureService } from '../../common/internal-request-signature.service';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import type { MyTaskQueryDto, TaskQueryDto } from './dto/task-query.dto';
 import type { UpdateTaskDto } from './dto/update-task.dto';
 

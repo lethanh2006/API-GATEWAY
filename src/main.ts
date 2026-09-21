@@ -1,5 +1,3 @@
-import '@nrapp/observability/register';
-
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,12 +7,9 @@ import * as bodyParser from 'body-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import {
-  flushLoggerAndShutdownTelemetry,
-  logAndRecordException,
-} from '@nrapp/observability';
-import { createValidationException } from './common/global-exception.filter';
-import { appLogger, nestLogger } from './common/observability';
+import { flushLogger, logException } from '@nrapp/observability';
+import { createValidationException } from './common/filters/global-exception.filter';
+import { appLogger, nestLogger } from './common/logging/logger';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { logger: nestLogger });
@@ -72,7 +67,7 @@ async function bootstrap(): Promise<void> {
     changeOrigin: true,
     ws: true,
     onError: (err: any, _req: any, response: any) => {
-      const result = logAndRecordException(
+      const result = logException(
         appLogger,
         'chat.socket_proxy.failed',
         err,
@@ -127,7 +122,7 @@ async function bootstrap(): Promise<void> {
 }
 
 void bootstrap().catch(async (error: unknown) => {
-  logAndRecordException(
+  logException(
     appLogger,
     'process.bootstrap.failed',
     error,
@@ -143,6 +138,6 @@ void bootstrap().catch(async (error: unknown) => {
       },
     },
   );
-  await flushLoggerAndShutdownTelemetry(appLogger, 3_000);
+  await flushLogger(appLogger);
   process.exitCode = 1;
 });

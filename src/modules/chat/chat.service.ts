@@ -4,11 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import FormData from 'form-data';
-import type { RequestWithContext } from '../../common/request-context';
-import { throwUpstreamError } from '../../common/upstream-error';
+import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { throwUpstreamError } from '../../common/http/upstream-error';
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { InternalRequestSignatureService } from '../../common/internal-request-signature.service';
+import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 
 export interface UploadedChatImage {
   buffer: Buffer;

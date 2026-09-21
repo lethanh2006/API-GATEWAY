@@ -2,14 +2,13 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import {
   DEFAULT_CODE_BY_STATUS,
   normalizeRouteTemplate,
-  recordHttpRejection,
 } from '@nrapp/observability';
 import type { NextFunction, Response } from 'express';
 import type {
   GatewayRequestOutcome,
   RequestWithContext,
-} from './request-context';
-import { StructuredLoggerService } from './observability';
+} from '../interfaces/request-context.interface';
+import { StructuredLoggerService } from '../logging/logger';
 import { performance } from 'node:perf_hooks';
 
 function notFoundSampleRate(): number {
@@ -48,11 +47,11 @@ export class RequestOutcomeMiddleware implements NestMiddleware {
     response: Response,
     next: NextFunction,
   ): void {
-    const traceMinMs = Number(process.env.PERF_TRACE_MIN_MS || 0);
-    const started = traceMinMs > 0 ? performance.now() : 0;
+    const logMinMs = Number(process.env.PERF_LOG_MIN_MS || 0);
+    const started = logMinMs > 0 ? performance.now() : 0;
     response.once('finish', () => {
       this.recordRejection(request, response);
-      if (started && performance.now() - started >= traceMinMs) {
+      if (started && performance.now() - started >= logMinMs) {
         this.recordTiming(request, response, performance.now() - started);
       }
     });
@@ -96,13 +95,6 @@ export class RequestOutcomeMiddleware implements NestMiddleware {
       outcome?.code ??
       DEFAULT_CODE_BY_STATUS[statusCode] ??
       `HTTP_${statusCode}`;
-
-    recordHttpRejection({
-      method: request.method,
-      route,
-      statusCode,
-      errorCode,
-    });
 
     if (statusCode === 404 && Math.random() > notFoundSampleRate()) {
       return;
