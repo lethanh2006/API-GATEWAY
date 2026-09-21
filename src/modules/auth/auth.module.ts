@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './common/guard/jwt/jwt.strategy';
 import { JwtAuthGuard } from './common/guard/jwt/jwt.guard';
 import { RolesGuard } from './common/guard/role/role.guard';
-import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
+import { UpstreamHttpModule } from '../../common/upstream-http.module';
 
 @Global()
 @Module({

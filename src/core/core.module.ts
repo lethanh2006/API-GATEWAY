@@ -1,13 +1,15 @@
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
-import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
-import { RateLimitMiddleware } from '../common/middleware/rate-limit.middleware';
-import { RequestIdMiddleware } from '../common/middleware/request-id.middleware';
-import { RequestOutcomeMiddleware } from '../common/middleware/request-outcome.middleware';
-import { StructuredLoggerService } from '../common/observability/structured-logger.service';
-import { TelemetryLifecycleService } from '../common/observability/telemetry-lifecycle.service';
-import { InternalRequestSignatureService } from '../common/security/internal-request-signature.service';
+import { GlobalExceptionFilter } from '../common/global-exception.filter';
+import { InternalRequestSignatureService } from '../common/internal-request-signature.service';
+import {
+  StructuredLoggerService,
+  TelemetryLifecycleService,
+} from '../common/observability';
+import { RateLimitMiddleware } from '../common/rate-limit.middleware';
+import { RequestIdMiddleware } from '../common/request-id.middleware';
+import { RequestOutcomeMiddleware } from '../common/request-outcome.middleware';
 
 @Global()
 @Module({

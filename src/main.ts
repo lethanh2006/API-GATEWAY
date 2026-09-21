@@ -13,8 +13,8 @@ import {
   flushLoggerAndShutdownTelemetry,
   logAndRecordException,
 } from '@nrapp/observability';
-import { createValidationException } from './common/validation/validation-exception';
-import { appLogger, nestLogger } from './common/observability/app-logger';
+import { createValidationException } from './common/global-exception.filter';
+import { appLogger, nestLogger } from './common/observability';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { logger: nestLogger });

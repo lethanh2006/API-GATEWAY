@@ -5,8 +5,8 @@ import type { HttpService } from '@nestjs/axios';
 import type { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
-import type { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import type { InternalRequestSignatureService } from '../../common/internal-request-signature.service';
+import type { RequestWithContext } from '../../common/request-context';
 import { MyTaskQueryDto, type TaskQueryDto } from './dto/task-query.dto';
 import { TodoService } from './todo.service';
 

@@ -3,20 +3,20 @@ import { EventEmitter } from 'node:events';
 import test from 'node:test';
 import { HttpException, InternalServerErrorException } from '@nestjs/common';
 import { getLogContext } from '@nrapp/observability';
-import { GlobalExceptionFilter } from '../filters/global-exception.filter';
+import { GlobalExceptionFilter } from './global-exception.filter';
 import {
   UpstreamHttpException,
   createUpstreamErrorPayload,
-} from '../http/upstream-error';
-import type { RequestWithContext } from '../interfaces/request-context.interface';
-import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
+} from './upstream-error';
+import type { RequestWithContext } from './request-context';
+import { RateLimitMiddleware } from './rate-limit.middleware';
 import {
   CLIENT_REQUEST_ID_HEADER,
   REQUEST_ID_HEADER,
   RequestIdMiddleware,
-} from '../middleware/request-id.middleware';
-import { RequestOutcomeMiddleware } from '../middleware/request-outcome.middleware';
-import type { StructuredLoggerService } from './structured-logger.service';
+} from './request-id.middleware';
+import { RequestOutcomeMiddleware } from './request-outcome.middleware';
+import type { StructuredLoggerService } from './observability';
 
 interface LoggedEvent {
   level: string;

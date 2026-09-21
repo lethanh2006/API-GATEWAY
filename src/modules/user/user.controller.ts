@@ -18,8 +18,7 @@ import {
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
-import { Roles } from '../../common/decorators/role.decorator';
-import { Role } from '../../common/enums/role.enum';
+import { Role, Roles } from '../../common/auth';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('api/user')

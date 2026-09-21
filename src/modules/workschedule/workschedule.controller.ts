@@ -15,9 +15,7 @@ import {
 import { WorkscheduleService } from './workschedule.service';
 import { JwtAuthGuard } from '../auth/common/guard/jwt/jwt.guard';
 import { RolesGuard } from '../auth/common/guard/role/role.guard';
-import { Roles } from '../../common/decorators/role.decorator';
-import { Public } from '../../common/decorators/public.decorator';
-import { Role } from '../../common/enums/role.enum';
+import { Public, Role, Roles } from '../../common/auth';
 import {
   ApiTags,
   ApiOperation,

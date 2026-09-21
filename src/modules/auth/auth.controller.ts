@@ -20,9 +20,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './common/guard/jwt/jwt.guard';
 import { RolesGuard } from './common/guard/role/role.guard';
-import { Roles } from '../../common/decorators/role.decorator';
-import { Public } from '../../common/decorators/public.decorator';
-import { Role } from '../../common/enums/role.enum';
+import { Public, Role, Roles } from '../../common/auth';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';

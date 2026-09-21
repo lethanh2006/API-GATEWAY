@@ -1,10 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, type OnApplicationShutdown } from '@nestjs/common';
 import {
   createAppLogger,
+  flushLoggerAndShutdownTelemetry,
   logAndRecordException,
   type ClassificationOverrides,
+  PinoNestLogger,
 } from '@nrapp/observability';
-import { appLogger } from './app-logger';
+
+export const appLogger: ReturnType<typeof createAppLogger> = createAppLogger({
+  serviceName: 'gateway',
+});
+
+export const nestLogger = new PinoNestLogger(appLogger, 'Gateway');
 
 export type LogDetails = Record<string, unknown>;
 
@@ -52,5 +59,12 @@ export class StructuredLoggerService {
       errorId: result.errorId,
       recordedOnSpan: result.recordedOnSpan,
     };
+  }
+}
+
+@Injectable()
+export class TelemetryLifecycleService implements OnApplicationShutdown {
+  async onApplicationShutdown(): Promise<void> {
+    await flushLoggerAndShutdownTelemetry(appLogger, 3_000);
   }
 }

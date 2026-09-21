@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
+import { InternalRequestSignatureService } from '../../common/internal-request-signature.service';
+import type { RequestWithContext } from '../../common/request-context';
 import { UserService } from './user.service';
 
 test('admin profile dùng internal endpoint và identity đã ký', async () => {

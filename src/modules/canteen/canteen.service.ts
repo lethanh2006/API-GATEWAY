@@ -3,9 +3,9 @@ import { REQUEST } from '@nestjs/core';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { throwUpstreamError } from '../../common/http/upstream-error';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
-import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import { InternalRequestSignatureService } from '../../common/internal-request-signature.service';
+import type { RequestWithContext } from '../../common/request-context';
+import { throwUpstreamError } from '../../common/upstream-error';
 import { randomUUID } from 'crypto';
 
 @Injectable({ scope: Scope.REQUEST })

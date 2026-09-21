@@ -8,8 +8,8 @@ import type { NextFunction, Response } from 'express';
 import type {
   GatewayRequestOutcome,
   RequestWithContext,
-} from '../interfaces/request-context.interface';
-import { StructuredLoggerService } from '../observability/structured-logger.service';
+} from './request-context';
+import { StructuredLoggerService } from './observability';
 import { performance } from 'node:perf_hooks';
 
 function notFoundSampleRate(): number {

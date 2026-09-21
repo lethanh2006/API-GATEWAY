@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { WorkscheduleController } from './workschedule.controller';
 import { WorkscheduleService } from './workschedule.service';
-import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
+import { UpstreamHttpModule } from '../../common/upstream-http.module';
 
 @Module({
   imports: [UpstreamHttpModule],

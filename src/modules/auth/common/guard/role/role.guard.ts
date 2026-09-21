@@ -6,8 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../../../../../common/constants/metadata-keys';
-import { Role } from '../../../../../common/enums/role.enum';
+import { Role, ROLES_KEY } from '../../../../../common/auth';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
