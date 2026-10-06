@@ -8,6 +8,10 @@ import { validate } from 'class-validator';
 import type { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
 import { MyTaskQueryDto, type TaskQueryDto } from './dto/task-query.dto';
+import { UpdateTaskDeadlineDto } from './dto/update-task-deadline.dto';
+import { UpdateTaskPriorityDto } from './dto/update-task-priority.dto';
+import { UpdateTaskProgressDto } from './dto/update-task-progress.dto';
+import { UpcomingDeadlineQueryDto } from './dto/upcoming-deadline-query.dto';
 import { TodoService } from './todo.service';
 
 const USER_ID = '507f1f77bcf86cd799439012';
@@ -191,4 +195,112 @@ test('DTO danh sách cá nhân loại bỏ bộ lọc quản trị', async () =>
   assert.equal(query.search, 'bếp');
   assert.equal('assignedTo' in query, false);
   assert.equal('createdBy' in query, false);
+});
+
+test('API Todo mới chuyển đúng payload, query và chữ ký theo method/path', async () => {
+  const harness = createHarness();
+  const user = { _id: USER_ID, role: 'manager' };
+  const deadline = '2026-12-31T23:59:59.000Z';
+
+  await harness.service.updateTaskPriority('id/co-slash', 'urgent', user);
+  await harness.service.updateTaskDeadline('id/co-slash', deadline, user);
+  await harness.service.updateTaskProgress('id/co-slash', 75, user);
+  await harness.service.getOverdue(user);
+  await harness.service.getUpcomingDeadline({ days: 7 }, user);
+
+  assert.deepEqual(
+    harness.requestCalls.map(({ method, url, data, params }) => ({
+      method,
+      url,
+      data,
+      params,
+    })),
+    [
+      {
+        method: 'PATCH',
+        url: 'http://todo.test/api/todo/id%2Fco-slash/priority',
+        data: { priority: 'urgent' },
+        params: null,
+      },
+      {
+        method: 'PATCH',
+        url: 'http://todo.test/api/todo/id%2Fco-slash/deadline',
+        data: { deadline },
+        params: null,
+      },
+      {
+        method: 'PATCH',
+        url: 'http://todo.test/api/todo/id%2Fco-slash/progress',
+        data: { progress: 75 },
+        params: null,
+      },
+      {
+        method: 'GET',
+        url: 'http://todo.test/api/todo/overdue',
+        data: null,
+        params: null,
+      },
+      {
+        method: 'GET',
+        url: 'http://todo.test/api/todo/upcoming-deadline',
+        data: null,
+        params: { days: 7 },
+      },
+    ],
+  );
+  assert.deepEqual(
+    harness.signatureCalls.map(({ context }) => context),
+    [
+      'PATCH:/api/todo/id%2Fco-slash/priority',
+      'PATCH:/api/todo/id%2Fco-slash/deadline',
+      'PATCH:/api/todo/id%2Fco-slash/progress',
+      'GET:/api/todo/overdue',
+      'GET:/api/todo/upcoming-deadline',
+    ],
+  );
+});
+
+test('DTO Todo nhận urgent và chặn tiến độ, hạn chót, số ngày không hợp lệ', async () => {
+  assert.deepEqual(
+    await validate(
+      plainToInstance(UpdateTaskPriorityDto, { priority: 'urgent' }),
+    ),
+    [],
+  );
+  assert.deepEqual(
+    await validate(plainToInstance(UpdateTaskProgressDto, { progress: 75 })),
+    [],
+  );
+  assert.deepEqual(
+    await validate(plainToInstance(UpcomingDeadlineQueryDto, { days: '7' })),
+    [],
+  );
+  for (const progress of [-1, 101, 50.5, 'abc', null]) {
+    assert(
+      (await validate(plainToInstance(UpdateTaskProgressDto, { progress })))
+        .length > 0,
+    );
+  }
+  for (const days of [0, 31, 1.5, 'abc']) {
+    assert(
+      (await validate(plainToInstance(UpcomingDeadlineQueryDto, { days })))
+        .length > 0,
+    );
+  }
+  assert(
+    (
+      await validate(
+        plainToInstance(UpdateTaskDeadlineDto, { deadline: 'invalid-date' }),
+      )
+    ).length > 0,
+  );
+  assert(
+    (
+      await validate(
+        plainToInstance(UpdateTaskPriorityDto, {
+          priority: 'invalid-priority',
+        }),
+      )
+    ).length > 0,
+  );
 });

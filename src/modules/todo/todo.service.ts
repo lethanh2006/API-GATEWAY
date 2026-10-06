@@ -109,6 +109,16 @@ export class TodoService {
     );
   }
 
+  async updateTaskPriority(id: string, priority: string, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/todo/${encodeURIComponent(id)}/priority`,
+      { priority },
+      null,
+      user,
+    );
+  }
+
   async getAllTasks(query: TaskQueryDto, user: any) {
     return this.forward('GET', '/api/todo', null, query, user);
   }
@@ -119,6 +129,40 @@ export class TodoService {
       `/api/todo/${encodeURIComponent(id)}`,
       null,
       null,
+      user,
+    );
+  }
+
+  async updateTaskDeadline(id: string, deadline: string, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/todo/${encodeURIComponent(id)}/deadline`,
+      { deadline },
+      null,
+      user,
+    );
+  }
+
+  async updateTaskProgress(id: string, progress: number, user: any) {
+    return this.forward(
+      'PATCH',
+      `/api/todo/${encodeURIComponent(id)}/progress`,
+      { progress },
+      null,
+      user,
+    );
+  }
+
+  async getOverdue(user: any) {
+    return this.forward('GET', '/api/todo/overdue', null, null, user);
+  }
+
+  async getUpcomingDeadline(query: any, user: any) {
+    return this.forward(
+      'GET',
+      '/api/todo/upcoming-deadline',
+      null,
+      query,
       user,
     );
   }
