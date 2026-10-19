@@ -1,97 +1,61 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
-import { throwUpstreamError } from '../../common/http/upstream-error';
-import { randomUUID } from 'node:crypto';
-import { performance } from 'node:perf_hooks';
+
+import { UpstreamClient } from '../../common/http/upstream-client';
+import type {
+  GatewayUser,
+  RequestWithContext,
+} from '../../common/interfaces/request-context.interface';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import type { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
-  private readonly baseUrl: string;
+  private readonly upstream: UpstreamClient;
 
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    @Inject(REQUEST) private readonly request: RequestWithContext,
-    private readonly signatureService: InternalRequestSignatureService,
+    httpService: HttpService,
+    configService: ConfigService,
+    @Inject(REQUEST) request: RequestWithContext,
+    signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>(
-      'USER_SERVICE_URL',
-      'http://localhost:5000',
-    );
+    this.upstream = new UpstreamClient({
+      httpService,
+      signatureService,
+      request,
+      service: 'user',
+      baseUrl: configService.get<string>(
+        'USER_SERVICE_URL',
+        'http://localhost:5000',
+      ),
+      label: 'Dịch vụ người dùng',
+    });
   }
 
-  private async forward(
-    method: string,
-    path: string,
-    data?: any,
-    params?: any,
-    user?: any,
-  ) {
-    const requestId = this.request.requestContext?.requestId ?? randomUUID();
-    const headers: Record<string, string> = {
-      'x-request-id': requestId,
-    };
-    if (user) {
-      const userPayloadStr = JSON.stringify(user);
-      const base64User = Buffer.from(userPayloadStr).toString('base64');
-      Object.assign(
-        headers,
-        this.signatureService.signUserPayload(
-          base64User,
-          requestId,
-          'user',
-          `${method.toUpperCase()}:${path}`,
-        ),
-      );
-    }
-
-    const started = performance.now();
-    try {
-      const response = await this.httpService.axiosRef.request({
-        method,
-        url: `${this.baseUrl}${path}`,
-        data,
-        params,
-        headers,
-      });
-      return response.data;
-    } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ người dùng');
-    } finally {
-      if (this.request.requestContext) {
-        (this.request.requestContext.perf ??= {}).upstreamMs =
-          performance.now() - started;
-      }
-    }
+  getMyProfile(user: GatewayUser) {
+    return this.upstream.get('/api/user/me', { user });
   }
 
-  async getMyProfile(user: any) {
-    return this.forward('GET', '/api/user/me', null, null, user);
-  }
-
-  async getPublicProfile(userId: string, user: any) {
-    return this.forward('GET', `/api/user/user/${userId}`, null, null, user);
-  }
-
-  async getFullProfileByAdmin(userId: string, user: any) {
-    return this.forward(
-      'GET',
-      `/api/user/internal/admin/${encodeURIComponent(userId)}`,
-      null,
-      null,
+  getPublicProfile(userId: string, user: GatewayUser) {
+    return this.upstream.get(`/api/user/user/${encodeURIComponent(userId)}`, {
       user,
+    });
+  }
+
+  getFullProfileByAdmin(userId: string, user: GatewayUser) {
+    return this.upstream.get(
+      `/api/user/internal/admin/${encodeURIComponent(userId)}`,
+      { user },
     );
   }
 
-  async getAllUsers(user: any) {
-    return this.forward('GET', '/api/user/user/all', null, null, user);
+  getAllUsers(user: GatewayUser) {
+    return this.upstream.get('/api/user/user/all', { user });
   }
 
-  async updateUser(dto: any, user: any) {
-    return this.forward('POST', '/api/user/update/user', dto, null, user);
+  updateUser(dto: UpdateUserDto, user: GatewayUser) {
+    return this.upstream.post('/api/user/update/user', dto, { user });
   }
 }

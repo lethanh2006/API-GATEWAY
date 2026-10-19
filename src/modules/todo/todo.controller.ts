@@ -1,35 +1,41 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
   Param,
+  Patch,
+  Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { TodoService } from './todo.service';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Role } from '../../common/enums/role.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
-import { CreateTaskDto } from './dto/create-task.dto';
+import type { AuthenticatedRequest } from '../../common/interfaces/request-context.interface';
 import { AssignTaskDto, UpdateTaskStatusDto } from './dto/assign-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { MyTaskQueryDto, TaskQueryDto } from './dto/task-query.dto';
 import { UpcomingDeadlineQueryDto } from './dto/upcoming-deadline-query.dto';
 import { UpdateTaskDeadlineDto } from './dto/update-task-deadline.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { UpdateTaskPriorityDto } from './dto/update-task-priority.dto';
 import { UpdateTaskProgressDto } from './dto/update-task-progress.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { TodoService } from './todo.service';
 
+/**
+ * Công việc: ai cũng xem và cập nhật việc của mình, nhóm quản lý (ADMIN, MANAGER, CHEF) tạo,
+ * giao, sửa, xóa; chuyển tiếp tới Todo.
+ */
 @ApiTags('Api Todo')
 @Controller('api/todo')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -39,7 +45,7 @@ export class TodoController {
   @Get('my-tasks')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy danh sách công việc của người dùng hiện tại' })
-  async getMyTasks(@Query() query: MyTaskQueryDto, @Req() req: any) {
+  getMyTasks(@Query() query: MyTaskQueryDto, @Req() req: AuthenticatedRequest) {
     return this.todoService.getMyTasks(query, req.user);
   }
 
@@ -47,10 +53,10 @@ export class TodoController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cập nhật trạng thái của một công việc' })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async updateTaskStatus(
+  updateTaskStatus(
     @Param('id') id: string,
     @Body() body: UpdateTaskStatusDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.updateTaskStatus(id, body.status, req.user);
   }
@@ -59,7 +65,7 @@ export class TodoController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Tạo công việc mới (ADMIN, MANAGER, CHEF)' })
-  async createTask(@Body() body: CreateTaskDto, @Req() req: any) {
+  createTask(@Body() body: CreateTaskDto, @Req() req: AuthenticatedRequest) {
     return this.todoService.createTask(body, req.user);
   }
 
@@ -70,10 +76,10 @@ export class TodoController {
     summary: 'Giao lại công việc cho người dùng (ADMIN, MANAGER, CHEF)',
   })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async assignTask(
+  assignTask(
     @Param('id') id: string,
     @Body() body: AssignTaskDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.assignTask(id, body.assignedTo, req.user);
   }
@@ -85,10 +91,10 @@ export class TodoController {
     summary: 'Cập nhật nội dung công việc (ADMIN, MANAGER, CHEF)',
   })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async updateTask(
+  updateTask(
     @Param('id') id: string,
     @Body() body: UpdateTaskDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.updateTask(id, body, req.user);
   }
@@ -100,10 +106,10 @@ export class TodoController {
     summary: 'Cập nhật mức độ ưu tiên của công việc (ADMIN, MANAGER, CHEF)',
   })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async updatePriority(
+  updatePriority(
     @Param('id') id: string,
     @Body() body: UpdateTaskPriorityDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.updateTaskPriority(id, body.priority, req.user);
   }
@@ -115,10 +121,10 @@ export class TodoController {
     summary: 'Cập nhật hạn chót công việc (ADMIN, MANAGER, CHEF)',
   })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async updateDeadline(
+  updateDeadline(
     @Param('id') id: string,
     @Body() body: UpdateTaskDeadlineDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.updateTaskDeadline(id, body.deadline, req.user);
   }
@@ -129,10 +135,10 @@ export class TodoController {
     summary: 'Cập nhật tiến độ hoàn thành % của công việc',
   })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async updateProgress(
+  updateProgress(
     @Param('id') id: string,
     @Body() body: UpdateTaskProgressDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.updateTaskProgress(id, body.progress, req.user);
   }
@@ -142,7 +148,7 @@ export class TodoController {
   @ApiOperation({
     summary: 'Lấy danh sách các công việc đã quá hạn chót',
   })
-  async getOverdue(@Req() req: any) {
+  getOverdue(@Req() req: AuthenticatedRequest) {
     return this.todoService.getOverdue(req.user);
   }
 
@@ -151,9 +157,9 @@ export class TodoController {
   @ApiOperation({
     summary: 'Lấy danh sách các công việc sắp đến hạn chót trong N ngày',
   })
-  async getUpcomingDeadline(
+  getUpcomingDeadline(
     @Query() query: UpcomingDeadlineQueryDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.todoService.getUpcomingDeadline(query, req.user);
   }
@@ -162,7 +168,7 @@ export class TodoController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Lấy tất cả công việc (ADMIN, MANAGER, CHEF)' })
-  async getAllTasks(@Query() query: TaskQueryDto, @Req() req: any) {
+  getAllTasks(@Query() query: TaskQueryDto, @Req() req: AuthenticatedRequest) {
     return this.todoService.getAllTasks(query, req.user);
   }
 
@@ -170,7 +176,7 @@ export class TodoController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy chi tiết công việc được phép truy cập' })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async getTaskById(@Param('id') id: string, @Req() req: any) {
+  getTaskById(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.todoService.getTaskById(id, req.user);
   }
 
@@ -179,7 +185,7 @@ export class TodoController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.CHEF)
   @ApiOperation({ summary: 'Xóa công việc (ADMIN, MANAGER, CHEF)' })
   @ApiParam({ name: 'id', example: '507f1f77bcf86cd799439011' })
-  async deleteTask(@Param('id') id: string, @Req() req: any) {
+  deleteTask(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.todoService.deleteTask(id, req.user);
   }
 }

@@ -11,9 +11,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ChatService, type UploadedChatImage } from './chat.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -23,10 +20,16 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import type { AuthenticatedRequest } from '../../common/interfaces/request-context.interface';
+import { filterSupportedChatImage } from './chat-image-upload';
+import { ChatService, type UploadedChatImage } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
-import { filterSupportedChatImage } from './chat-image-upload';
 
+/** Trò chuyện 1-1 và gửi ảnh; chuyển tiếp tới Chat. */
 @ApiTags('Api Chat')
 @Controller('api/chat')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -38,7 +41,7 @@ export class ChatController {
   @ApiOperation({ summary: 'Tạo cuộc trò chuyện mới' })
   async createChat(
     @Body() body: CreateChatDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
     const result = await this.chatService.createChat(body, req.user);
@@ -49,7 +52,7 @@ export class ChatController {
   @Get('chat/all')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy danh sách tất cả trò chuyện' })
-  async getAllChats(@Req() req: any) {
+  getAllChats(@Req() req: AuthenticatedRequest) {
     return this.chatService.getAllChats(req.user);
   }
 
@@ -75,10 +78,10 @@ export class ChatController {
     },
   })
   @ApiOperation({ summary: 'Gửi tin nhắn mới (chứa text hoặc file ảnh)' })
-  async sendMessage(
+  sendMessage(
     @Body() body: SendMessageDto,
     @UploadedFile() image: UploadedChatImage | undefined,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.chatService.sendMessage(body, image, req.user);
   }
@@ -87,7 +90,10 @@ export class ChatController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy danh sách tin nhắn theo ID cuộc trò chuyện' })
   @ApiParam({ name: 'chatId', example: 'chatId123' })
-  async getMessages(@Param('chatId') chatId: string, @Req() req: any) {
+  getMessages(
+    @Param('chatId') chatId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.chatService.getMessages(chatId, req.user);
   }
 }

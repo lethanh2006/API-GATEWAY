@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
 import test from 'node:test';
-import { ConfigService } from '@nestjs/config';
 import { ServiceUnavailableException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
 import { InternalRequestSignatureService } from './internal-request-signature.service';
 
 const strongSecret = '0123456789abcdef0123456789abcdef';

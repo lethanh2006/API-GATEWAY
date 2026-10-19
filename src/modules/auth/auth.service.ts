@@ -1,123 +1,93 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
-import { firstValueFrom } from 'rxjs';
+
+import { UpstreamClient } from '../../common/http/upstream-client';
+import type {
+  GatewayUser,
+  RequestWithContext,
+} from '../../common/interfaces/request-context.interface';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
-import { throwUpstreamError } from '../../common/http/upstream-error';
-import { randomUUID } from 'node:crypto';
+import type { LoginDto } from './dto/login.dto';
+import type { RefreshTokenDto } from './dto/refresh-token.dto';
+import type { RegisterDto } from './dto/register.dto';
+import type { LoginGoogleDto, UpdateEmailDto } from './dto/update-email.dto';
+import type { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
-  private readonly baseUrl: string;
+  private readonly upstream: UpstreamClient;
 
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    @Inject(REQUEST) private readonly request: RequestWithContext,
-    private readonly signatureService: InternalRequestSignatureService,
+    httpService: HttpService,
+    configService: ConfigService,
+    @Inject(REQUEST) request: RequestWithContext,
+    signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>(
-      'AUTH_SERVICE_URL',
-      'http://localhost:4000',
-    );
+    this.upstream = new UpstreamClient({
+      httpService,
+      signatureService,
+      request,
+      service: 'auth',
+      baseUrl: configService.get<string>(
+        'AUTH_SERVICE_URL',
+        'http://localhost:4000',
+      ),
+      label: 'Dịch vụ xác thực',
+    });
   }
 
-  private async forward(
-    method: string,
-    path: string,
-    data?: any,
-    params?: any,
-    user?: any,
-  ) {
-    const requestId = this.request.requestContext?.requestId ?? randomUUID();
-    const headers: Record<string, string> = {
-      'x-request-id': requestId,
-    };
-    if (user) {
-      const userPayloadStr = JSON.stringify(user);
-      const base64User = Buffer.from(userPayloadStr).toString('base64');
-      Object.assign(
-        headers,
-        this.signatureService.signUserPayload(
-          base64User,
-          requestId,
-          'auth',
-          `${method.toUpperCase()}:${path}`,
-        ),
-      );
-    }
-
-    try {
-      const response = await firstValueFrom(
-        this.httpService.request({
-          method,
-          url: `${this.baseUrl}${path}`,
-          data,
-          params,
-          headers,
-        }),
-      );
-      return response.data;
-    } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ xác thực');
-    }
+  register(dto: RegisterDto) {
+    return this.upstream.post('/api/auth/register', dto);
   }
 
-  async register(dto: any) {
-    return this.forward('POST', '/api/auth/register', dto);
+  login(dto: LoginDto) {
+    return this.upstream.post('/api/auth/login', dto);
   }
 
-  async login(dto: any) {
-    return this.forward('POST', '/api/auth/login', dto);
+  verifyOtp(dto: VerifyOtpDto) {
+    return this.upstream.post('/api/auth/verify', dto);
   }
 
-  async verifyOtp(dto: any) {
-    return this.forward('POST', '/api/auth/verify', dto);
+  refresh(dto: RefreshTokenDto) {
+    return this.upstream.post('/api/auth/refresh', dto);
   }
 
-  async refresh(dto: any) {
-    return this.forward('POST', '/api/auth/refresh', dto);
+  loginWithGoogle(dto: LoginGoogleDto) {
+    return this.upstream.post('/api/auth/login-google', dto);
   }
 
-  async loginWithGoogle(dto: any) {
-    return this.forward('POST', '/api/auth/login-google', dto);
+  getMyProfile(user: GatewayUser) {
+    return this.upstream.get('/api/auth/me', { user });
   }
 
-  async getMyProfile(user: any) {
-    return this.forward('GET', '/api/auth/me', null, null, user);
+  updateMyEmail(dto: UpdateEmailDto, user: GatewayUser) {
+    return this.upstream.patch('/api/auth/me/email', dto, { user });
   }
 
-  async updateMyEmail(dto: any, user: any) {
-    return this.forward('PATCH', '/api/auth/me/email', dto, null, user);
+  deleteMyAccount(user: GatewayUser) {
+    return this.upstream.delete('/api/auth/me', { user });
   }
 
-  async deleteMyAccount(user: any) {
-    return this.forward('DELETE', '/api/auth/me', null, null, user);
-  }
-
-  async getUserProfileByAdmin(userId: string, user: any) {
-    return this.forward('GET', `/api/auth/users/${userId}`, null, null, user);
-  }
-
-  async deleteUserByAdmin(userId: string, user: any) {
-    return this.forward(
-      'DELETE',
-      `/api/auth/users/${userId}`,
-      null,
-      null,
+  getUserProfileByAdmin(userId: string, user: GatewayUser) {
+    return this.upstream.get(`/api/auth/users/${encodeURIComponent(userId)}`, {
       user,
+    });
+  }
+
+  deleteUserByAdmin(userId: string, user: GatewayUser) {
+    return this.upstream.delete(
+      `/api/auth/users/${encodeURIComponent(userId)}`,
+      { user },
     );
   }
 
-  async updateUserRole(userId: string, role: string, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/auth/users/${userId}/role`,
+  updateUserRole(userId: string, role: string, user: GatewayUser) {
+    return this.upstream.patch(
+      `/api/auth/users/${encodeURIComponent(userId)}/role`,
       { role },
-      null,
-      user,
+      { user },
     );
   }
 }

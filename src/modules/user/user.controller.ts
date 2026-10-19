@@ -1,86 +1,80 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Param,
-  Req,
-  UseGuards,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
   ApiBearerAuth,
+  ApiOperation,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
-import { UserService } from './user.service';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Role } from '../../common/enums/role.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
+import type { AuthenticatedRequest } from '../../common/interfaces/request-context.interface';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserService } from './user.service';
 
+/**
+ * Hồ sơ người dùng: `me` và `admin/:userId` gộp dữ liệu Auth với User, các route còn lại chuyển
+ * tiếp tới User.
+ */
 @Controller('api/user')
 @ApiTags('Api User')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // ============================================================
-  // USER — xem profile của chính mình (full info)
-  // ============================================================
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Lấy full profile của bản thân (USER) — BFF aggregate auth + user',
   })
-  async getMyProfile(@Req() req: any) {
+  getMyProfile(@Req() req: AuthenticatedRequest) {
     return this.userService.getMyProfile(req.user);
   }
 
-  // ============================================================
-  // USER — xem danh sách tất cả người dùng trong hệ thống
-  // ============================================================
   @Get('user/all')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Lấy danh sách tất cả người dùng trong hệ thống (USER)',
   })
-  async getAllUsers(@Req() req: any) {
+  getAllUsers(@Req() req: AuthenticatedRequest) {
     return this.userService.getAllUsers(req.user);
   }
 
-  // ============================================================
-  // USER — xem profile public của user khác
-  // ============================================================
   @Get(':userId')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Xem profile public của user khác (USER) — chỉ realname',
   })
   @ApiParam({ name: 'userId', example: '1' })
-  async getPublicProfile(@Param('userId') userId: string, @Req() req: any) {
+  getPublicProfile(
+    @Param('userId') userId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.userService.getPublicProfile(userId, req.user);
   }
 
-  // ============================================================
-  // USER — cập nhật thông tin tên người dùng
-  // ============================================================
   @Post('update/user')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cập nhật tên hiển thị của người dùng (USER)',
   })
-  async updateUser(@Body() body: UpdateUserDto, @Req() req: any) {
+  updateUser(@Body() body: UpdateUserDto, @Req() req: AuthenticatedRequest) {
     return this.userService.updateUser(body, req.user);
   }
 
-  // ============================================================
-  // ADMIN — xem full profile của user bất kỳ
-  // ============================================================
   @Get('admin/:userId')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
@@ -88,9 +82,9 @@ export class UserController {
     summary: 'Xem full profile của user bất kỳ (ADMIN) — BFF aggregate',
   })
   @ApiParam({ name: 'userId', example: '1' })
-  async getFullProfileByAdmin(
+  getFullProfileByAdmin(
     @Param('userId') userId: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.userService.getFullProfileByAdmin(userId, req.user);
   }

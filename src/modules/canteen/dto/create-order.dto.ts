@@ -1,18 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsMongoId,
-  IsString,
-  IsOptional,
-  IsInt,
-  Min,
-  Max,
-  IsArray,
-  ArrayMinSize,
-  ValidateNested,
-  IsEnum,
-} from 'class-validator';
 import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 export class OrderSelectedOptionDto {
   @ApiProperty({ example: 'Trứng opla', description: 'Tên tùy chọn kèm theo' })

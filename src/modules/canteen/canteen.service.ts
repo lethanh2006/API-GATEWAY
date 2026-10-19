@@ -1,272 +1,216 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
 import { HttpService } from '@nestjs/axios';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
+import { REQUEST } from '@nestjs/core';
+
+import { UpstreamClient } from '../../common/http/upstream-client';
+import type {
+  GatewayUser,
+  RequestWithContext,
+} from '../../common/interfaces/request-context.interface';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
-import { throwUpstreamError } from '../../common/http/upstream-error';
-import { randomUUID } from 'crypto';
+import type { CancelOrderDto } from './dto/cancel-order.dto';
+import type { CategoryQueryDto } from './dto/category-query.dto';
+import type { CreateCategoryDto } from './dto/create-category.dto';
+import type { CreateMenuItemDto } from './dto/create-menu-item.dto';
+import type { CreateOrderDto } from './dto/create-order.dto';
+import type { CreateTableDto } from './dto/create-table.dto';
+import type { OrderQueryDto } from './dto/order-query.dto';
+import type { ReplyReviewDto } from './dto/reply-review.dto';
+import type {
+  ReviewQueryDto,
+  ReviewSummaryQueryDto,
+} from './dto/review-query.dto';
+import type { TableQueryDto } from './dto/table-query.dto';
+import type { UpdateCategoryDto } from './dto/update-category.dto';
+import type { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import type { UpdateTableStatusDto } from './dto/update-table-status.dto';
+import type { UpdateTableDto } from './dto/update-table.dto';
+import type { UpsertReviewDto } from './dto/upsert-review.dto';
+
+const MENU = '/api/canteen/menu';
+const ADMIN_MENU = '/api/canteen/admin/menu';
+const ORDERS = '/api/canteen/orders';
+const REVIEWS = '/api/canteen/reviews';
+const TABLES = '/api/canteen/tables';
+const CATEGORIES = '/api/canteen/categories';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CanteenService {
-  private readonly baseUrl: string;
+  private readonly upstream: UpstreamClient;
 
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    private readonly signatureService: InternalRequestSignatureService,
-    @Inject(REQUEST) private readonly request: RequestWithContext,
+    httpService: HttpService,
+    configService: ConfigService,
+    signatureService: InternalRequestSignatureService,
+    @Inject(REQUEST) request: RequestWithContext,
   ) {
-    this.baseUrl = this.configService.get<string>(
-      'CANTEEN_SERVICE_URL',
-      'http://localhost:5005',
-    );
+    this.upstream = new UpstreamClient({
+      httpService,
+      signatureService,
+      request,
+      service: 'canteen',
+      baseUrl: configService.get<string>(
+        'CANTEEN_SERVICE_URL',
+        'http://localhost:5005',
+      ),
+      label: 'Dịch vụ căn tin',
+      // Hợp đồng của Canteen chỉ ký danh tính, không gắn với METHOD:path.
+      signRoute: false,
+    });
   }
 
-  private async forward(
-    method: string,
-    path: string,
-    data?: any,
-    params?: any,
-    user?: any,
-  ) {
-    const requestId = this.request.requestContext?.requestId ?? randomUUID();
-    const headers: Record<string, string> = {
-      'x-request-id': requestId,
-    };
-    if (user) {
-      const userPayloadStr = JSON.stringify(user);
-      const base64User = Buffer.from(userPayloadStr).toString('base64');
-      Object.assign(
-        headers,
-        this.signatureService.signUserPayload(base64User, requestId),
-      );
-    }
-
-    try {
-      const response = await firstValueFrom(
-        this.httpService.request({
-          method,
-          url: `${this.baseUrl}${path}`,
-          data,
-          params,
-          headers,
-        }),
-      );
-      return response.data;
-    } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ căn tin');
-    }
+  getMenu() {
+    return this.upstream.get(MENU);
   }
 
-  // --- Menu APIs ---
-  async getMenu() {
-    return this.forward('GET', '/api/canteen/menu');
+  searchMenu(query: string) {
+    return this.upstream.get(`${MENU}/search`, {
+      params: query ? { q: query } : undefined,
+    });
   }
 
-  async searchMenu(query: string) {
-    const params = query ? { q: query } : undefined;
-    return this.forward('GET', '/api/canteen/menu/search', null, params);
+  getAdminMenu(user: GatewayUser) {
+    return this.upstream.get(ADMIN_MENU, { user });
   }
 
-  async getAdminMenu(user: any) {
-    return this.forward('GET', '/api/canteen/admin/menu', null, null, user);
+  createMenuItem(dto: CreateMenuItemDto, user: GatewayUser) {
+    return this.upstream.post(ADMIN_MENU, dto, { user });
   }
 
-  async createMenuItem(dto: any, user: any) {
-    return this.forward('POST', '/api/canteen/admin/menu', dto, null, user);
+  updateMenuItem(id: string, dto: UpdateMenuItemDto, user: GatewayUser) {
+    return this.upstream.put(`${ADMIN_MENU}/${encodeURIComponent(id)}`, dto, {
+      user,
+    });
   }
 
-  async updateMenuItem(id: string, dto: any, user: any) {
-    return this.forward(
-      'PUT',
-      `/api/canteen/admin/menu/${id}`,
+  deleteMenuItem(id: string, user: GatewayUser) {
+    return this.upstream.delete(`${ADMIN_MENU}/${encodeURIComponent(id)}`, {
+      user,
+    });
+  }
+
+  undoMenuItemChange(user: GatewayUser) {
+    return this.upstream.post(`${ADMIN_MENU}/undo`, undefined, { user });
+  }
+
+  redoMenuItemChange(user: GatewayUser) {
+    return this.upstream.post(`${ADMIN_MENU}/redo`, undefined, { user });
+  }
+
+  createOrder(dto: CreateOrderDto, user: GatewayUser) {
+    return this.upstream.post(ORDERS, dto, { user });
+  }
+
+  getOrders(params: OrderQueryDto, user: GatewayUser) {
+    return this.upstream.get(ORDERS, { params, user });
+  }
+
+  getMyOrders(user: GatewayUser) {
+    return this.upstream.get(`${ORDERS}/my-orders`, { user });
+  }
+
+  getOrderById(id: string, user: GatewayUser) {
+    return this.upstream.get(`${ORDERS}/${encodeURIComponent(id)}`, { user });
+  }
+
+  cancelOrder(id: string, dto: CancelOrderDto, user: GatewayUser) {
+    return this.upstream.patch(
+      `${ORDERS}/${encodeURIComponent(id)}/cancel`,
       dto,
-      null,
-      user,
+      { user },
     );
   }
 
-  async deleteMenuItem(id: string, user: any) {
-    return this.forward(
-      'DELETE',
-      `/api/canteen/admin/menu/${id}`,
-      null,
-      null,
-      user,
+  confirmCashPayment(id: string, user: GatewayUser) {
+    return this.upstream.patch(
+      `${ORDERS}/${encodeURIComponent(id)}/payment/cash`,
+      undefined,
+      { user },
     );
   }
 
-  async undoMenuItemChange(user: any) {
-    return this.forward(
-      'POST',
-      '/api/canteen/admin/menu/undo',
-      null,
-      null,
-      user,
-    );
-  }
-
-  async redoMenuItemChange(user: any) {
-    return this.forward(
-      'POST',
-      '/api/canteen/admin/menu/redo',
-      null,
-      null,
-      user,
-    );
-  }
-
-  // --- Order APIs ---
-  async createOrder(dto: any, user: any) {
-    return this.forward('POST', '/api/canteen/orders', dto, null, user);
-  }
-
-  async getOrders(params: any, user: any) {
-    return this.forward('GET', '/api/canteen/orders', null, params, user);
-  }
-
-  async getMyOrders(user: any) {
-    return this.forward(
-      'GET',
-      '/api/canteen/orders/my-orders',
-      null,
-      null,
-      user,
-    );
-  }
-
-  async getOrderById(id: string, user: any) {
-    return this.forward('GET', `/api/canteen/orders/${id}`, null, null, user);
-  }
-
-  async cancelOrder(id: string, dto: any, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/canteen/orders/${encodeURIComponent(id)}/cancel`,
+  upsertReview(id: string, dto: UpsertReviewDto, user: GatewayUser) {
+    return this.upstream.put(
+      `${ORDERS}/${encodeURIComponent(id)}/review`,
       dto,
-      null,
-      user,
+      { user },
     );
   }
 
-  async confirmCashPayment(id: string, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/canteen/orders/${id}/payment/cash`,
-      null,
-      null,
-      user,
-    );
+  getMyReviews(user: GatewayUser) {
+    return this.upstream.get(`${REVIEWS}/my`, { user });
   }
 
-  // --- Review APIs ---
-  async upsertReview(id: string, dto: any, user: any) {
-    return this.forward(
-      'PUT',
-      `/api/canteen/orders/${encodeURIComponent(id)}/review`,
+  getReviewSummary(params: ReviewSummaryQueryDto, user: GatewayUser) {
+    return this.upstream.get(`${REVIEWS}/summary`, { params, user });
+  }
+
+  getReviews(params: ReviewQueryDto, user: GatewayUser) {
+    return this.upstream.get(REVIEWS, { params, user });
+  }
+
+  replyToReview(id: string, dto: ReplyReviewDto, user: GatewayUser) {
+    return this.upstream.patch(
+      `${REVIEWS}/${encodeURIComponent(id)}/reply`,
       dto,
-      null,
-      user,
+      { user },
     );
   }
 
-  async getMyReviews(user: any) {
-    return this.forward('GET', '/api/canteen/reviews/my', null, null, user);
+  getAllTables(params: TableQueryDto, user: GatewayUser) {
+    return this.upstream.get(TABLES, { params, user });
   }
 
-  async getReviewSummary(params: any, user: any) {
-    return this.forward(
-      'GET',
-      '/api/canteen/reviews/summary',
-      null,
-      params,
+  getTableById(id: string, user: GatewayUser) {
+    return this.upstream.get(`${TABLES}/${encodeURIComponent(id)}`, { user });
+  }
+
+  createTable(dto: CreateTableDto, user: GatewayUser) {
+    return this.upstream.post(TABLES, dto, { user });
+  }
+
+  updateTable(id: string, dto: UpdateTableDto, user: GatewayUser) {
+    return this.upstream.patch(`${TABLES}/${encodeURIComponent(id)}`, dto, {
       user,
-    );
+    });
   }
 
-  async getReviews(params: any, user: any) {
-    return this.forward('GET', '/api/canteen/reviews', null, params, user);
+  deleteTable(id: string, user: GatewayUser) {
+    return this.upstream.delete(`${TABLES}/${encodeURIComponent(id)}`, {
+      user,
+    });
   }
 
-  async replyToReview(id: string, dto: any, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/canteen/reviews/${encodeURIComponent(id)}/reply`,
+  updateTableStatus(id: string, dto: UpdateTableStatusDto, user: GatewayUser) {
+    return this.upstream.patch(
+      `${TABLES}/${encodeURIComponent(id)}/status`,
       dto,
-      null,
-      user,
+      { user },
     );
   }
 
-  // --- Table APIs ---
-  async getAllTables(params: any, user: any) {
-    return this.forward('GET', '/api/canteen/tables', null, params, user);
+  getCategories(params: CategoryQueryDto) {
+    return this.upstream.get(CATEGORIES, { params });
   }
 
-  async getTableById(id: string, user: any) {
-    return this.forward('GET', `/api/canteen/tables/${id}`, null, null, user);
+  getCategoryById(id: string) {
+    return this.upstream.get(`${CATEGORIES}/${encodeURIComponent(id)}`);
   }
 
-  async createTable(dto: any, user: any) {
-    return this.forward('POST', '/api/canteen/tables', dto, null, user);
+  createCategory(dto: CreateCategoryDto, user: GatewayUser) {
+    return this.upstream.post(CATEGORIES, dto, { user });
   }
 
-  async updateTable(id: string, dto: any, user: any) {
-    return this.forward('PATCH', `/api/canteen/tables/${id}`, dto, null, user);
-  }
-
-  async deleteTable(id: string, user: any) {
-    return this.forward(
-      'DELETE',
-      `/api/canteen/tables/${id}`,
-      null,
-      null,
+  updateCategory(id: string, dto: UpdateCategoryDto, user: GatewayUser) {
+    return this.upstream.patch(`${CATEGORIES}/${encodeURIComponent(id)}`, dto, {
       user,
-    );
+    });
   }
 
-  async updateTableStatus(id: string, dto: any, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/canteen/tables/${id}/status`,
-      dto,
-      null,
+  deleteCategory(id: string, user: GatewayUser) {
+    return this.upstream.delete(`${CATEGORIES}/${encodeURIComponent(id)}`, {
       user,
-    );
-  }
-
-  // --- Category APIs ---
-  async getCategories(params: any) {
-    return this.forward('GET', '/api/canteen/categories', null, params);
-  }
-
-  async getCategoryById(id: string) {
-    return this.forward('GET', `/api/canteen/categories/${id}`);
-  }
-
-  async createCategory(dto: any, user: any) {
-    return this.forward('POST', '/api/canteen/categories', dto, null, user);
-  }
-
-  async updateCategory(id: string, dto: any, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/canteen/categories/${id}`,
-      dto,
-      null,
-      user,
-    );
-  }
-
-  async deleteCategory(id: string, user: any) {
-    return this.forward(
-      'DELETE',
-      `/api/canteen/categories/${id}`,
-      null,
-      null,
-      user,
-    );
+    });
   }
 }

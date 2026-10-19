@@ -12,13 +12,14 @@ import {
   handleOriginHttpException,
 } from '@nrapp/observability';
 import type { ValidationError } from 'class-validator';
-import { StructuredLoggerService } from '../logging/logger';
+
+import { UpstreamHttpException } from '../http/upstream-error';
 import type { RequestWithContext } from '../interfaces/request-context.interface';
+import { StructuredLoggerService } from '../logging/logger';
 import {
   requestRouteTemplate,
   setRequestOutcome,
 } from '../middleware/request-outcome.middleware';
-import { UpstreamHttpException } from '../http/upstream-error';
 
 @Catch()
 @Injectable()

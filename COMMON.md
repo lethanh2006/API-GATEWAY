@@ -12,10 +12,19 @@ Luồng HTTP:
 3. `common/guards/jwt-auth.guard.ts` bỏ qua route `@Public()` hoặc chạy
    `common/security/jwt.strategy.ts` để xác thực JWT và introspect tại Auth.
 4. `common/guards/roles.guard.ts` kiểm tra role được khai báo bằng `@Roles()`.
-5. Controller nhận DTO; service gọi backend bằng `common/http/upstream-http.module.ts`.
-   `common/security/internal-request-signature.service.ts` ký danh tính gửi nội bộ.
+5. Controller nhận DTO và chỉ chuyển `req.user` (`AuthenticatedRequest`) cho service.
+   Service của từng module gọi upstream qua `common/http/upstream-client.ts`
+   (`UpstreamClient`): thêm `x-request-id`, ký danh tính bằng
+   `common/security/internal-request-signature.service.ts`, đo `upstreamMs` và đổi
+   lỗi upstream sang định dạng lỗi của Gateway. `common/http/upstream-http.module.ts`
+   cấp `HttpService` (timeout, không theo redirect).
 6. `common/filters/global-exception.filter.ts` giữ định dạng lỗi trả frontend;
    `common/logging/logger.ts` ghi JSON và flush log khi ứng dụng dừng.
+
+Module nhiều tài nguyên tách controller theo tài nguyên, cùng prefix với upstream:
+`canteen-{menu,order,review,table,category}.controller.ts` và
+`workschedule-{schedule,attendance,policy,request}.controller.ts`; chúng dùng chung
+một service. Route, guard, role và Swagger không đổi khi tách.
 
 `config/` chứa kiểm tra cấu hình; `decorators/` chứa metadata route; `enums/`
 chứa role; `interfaces/` chỉ chứa kiểu request. Các thư mục chỉ xuất hiện khi có

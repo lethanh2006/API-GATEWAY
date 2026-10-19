@@ -20,6 +20,14 @@ Chat.
 Gateway là ranh giới phía client. Trong luồng sử dụng thông thường, client cần
 truy cập các service thông qua Gateway.
 
+## Kho dữ liệu
+
+Gateway không có cơ sở dữ liệu. Rate limit nằm trong bộ nhớ từng instance (đủ cho một
+container, sẽ không chia sẻ nếu chạy nhiều instance). Chi phí lớn nhất nó gây cho kho dữ
+liệu là mỗi request có JWT làm Auth đọc `credentials` một lần (cache identity tùy chọn).
+
+Đánh giá đầy đủ và các quyết định đang chờ: [docs/DATA_STORES.md](../docs/DATA_STORES.md).
+
 ## Các prefix được định tuyến
 
 | Prefix | Nghiệp vụ upstream |
@@ -74,8 +82,8 @@ bỏ trống, Gateway giữ cơ chế tương thích dùng `JWT_SECRET`. Giới 
 định trong bộ nhớ là 120 request mỗi 60 giây trên mỗi Gateway instance; có thể
 đổi bằng `RATE_LIMIT_WINDOW_MS` và `RATE_LIMIT_MAX_REQUESTS`.
 
-Các biến observability trong `.env.example` điều khiển định dạng log, log level,
-trace export và metadata Swagger. Không commit file `.env` thật.
+Các biến observability trong `.env.example` điều khiển định dạng log, log level
+và metadata Swagger. Không commit file `.env` thật.
 
 ## Chạy local
 

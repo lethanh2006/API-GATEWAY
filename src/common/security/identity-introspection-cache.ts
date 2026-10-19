@@ -5,7 +5,7 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
-/** Bounded, per-process cache for successful identity introspection results. */
+/** Cache trong tiến trình, có giới hạn kích thước, cho kết quả introspect thành công. */
 export class IdentityIntrospectionCache<T> {
   private readonly pending = new Map<string, Promise<T>>();
   private readonly cached = new Map<string, CacheEntry<T>>();

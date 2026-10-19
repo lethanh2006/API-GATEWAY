@@ -1,6 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { NextFunction, Response } from 'express';
+
 import type { RequestWithContext } from '../interfaces/request-context.interface';
 import { setRequestOutcome } from './request-outcome.middleware';
 

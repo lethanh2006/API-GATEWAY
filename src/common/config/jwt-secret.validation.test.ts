@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import { createJwtKey, requireJwtSecret } from './jwt-secret';
 import { createHmac } from 'node:crypto';
+import test from 'node:test';
+
+import { createJwtKey, requireJwtSecret } from './jwt-secret';
 
 test('từ chối JWT secret bị thiếu hoặc quá ngắn', () => {
   assert.throws(() => requireJwtSecret(undefined), /JWT_SECRET/);

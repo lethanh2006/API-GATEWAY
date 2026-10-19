@@ -11,7 +11,7 @@ export const appLogger: ReturnType<typeof createAppLogger> = createAppLogger({
 
 export const nestLogger = new PinoNestLogger(appLogger, 'Gateway');
 
-export type LogDetails = Record<string, unknown>;
+type LogDetails = Record<string, unknown>;
 
 /** Adapter log dùng chung cho Gateway; Pino tự gắn request_id. */
 @Injectable()

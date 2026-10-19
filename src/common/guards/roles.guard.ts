@@ -1,13 +1,15 @@
 import {
   CanActivate,
   ExecutionContext,
-  Injectable,
   HttpException,
   HttpStatus,
+  Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '../enums/role.enum';
+
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { Role } from '../enums/role.enum';
+import type { GatewayUser } from '../interfaces/request-context.interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -19,13 +21,14 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // If no static decorator roles are defined, default allow for all authenticated users
+    // Route không khai báo @Roles thì mọi người đã xác thực đều được vào.
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const { user } = context
+      .switchToHttp()
+      .getRequest<{ user?: GatewayUser }>();
 
     if (!user) {
       throw new HttpException(

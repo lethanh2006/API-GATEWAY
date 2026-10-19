@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { HealthService, type GatewayHealth } from './health.service';
 
+import { type GatewayHealth, HealthService } from './health.service';
+
+/** Healthcheck cho Compose: `/health` và `/health/live` báo process còn sống. */
 @ApiExcludeController()
 @Controller('health')
 export class HealthController {

@@ -1,11 +1,12 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import {
   CLIENT_REQUEST_ID_HEADER,
-  REQUEST_ID_HEADER,
   createRequestCorrelation,
+  REQUEST_ID_HEADER,
   runWithLogContext,
 } from '@nrapp/observability';
 import type { NextFunction, Response } from 'express';
+
 import type { RequestWithContext } from '../interfaces/request-context.interface';
 
 export {

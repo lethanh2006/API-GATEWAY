@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
+
+import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
-import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
 
 @Module({
   imports: [UpstreamHttpModule],

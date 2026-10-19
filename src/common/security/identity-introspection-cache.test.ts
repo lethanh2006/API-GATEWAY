@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+
 import { IdentityIntrospectionCache } from './identity-introspection-cache';
 
 test('coalesces concurrent loads and reuses a successful identity until TTL', async () => {

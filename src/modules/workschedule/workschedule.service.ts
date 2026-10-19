@@ -1,319 +1,209 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
-import { firstValueFrom } from 'rxjs';
-import type { RequestWithContext } from '../../common/interfaces/request-context.interface';
-import { throwUpstreamError } from '../../common/http/upstream-error';
-import { randomUUID } from 'node:crypto';
+
+import { UpstreamClient } from '../../common/http/upstream-client';
+import type {
+  GatewayUser,
+  RequestWithContext,
+} from '../../common/interfaces/request-context.interface';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
+import type { CreateScheduleRequestDto } from './dto/create-request.dto';
+import type {
+  BulkApproveDto,
+  RejectRequestDto,
+  ScanAttendanceDto,
+  UpdatePolicyDto,
+  UpdateScheduleEntriesDto,
+} from './dto/update-entries.dto';
+import type { CreateWorkRequestDto } from './dto/work-request.dto';
+
+type QueryParams = Record<string, string>;
+
+const SCHEDULE = '/api/workschedule/schedule';
+const ATTENDANCE = '/api/workschedule/attendance';
+const POLICY = '/api/workschedule/policy';
+const WORK_REQUESTS = '/api/workschedule/requests';
 
 @Injectable({ scope: Scope.REQUEST })
 export class WorkscheduleService {
-  private readonly baseUrl: string;
+  private readonly upstream: UpstreamClient;
 
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    @Inject(REQUEST) private readonly request: RequestWithContext,
-    private readonly signatureService: InternalRequestSignatureService,
+    httpService: HttpService,
+    configService: ConfigService,
+    @Inject(REQUEST) request: RequestWithContext,
+    signatureService: InternalRequestSignatureService,
   ) {
-    this.baseUrl = this.configService.get<string>(
-      'WORKSCHEDULE_SERVICE_URL',
-      'http://localhost:5004',
+    this.upstream = new UpstreamClient({
+      httpService,
+      signatureService,
+      request,
+      service: 'workschedule',
+      baseUrl: configService.get<string>(
+        'WORKSCHEDULE_SERVICE_URL',
+        'http://localhost:5004',
+      ),
+      label: 'Dịch vụ lịch làm việc',
+    });
+  }
+
+  getPendingRequests(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${SCHEDULE}/pending`, { params: query, user });
+  }
+
+  getAllRequests(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${SCHEDULE}/all`, { params: query, user });
+  }
+
+  approveRequest(id: string, user: GatewayUser) {
+    return this.upstream.post(
+      `${SCHEDULE}/requests/${encodeURIComponent(id)}/approve`,
+      undefined,
+      { user },
     );
   }
 
-  private async forward(
-    method: string,
-    path: string,
-    data?: any,
-    params?: any,
-    user?: any,
+  rejectRequest(id: string, dto: RejectRequestDto, user: GatewayUser) {
+    return this.upstream.post(
+      `${SCHEDULE}/requests/${encodeURIComponent(id)}/reject`,
+      dto,
+      { user },
+    );
+  }
+
+  bulkApprove(dto: BulkApproveDto, user: GatewayUser) {
+    return this.upstream.post(`${SCHEDULE}/requests/bulk-approve`, dto, {
+      user,
+    });
+  }
+
+  getHeatmap(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${SCHEDULE}/heatmap`, { params: query, user });
+  }
+
+  scanAttendance(dto: ScanAttendanceDto, user: GatewayUser) {
+    return this.upstream.post(`${ATTENDANCE}/scan`, dto, { user });
+  }
+
+  getMyAttendance(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${ATTENDANCE}/my`, { params: query, user });
+  }
+
+  generateQrToken(user: GatewayUser) {
+    return this.upstream.post(`${ATTENDANCE}/qr/generate`, undefined, {
+      user,
+    });
+  }
+
+  getTodayAttendance(user: GatewayUser) {
+    return this.upstream.get(`${ATTENDANCE}/today`, { user });
+  }
+
+  getReport(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${ATTENDANCE}/report`, { params: query, user });
+  }
+
+  getPolicy() {
+    return this.upstream.get(POLICY);
+  }
+
+  updatePolicy(dto: UpdatePolicyDto, user: GatewayUser) {
+    return this.upstream.patch(POLICY, dto, { user });
+  }
+
+  getMySchedules(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${SCHEDULE}/my`, { params: query, user });
+  }
+
+  getMonthlyOverview(month: string, user: GatewayUser) {
+    return this.upstream.get(`${SCHEDULE}/monthly-overview`, {
+      params: { month },
+      user,
+    });
+  }
+
+  createRequest(dto: CreateScheduleRequestDto, user: GatewayUser) {
+    return this.upstream.post(`${SCHEDULE}/requests`, dto, { user });
+  }
+
+  resubmitRequest(
+    id: string,
+    dto: UpdateScheduleEntriesDto,
+    user: GatewayUser,
   ) {
-    const requestId = this.request.requestContext?.requestId ?? randomUUID();
-    const headers: Record<string, string> = {
-      'x-request-id': requestId,
-    };
-    if (user) {
-      const userPayloadStr = JSON.stringify(user);
-      const base64User = Buffer.from(userPayloadStr).toString('base64');
-      Object.assign(
-        headers,
-        this.signatureService.signUserPayload(
-          base64User,
-          requestId,
-          'workschedule',
-          `${method.toUpperCase()}:${path}`,
-        ),
-      );
-    }
-
-    try {
-      const response = await firstValueFrom(
-        this.httpService.request({
-          method,
-          url: `${this.baseUrl}${path}`,
-          data,
-          params,
-          headers,
-        }),
-      );
-      return response.data;
-    } catch (error: unknown) {
-      throwUpstreamError(error, 'Dịch vụ lịch làm việc');
-    }
-  }
-
-  async getPendingRequests(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/schedule/pending',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async getAllRequests(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/schedule/all',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async approveRequest(id: string, user: any) {
-    return this.forward(
-      'POST',
-      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/approve`,
-      null,
-      null,
-      user,
-    );
-  }
-
-  async rejectRequest(id: string, dto: any, user: any) {
-    return this.forward(
-      'POST',
-      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/reject`,
+    return this.upstream.post(
+      `${SCHEDULE}/requests/${encodeURIComponent(id)}/resubmit`,
       dto,
-      null,
-      user,
+      { user },
     );
   }
 
-  async bulkApprove(dto: any, user: any) {
-    return this.forward(
-      'POST',
-      '/api/workschedule/schedule/requests/bulk-approve',
+  getRequestInfo(id: string, user: GatewayUser) {
+    return this.upstream.get(`${SCHEDULE}/requests/${encodeURIComponent(id)}`, {
+      user,
+    });
+  }
+
+  updateEntries(id: string, dto: UpdateScheduleEntriesDto, user: GatewayUser) {
+    return this.upstream.patch(
+      `${SCHEDULE}/requests/${encodeURIComponent(id)}`,
       dto,
-      null,
-      user,
+      { user },
     );
   }
 
-  async getHeatmap(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/schedule/heatmap',
-      null,
-      query,
-      user,
+  deleteRequest(id: string, user: GatewayUser) {
+    return this.upstream.delete(
+      `${SCHEDULE}/requests/${encodeURIComponent(id)}`,
+      { user },
     );
   }
 
-  async scanAttendance(dto: any, user: any) {
-    return this.forward(
-      'POST',
-      '/api/workschedule/attendance/scan',
+  getMyWorkRequestStats(month: string, user: GatewayUser) {
+    return this.upstream.get(`${WORK_REQUESTS}/my/stats`, {
+      params: month ? { month } : undefined,
+      user,
+    });
+  }
+
+  getMyWorkRequests(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${WORK_REQUESTS}/my`, { params: query, user });
+  }
+
+  createWorkRequest(dto: CreateWorkRequestDto, user: GatewayUser) {
+    return this.upstream.post(WORK_REQUESTS, dto, { user });
+  }
+
+  cancelWorkRequest(id: string, user: GatewayUser) {
+    return this.upstream.patch(
+      `${WORK_REQUESTS}/${encodeURIComponent(id)}/cancel`,
+      undefined,
+      { user },
+    );
+  }
+
+  getAdminWorkRequests(query: QueryParams, user: GatewayUser) {
+    return this.upstream.get(`${WORK_REQUESTS}/admin`, {
+      params: query,
+      user,
+    });
+  }
+
+  approveWorkRequest(id: string, user: GatewayUser) {
+    return this.upstream.post(
+      `${WORK_REQUESTS}/${encodeURIComponent(id)}/approve`,
+      undefined,
+      { user },
+    );
+  }
+
+  rejectWorkRequest(id: string, dto: RejectRequestDto, user: GatewayUser) {
+    return this.upstream.post(
+      `${WORK_REQUESTS}/${encodeURIComponent(id)}/reject`,
       dto,
-      null,
-      user,
-    );
-  }
-
-  async getMyAttendance(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/attendance/my',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async generateQrToken(user: any) {
-    return this.forward(
-      'POST',
-      '/api/workschedule/attendance/qr/generate',
-      null,
-      null,
-      user,
-    );
-  }
-
-  async getTodayAttendance(user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/attendance/today',
-      null,
-      null,
-      user,
-    );
-  }
-
-  async getReport(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/attendance/report',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async getPolicy() {
-    return this.forward('GET', '/api/workschedule/policy');
-  }
-
-  async updatePolicy(dto: any, user: any) {
-    return this.forward('PATCH', '/api/workschedule/policy', dto, null, user);
-  }
-
-  async getMySchedules(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/schedule/my',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async getMonthlyOverview(month: string, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/schedule/monthly-overview',
-      null,
-      { month },
-      user,
-    );
-  }
-
-  async createRequest(dto: any, user: any) {
-    return this.forward(
-      'POST',
-      '/api/workschedule/schedule/requests',
-      dto,
-      null,
-      user,
-    );
-  }
-
-  async resubmitRequest(id: string, dto: any, user: any) {
-    return this.forward(
-      'POST',
-      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}/resubmit`,
-      dto,
-      null,
-      user,
-    );
-  }
-
-  async getRequestInfo(id: string, user: any) {
-    return this.forward(
-      'GET',
-      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`,
-      null,
-      null,
-      user,
-    );
-  }
-
-  async updateEntries(id: string, dto: any, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`,
-      dto,
-      null,
-      user,
-    );
-  }
-
-  async deleteRequest(id: string, user: any) {
-    return this.forward(
-      'DELETE',
-      `/api/workschedule/schedule/requests/${encodeURIComponent(id)}`,
-      null,
-      null,
-      user,
-    );
-  }
-
-  async getMyWorkRequestStats(month: string, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/requests/my/stats',
-      null,
-      month ? { month } : undefined,
-      user,
-    );
-  }
-
-  async getMyWorkRequests(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/requests/my',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async createWorkRequest(dto: any, user: any) {
-    return this.forward('POST', '/api/workschedule/requests', dto, null, user);
-  }
-
-  async cancelWorkRequest(id: string, user: any) {
-    return this.forward(
-      'PATCH',
-      `/api/workschedule/requests/${encodeURIComponent(id)}/cancel`,
-      null,
-      null,
-      user,
-    );
-  }
-
-  async getAdminWorkRequests(query: Record<string, string>, user: any) {
-    return this.forward(
-      'GET',
-      '/api/workschedule/requests/admin',
-      null,
-      query,
-      user,
-    );
-  }
-
-  async approveWorkRequest(id: string, user: any) {
-    return this.forward(
-      'POST',
-      `/api/workschedule/requests/${encodeURIComponent(id)}/approve`,
-      null,
-      null,
-      user,
-    );
-  }
-
-  async rejectWorkRequest(id: string, dto: any, user: any) {
-    return this.forward(
-      'POST',
-      `/api/workschedule/requests/${encodeURIComponent(id)}/reject`,
-      dto,
-      null,
-      user,
+      { user },
     );
   }
 }

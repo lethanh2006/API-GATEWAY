@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
-  IsNotEmpty,
-  IsMongoId,
-  IsString,
-  IsOptional,
-  IsInt,
-  Min,
-  Max,
-  IsBoolean,
   IsArray,
+  IsBoolean,
+  IsInt,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class MenuItemOptionDto {
   @ApiProperty({ example: 'Thêm trân châu', description: 'Tên tùy chọn thêm' })

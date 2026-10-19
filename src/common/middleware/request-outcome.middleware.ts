@@ -1,15 +1,16 @@
+import { performance } from 'node:perf_hooks';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import {
   DEFAULT_CODE_BY_STATUS,
   normalizeRouteTemplate,
 } from '@nrapp/observability';
 import type { NextFunction, Response } from 'express';
+
 import type {
   GatewayRequestOutcome,
   RequestWithContext,
 } from '../interfaces/request-context.interface';
 import { StructuredLoggerService } from '../logging/logger';
-import { performance } from 'node:perf_hooks';
 
 function notFoundSampleRate(): number {
   const configured = Number(process.env.LOG_HTTP_404_SAMPLE_RATE);

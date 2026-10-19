@@ -1,17 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { AppController } from './app.controller';
 
-// Service Modules
-import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
-import { ChatModule } from './modules/chat/chat.module';
-import { TodoModule } from './modules/todo/todo.module';
-import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
-import { CanteenModule } from './modules/canteen/canteen.module';
+import { AppController } from './app.controller';
 import { CoreModule } from './core/core.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CanteenModule } from './modules/canteen/canteen.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { HealthModule } from './modules/health/health.module';
+import { TodoModule } from './modules/todo/todo.module';
+import { UserModule } from './modules/user/user.module';
+import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
 
 @Module({
   imports: [

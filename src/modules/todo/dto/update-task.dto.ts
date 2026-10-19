@@ -7,6 +7,7 @@ import {
   MaxLength,
   ValidateIf,
 } from 'class-validator';
+
 import { TaskPriority } from './create-task.dto';
 
 export class UpdateTaskDto {

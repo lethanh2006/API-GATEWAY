@@ -4,11 +4,16 @@ import test from 'node:test';
 import { PATH_METADATA } from '@nestjs/common/constants';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { of } from 'rxjs';
-import { CanteenController } from './canteen.controller';
+import { CanteenModule } from './canteen.module';
 import { CanteenService } from './canteen.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
+
+function canteenControllers(): Array<{ prototype: object }> {
+  return Reflect.getMetadata('controllers', CanteenModule) as Array<{
+    prototype: object;
+  }>;
+}
 
 test('Gateway chỉ nhận đơn có bàn, món và thanh toán tiền mặt', async () => {
   const payload = {
@@ -63,16 +68,17 @@ test('bộ lọc Gateway bỏ trạng thái bếp và hoàn tiền', async () =>
 });
 
 test('route căn tin giữ CRUD và thu tiền, không còn API nghiệp vụ bếp/kho', () => {
-  const prototype = CanteenController.prototype;
-  const paths = Object.getOwnPropertyNames(prototype)
-    .filter((key) => key !== 'constructor')
-    .map(
-      (key) =>
-        Reflect.getMetadata(
-          PATH_METADATA,
-          Object.getOwnPropertyDescriptor(prototype, key)?.value as object,
-        ) as string,
-    );
+  const paths = canteenControllers().flatMap(({ prototype }) =>
+    Object.getOwnPropertyNames(prototype)
+      .filter((key) => key !== 'constructor')
+      .map(
+        (key) =>
+          Reflect.getMetadata(
+            PATH_METADATA,
+            Object.getOwnPropertyDescriptor(prototype, key)?.value as object,
+          ) as string,
+      ),
+  );
   assert.ok(paths.includes('orders/:id/payment/cash'));
   for (const path of ['orders', 'tables', 'admin/menu', 'categories'])
     assert.ok(paths.includes(path));
@@ -90,9 +96,11 @@ test('thu tiền và lọc đơn theo bàn chuyển đúng API Canteen với dan
   const calls: Array<Record<string, any>> = [];
   const service = new CanteenService(
     {
-      request: (request: Record<string, any>) => {
-        calls.push(request);
-        return of({ data: { ok: true } });
+      axiosRef: {
+        request: (request: Record<string, any>) => {
+          calls.push(request);
+          return Promise.resolve({ data: { ok: true } });
+        },
       },
     } as never,
     { get: () => 'http://canteen.test' } as never,
@@ -102,7 +110,10 @@ test('thu tiền và lọc đơn theo bàn chuyển đúng API Canteen với dan
   const user = { _id: '507f1f77bcf86cd799439011', role: 'admin' };
   await service.confirmCashPayment('507f1f77bcf86cd799439012', user);
   await service.getOrders(
-    { tableId: '507f1f77bcf86cd799439013', paymentStatus: 'PENDING' },
+    {
+      tableId: '507f1f77bcf86cd799439013',
+      paymentStatus: 'PENDING',
+    } as OrderQueryDto,
     user,
   );
   assert.equal(

@@ -3,10 +3,11 @@ import { EventEmitter } from 'node:events';
 import test from 'node:test';
 import { HttpException, InternalServerErrorException } from '@nestjs/common';
 import { getLogContext } from '@nrapp/observability';
+
 import { GlobalExceptionFilter } from '../filters/global-exception.filter';
 import {
-  UpstreamHttpException,
   createUpstreamErrorPayload,
+  UpstreamHttpException,
 } from '../http/upstream-error';
 import type { RequestWithContext } from '../interfaces/request-context.interface';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';

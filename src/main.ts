@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 import { NestFactory } from '@nestjs/core';
@@ -14,22 +15,19 @@ import { appLogger, nestLogger } from './common/logging/logger';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { logger: nestLogger });
 
-  // VPS topology: Internet -> host Nginx -> Gateway container.
-  // Trust exactly one HTTP proxy so request.ip resolves to the real client IP.
+  // Trên VPS: Internet -> Nginx của host -> container Gateway. Chỉ tin đúng một
+  // proxy để request.ip là IP thật của client.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   app.enableShutdownHooks();
 
-  // 1. Configure bodyParser JSON payload limits
   app.use(bodyParser.json({ limit: '10mb' }));
 
-  // 2. Enable Cross-Origin Resource Sharing (CORS)
   app.enableCors({
     origin: '*',
     credentials: false,
   });
 
-  // 3. Setup global validation pipes matching user DTO validation standards
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -38,13 +36,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // 4. Configure Centralized Swagger UI route using native SwaggerModule scanning
   const config = new DocumentBuilder()
-    .setTitle(
-      process.env.TITLE_SWAGGER ||
-        process.env.TITTLE_SWAGGER ||
-        'Centralized API Gateway',
-    )
+    .setTitle(process.env.TITLE_SWAGGER || 'Centralized API Gateway')
     .setDescription(
       process.env.CONTENT_SWAGGER || 'API Gateway for Microservices',
     )
@@ -59,7 +52,6 @@ async function bootstrap(): Promise<void> {
     document,
   );
 
-  // 5. Setup WebSocket / Socket.io reverse proxy for Chat Service
   const chatServiceUrl =
     process.env.CHAT_SERVICE_URL || 'http://localhost:5002';
   const socketProxy = createProxyMiddleware('/socket.io', {
@@ -102,7 +94,6 @@ async function bootstrap(): Promise<void> {
   // Giữ nguyên /socket.io khi forward cả HTTP polling lẫn WebSocket upgrade.
   app.use(socketProxy);
 
-  // 6. Start the API Gateway HTTP Server
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
   appLogger.info(
@@ -114,7 +105,6 @@ async function bootstrap(): Promise<void> {
     'Gateway started',
   );
 
-  // 7. Bind WebSocket Upgrade listener for Socket.io traffic
   const server = app.getHttpServer();
   server.on('upgrade', (req: any, socket: any, head: any) => {
     socketProxy.upgrade(req, socket, head);

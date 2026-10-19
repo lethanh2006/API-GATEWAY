@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { BadRequestException } from '@nestjs/common';
+
 import {
   CHAT_IMAGE_MIME_ERROR,
   filterSupportedChatImage,

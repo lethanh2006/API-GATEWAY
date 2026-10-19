@@ -1,20 +1,22 @@
+import { createHash } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+
 import { createJwtKey } from '../config/jwt-secret';
-import type { RequestWithContext } from '../interfaces/request-context.interface';
-import { performance } from 'node:perf_hooks';
-import { createHash } from 'node:crypto';
+import type {
+  GatewayUser,
+  RequestWithContext,
+} from '../interfaces/request-context.interface';
 import { IdentityIntrospectionCache } from './identity-introspection-cache';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
   private readonly authServiceUrl: string;
-  private readonly identityCache: IdentityIntrospectionCache<
-    Record<string, unknown>
-  >;
+  private readonly identityCache: IdentityIntrospectionCache<GatewayUser>;
 
   constructor(
     private readonly httpService: HttpService,
@@ -24,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      // passport-jwt types omit KeyObject, which jsonwebtoken accepts at runtime.
+      // Kiểu của passport-jwt thiếu KeyObject, nhưng jsonwebtoken vẫn nhận lúc chạy.
       secretOrKeyProvider: (_request, _token, done) =>
         done(null, jwtKey as unknown as Buffer),
       algorithms: ['HS256'],
@@ -49,9 +51,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
 
     const started = performance.now();
     try {
-      // Passport has already verified this access token's signature and expiry.
-      // Store only a digest, and cache successful Auth decisions for a short,
-      // bounded TTL to reduce repeated introspection calls during request bursts.
+      // Passport đã xác minh chữ ký và hạn của access token này. Chỉ lưu bản băm,
+      // và chỉ cache quyết định thành công của Auth trong thời gian ngắn, có giới
+      // hạn, để giảm số lần introspect lặp lại khi request dồn dập.
       const cacheKey = createHash('sha256').update(authorization).digest('hex');
       const identity = await this.identityCache.get(cacheKey, async () => {
         const { data } = await this.httpService.axiosRef.post(
@@ -72,7 +74,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-1gio') {
         ) {
           throw new UnauthorizedException('Token không còn hiệu lực');
         }
-        return data.user as Record<string, unknown>;
+        return data.user as GatewayUser;
       });
       return { ...identity };
     } catch {

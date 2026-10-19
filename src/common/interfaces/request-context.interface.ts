@@ -20,3 +20,16 @@ export interface GatewayRequestContext {
 export interface RequestWithContext extends Request {
   requestContext?: GatewayRequestContext;
 }
+
+/** Danh tính Auth trả về khi introspect; được ký rồi chuyển tiếp cho các service. */
+export interface GatewayUser {
+  _id: string;
+  email?: string;
+  username?: string;
+  role?: string;
+}
+
+/** Request đã qua `JwtAuthGuard` nên chắc chắn có `user`. */
+export interface AuthenticatedRequest extends RequestWithContext {
+  user: GatewayUser;
+}

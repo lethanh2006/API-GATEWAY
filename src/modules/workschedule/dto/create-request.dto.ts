@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -7,11 +8,11 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  MaxLength,
   Matches,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+
 import { WorkPeriod } from './work-request.dto';
 
 export enum ScheduleEntryType {

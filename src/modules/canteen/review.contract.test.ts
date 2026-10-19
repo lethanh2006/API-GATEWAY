@@ -5,13 +5,18 @@ import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { RequestMethod } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { of } from 'rxjs';
 import { ROLES_KEY } from '../../common/decorators/roles.decorator';
-import { CanteenController } from './canteen.controller';
+import { CanteenModule } from './canteen.module';
 import { CanteenService } from './canteen.service';
 import { ReplyReviewDto } from './dto/reply-review.dto';
 import { ReviewQueryDto } from './dto/review-query.dto';
 import { UpsertReviewDto } from './dto/upsert-review.dto';
+
+function canteenControllers(): Array<{ prototype: object }> {
+  return Reflect.getMetadata('controllers', CanteenModule) as Array<{
+    prototype: object;
+  }>;
+}
 
 test('đánh giá chỉ nhận số sao nguyên 1-5 và nhận xét tối đa 500 ký tự', async () => {
   assert.equal(
@@ -64,23 +69,24 @@ test('bộ lọc đánh giá chuyển chuỗi query sang số/boolean và chặn
 });
 
 test('route đánh giá đúng phương thức; danh sách, thống kê và phản hồi chỉ dành cho admin', () => {
-  const prototype = CanteenController.prototype;
   const routes = new Map<string, string[] | undefined>(
-    Object.getOwnPropertyNames(prototype)
-      .filter((key) => key !== 'constructor')
-      .map((key) => {
-        const handler = Object.getOwnPropertyDescriptor(prototype, key)
-          ?.value as object;
-        const method = Reflect.getMetadata(
-          METHOD_METADATA,
-          handler,
-        ) as RequestMethod;
-        const path = Reflect.getMetadata(PATH_METADATA, handler) as string;
-        return [
-          `${RequestMethod[method]} ${path}`,
-          Reflect.getMetadata(ROLES_KEY, handler) as string[] | undefined,
-        ] as const;
-      }),
+    canteenControllers().flatMap(({ prototype }) =>
+      Object.getOwnPropertyNames(prototype)
+        .filter((key) => key !== 'constructor')
+        .map((key) => {
+          const handler = Object.getOwnPropertyDescriptor(prototype, key)
+            ?.value as object;
+          const method = Reflect.getMetadata(
+            METHOD_METADATA,
+            handler,
+          ) as RequestMethod;
+          const path = Reflect.getMetadata(PATH_METADATA, handler) as string;
+          return [
+            `${RequestMethod[method]} ${path}`,
+            Reflect.getMetadata(ROLES_KEY, handler) as string[] | undefined,
+          ] as const;
+        }),
+    ),
   );
   assert.ok(routes.has('PUT orders/:id/review'));
   assert.ok(routes.has('GET reviews/my'));
@@ -98,9 +104,11 @@ test('Gateway chuyển đúng API Canteen cho đánh giá với danh tính đã 
   const calls: Array<Record<string, any>> = [];
   const service = new CanteenService(
     {
-      request: (request: Record<string, any>) => {
-        calls.push(request);
-        return of({ data: { ok: true } });
+      axiosRef: {
+        request: (request: Record<string, any>) => {
+          calls.push(request);
+          return Promise.resolve({ data: { ok: true } });
+        },
       },
     } as never,
     { get: () => 'http://canteen.test' } as never,

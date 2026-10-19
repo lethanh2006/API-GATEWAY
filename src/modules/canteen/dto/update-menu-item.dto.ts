@@ -1,16 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
-  IsMongoId,
-  IsString,
-  IsOptional,
-  IsInt,
-  Min,
-  Max,
-  IsBoolean,
   IsArray,
+  IsBoolean,
+  IsInt,
+  IsMongoId,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+
 import { MenuItemOptionDto } from './create-menu-item.dto';
 
 export class UpdateMenuItemDto {
