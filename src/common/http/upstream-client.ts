@@ -30,6 +30,8 @@ interface UpstreamCall {
   params?: unknown;
   /** Người gọi đã xác thực; bỏ trống với route công khai. */
   user?: GatewayUser;
+  /** Ngữ cảnh ký thay cho `METHOD:path`, khi upstream gắn chữ ký với nội dung body. */
+  signatureContext?: string;
 }
 
 type BodylessCall = Omit<UpstreamCall, 'data'>;
@@ -74,10 +76,10 @@ export class UpstreamClient {
   async send(
     method: string,
     path: string,
-    { data, params, user }: UpstreamCall = {},
+    { data, params, user, signatureContext }: UpstreamCall = {},
   ): Promise<AxiosResponse> {
     const { httpService, request, baseUrl, label } = this.options;
-    const headers = this.headers(method, path, user);
+    const headers = this.headers(method, path, user, signatureContext);
 
     const started = performance.now();
     try {
@@ -102,6 +104,7 @@ export class UpstreamClient {
     method: string,
     path: string,
     user?: GatewayUser,
+    signatureContext?: string,
   ): Record<string, string> {
     const {
       request,
@@ -114,7 +117,9 @@ export class UpstreamClient {
     if (!user) return headers;
 
     const payload = Buffer.from(JSON.stringify(user)).toString('base64');
-    const context = signRoute ? `${method.toUpperCase()}:${path}` : undefined;
+    const context =
+      signatureContext ??
+      (signRoute ? `${method.toUpperCase()}:${path}` : undefined);
     return {
       ...headers,
       ...signatureService.signUserPayload(payload, requestId, service, context),

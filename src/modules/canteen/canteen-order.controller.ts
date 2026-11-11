@@ -16,17 +16,24 @@ import { Role } from '../../common/enums/role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthenticatedRequest } from '../../common/interfaces/request-context.interface';
+import { PaymentService } from '../payment/payment.service';
 import { CanteenService } from './canteen.service';
 import { CancelOrderDto } from './dto/cancel-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
 
-/** Đơn hàng căn tin thu tiền mặt; chuyển tiếp tới Canteen. */
+/**
+ * Đơn hàng căn tin; chuyển tiếp tới Canteen. Đơn kết thúc không qua PayOS (huỷ, thu tiền mặt) thì
+ * báo Payment khoá link QR còn mở, để khách không trả tiền vào đơn đã xong.
+ */
 @ApiTags('Api Canteen')
 @Controller('api/canteen')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CanteenOrderController {
-  constructor(private readonly canteenService: CanteenService) {}
+  constructor(
+    private readonly canteenService: CanteenService,
+    private readonly paymentService: PaymentService,
+  ) {}
 
   @Post('orders')
   @ApiBearerAuth()
@@ -67,12 +74,18 @@ export class CanteenOrderController {
   @ApiOperation({
     summary: 'Hủy đơn hàng (chủ đơn hoặc nhân viên có quyền vận hành)',
   })
-  cancelOrder(
+  async cancelOrder(
     @Param('id') id: string,
     @Body() body: CancelOrderDto,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.canteenService.cancelOrder(id, body, req.user);
+    const order = await this.canteenService.cancelOrder(id, body, req.user);
+    await this.paymentService.releaseOrderLinks(
+      id,
+      'ORDER_CANCELLED',
+      req.user,
+    );
+    return order;
   }
 
   @Patch('orders/:id/payment/cash')
@@ -81,10 +94,12 @@ export class CanteenOrderController {
   @ApiOperation({
     summary: 'Admin xác nhận đã thu tiền mặt và đóng đơn',
   })
-  confirmCashPayment(
+  async confirmCashPayment(
     @Param('id') id: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.canteenService.confirmCashPayment(id, req.user);
+    const order = await this.canteenService.confirmCashPayment(id, req.user);
+    await this.paymentService.releaseOrderLinks(id, 'PAID_IN_CASH', req.user);
+    return order;
   }
 }

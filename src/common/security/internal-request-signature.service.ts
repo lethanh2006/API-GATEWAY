@@ -20,6 +20,7 @@ export class InternalRequestSignatureService {
         configService.get<string>('JWT_SECRET')?.trim(),
       canteen: configService.get<string>('CANTEEN_INTERNAL_SECRET')?.trim(),
       chat: configService.get<string>('CHAT_INTERNAL_SECRET')?.trim(),
+      payment: configService.get<string>('PAYMENT_INTERNAL_SECRET')?.trim(),
       todo: configService.get<string>('TODO_INTERNAL_SECRET')?.trim(),
       user:
         configService.get<string>('USER_INTERNAL_SECRET')?.trim() ||
@@ -40,7 +41,9 @@ export class InternalRequestSignatureService {
     const secret = this.secrets[target];
     const signatureRequired =
       this.production ||
-      ['auth', 'chat', 'todo', 'user', 'workschedule'].includes(target);
+      ['auth', 'chat', 'payment', 'todo', 'user', 'workschedule'].includes(
+        target,
+      );
     if (
       !secret ||
       (signatureRequired &&
@@ -72,4 +75,4 @@ export class InternalRequestSignatureService {
 }
 
 export type InternalService =
-  'auth' | 'canteen' | 'chat' | 'todo' | 'user' | 'workschedule';
+  'auth' | 'canteen' | 'chat' | 'payment' | 'todo' | 'user' | 'workschedule';

@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CanteenModule } from './modules/canteen/canteen.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { HealthModule } from './modules/health/health.module';
+import { PaymentModule } from './modules/payment/payment.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { UserModule } from './modules/user/user.module';
 import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
@@ -27,6 +28,7 @@ import { WorkscheduleModule } from './modules/workschedule/workschedule.module';
     TodoModule,
     WorkscheduleModule,
     CanteenModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [],

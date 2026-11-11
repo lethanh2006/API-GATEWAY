@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { UpstreamHttpModule } from '../../common/http/upstream-http.module';
+import { PaymentModule } from '../payment/payment.module';
 import { CanteenCategoryController } from './canteen-category.controller';
 import { CanteenMenuController } from './canteen-menu.controller';
 import { CanteenOrderController } from './canteen-order.controller';
@@ -9,7 +10,7 @@ import { CanteenTableController } from './canteen-table.controller';
 import { CanteenService } from './canteen.service';
 
 @Module({
-  imports: [UpstreamHttpModule],
+  imports: [UpstreamHttpModule, PaymentModule],
   controllers: [
     CanteenMenuController,
     CanteenOrderController,
