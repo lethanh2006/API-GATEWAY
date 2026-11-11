@@ -9,9 +9,13 @@ import type { RequestWithContext } from '../../common/interfaces/request-context
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import { CanteenOrderController } from '../canteen/canteen-order.controller';
 import type { CanteenService } from '../canteen/canteen.service';
+import { ROLES_KEY } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
+import { PaymentRefundController } from './payment-refund.controller';
 import {
   createQrRequestContext,
   releaseLinksRequestContext,
+  resolveRefundRequestContext,
 } from './payment-request-context';
 import { PaymentService } from './payment.service';
 
@@ -208,4 +212,43 @@ test('Canteen từ chối huỷ thì không đụng tới thanh toán online', a
     ConflictException,
   );
   assert.equal(released, false);
+});
+
+test('chốt hồ sơ hoàn tiền: ký gắn mã hồ sơ và kết quả, chuyển nguyên body tới Payment', async () => {
+  const { service, requests, signatures } = harness({});
+  const caseId = 'c0f1d5a4-8a43-4d5c-9a4f-36e3d7f0c002';
+
+  await service.resolveRefund(
+    caseId,
+    { outcome: 'REFUNDED', note: 'Đã chuyển lại' },
+    USER,
+  );
+
+  assert.equal(
+    requests[0].url,
+    `http://localhost:5006/api/payment/refunds/${caseId}/resolve`,
+  );
+  assert.deepEqual(requests[0].data, {
+    outcome: 'REFUNDED',
+    note: 'Đã chuyển lại',
+  });
+  assert.deepEqual(signatures[0], {
+    target: 'payment',
+    context: resolveRefundRequestContext(caseId, 'REFUNDED'),
+  });
+});
+
+test('danh sách hồ sơ hoàn tiền chuyển bộ lọc sang Payment', async () => {
+  const { service, requests } = harness({});
+
+  await service.listRefunds({ status: 'OPEN', limit: 20 }, USER);
+
+  assert.equal(requests[0].url, 'http://localhost:5006/api/payment/refunds');
+  assert.deepEqual(requests[0].params, { status: 'OPEN', limit: 20 });
+});
+
+test('chỉ admin, quản lý và thu ngân vào được route hồ sơ hoàn tiền', () => {
+  const roles = Reflect.getMetadata(ROLES_KEY, PaymentRefundController) as
+    Role[] | undefined;
+  assert.deepEqual(roles, [Role.ADMIN, Role.MANAGER, Role.CASHIER]);
 });

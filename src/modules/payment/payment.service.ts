@@ -17,10 +17,13 @@ import type {
 import { appLogger } from '../../common/logging/logger';
 import { InternalRequestSignatureService } from '../../common/security/internal-request-signature.service';
 import type { PaymentHistoryQueryDto } from './dto/payment-history-query.dto';
+import type { RefundQueryDto } from './dto/refund-query.dto';
+import type { ResolveRefundDto } from './dto/resolve-refund.dto';
 import {
   createQrRequestContext,
   type ReleaseReason,
   releaseLinksRequestContext,
+  resolveRefundRequestContext,
 } from './payment-request-context';
 
 const PAYMENT = '/api/payment';
@@ -125,6 +128,21 @@ export class PaymentService {
         'Không đóng được thanh toán online của đơn; link cũ còn mở tới khi hết hạn',
       );
     }
+  }
+
+  listRefunds(query: RefundQueryDto, user: GatewayUser) {
+    return this.payment.get(`${PAYMENT}/refunds`, { params: query, user });
+  }
+
+  resolveRefund(caseId: string, dto: ResolveRefundDto, user: GatewayUser) {
+    return this.payment.post(
+      `${PAYMENT}/refunds/${encodeURIComponent(caseId)}/resolve`,
+      dto,
+      {
+        user,
+        signatureContext: resolveRefundRequestContext(caseId, dto.outcome),
+      },
+    );
   }
 
   getLatestForOrder(orderId: string, user: GatewayUser) {

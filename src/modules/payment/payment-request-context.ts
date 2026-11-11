@@ -32,3 +32,15 @@ export function releaseLinksRequestContext(
 ): string {
   return JSON.stringify([RELEASE_LINKS_CONTEXT_VERSION, orderId, reason]);
 }
+
+const RESOLVE_REFUND_CONTEXT_VERSION = 'payment.refund-resolve.v1';
+
+/** Bản sao hợp đồng ký trong Payment: gắn mã hồ sơ và kết quả, không dùng lại cho hồ sơ khác. */
+export function resolveRefundRequestContext(
+  caseId: string,
+  outcome: RefundOutcome,
+): string {
+  return JSON.stringify([RESOLVE_REFUND_CONTEXT_VERSION, caseId, outcome]);
+}
+
+export type RefundOutcome = 'REFUNDED' | 'DISMISSED';
